@@ -29,7 +29,7 @@ public class ChatConfirm implements Listener {
         }, 15 * 20);
     }
     
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncChatEvent e) {
         if (!ConfigUtils.toPlain(e.originalMessage()).equals(req)) {
             return;

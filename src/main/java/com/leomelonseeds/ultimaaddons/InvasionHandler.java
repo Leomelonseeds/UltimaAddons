@@ -41,11 +41,6 @@ public class InvasionHandler implements Listener {
         // Register event
         Bukkit.getServer().getPluginManager().registerEvents(this, UltimaAddons.getPlugin());
         
-        // Temp bossbar fix
-        Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
-            plunder.getTimeLimitProgress().removeAll();
-        }, 2);
-        
         // Stop capture progress if one defender present
         Kingdom defender = invasion.getDefender();
         plunder.setTickProcessor(data -> {

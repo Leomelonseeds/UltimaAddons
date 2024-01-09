@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -18,6 +17,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.kingdoms.constants.group.Kingdom;
+import org.kingdoms.utils.time.TimeFormatter;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -114,8 +114,6 @@ public class ConfigUtils {
      * @return
      */
     public static Component toComponent(String line) {
-        Bukkit.getLogger().log(Level.INFO, line);
-        Bukkit.getLogger().log(Level.INFO, convertAmps(line));
         return LegacyComponentSerializer.legacyAmpersand().deserialize(convertAmps(line)).decoration(TextDecoration.ITALIC, false);
     }
     
@@ -134,8 +132,7 @@ public class ConfigUtils {
     }
     
     public static String formatDate(long i) {
-        long s = i / 1000;
-        return String.format("%02d:%02d:%02d", s / 3600, (s / 60) % 60, s % 60);
+        return TimeFormatter.ofRaw(i);
     }
     
     /**

@@ -10,6 +10,7 @@ public class UltimaAddons extends JavaPlugin {
 
     public static final int WAR_HOURS = 2;
     public static final int CHALLENGE_COOLDOWN_HOURS = 24;
+    public static final int NEWBIE_DAYS = 5;
     private static UltimaAddons plugin;
     private InventoryManager invManager;
     

@@ -86,7 +86,8 @@ public class ChallengeInv implements UAInventory {
                 return;
             }
             
-            long wartime = System.currentTimeMillis() + ((long) (days * 1000 * 60 * 60 * 24));
+            long timeleft = (long) days * 1000 * 60 * 60 * 24;
+            long wartime = System.currentTimeMillis() + timeleft;
             String data = target.getId().toString() + "@" + wartime;
             KingdomMetadataHandler lckh = new StandardKingdomMetadataHandler(UltimaAddons.LCK);
             attacker.getMetadata().put(lckh, new StandardKingdomMetadata(data));
@@ -107,6 +108,8 @@ public class ChallengeInv implements UAInventory {
             TextChannel discordChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("war");
             discordChannel.sendMessage(":scroll: " + player.getName() + " from **" + attacker.getName() + "** has declared war on **" + 
                     target.getName() + "**, with " + days + " day(s) of preparation!").queue();
+            
+            ConfigUtils.setupReminders(attacker, target, timeleft);
         });
         
     }
