@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -24,10 +23,8 @@ import org.bukkit.inventory.Inventory;
 import org.kingdoms.config.KingdomsConfig;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.land.location.SimpleLocation;
-import org.kingdoms.constants.metadata.KingdomMetadataHandler;
-import org.kingdoms.constants.metadata.StandardKingdomMetadata;
-import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
 import org.kingdoms.constants.player.KingdomPlayer;
+import org.kingdoms.events.general.GroupShieldPurchaseEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEndEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEvent;
 import org.kingdoms.events.lands.UnclaimLandEvent.Reason;
@@ -49,6 +46,22 @@ public class UAListener implements Listener {
         new InvasionHandler(e.getInvasion());
     }
     
+    @EventHandler
+    public void onShield(GroupShieldPurchaseEvent e) {
+        if (!(e.getGroup() instanceof Kingdom)) {
+            return;
+        }
+        
+        // Close other shield buyers to stop abuse
+        Kingdom k = (Kingdom) e.getGroup();
+        for (Player p : k.getOnlineMembers()) {
+            String title = ConfigUtils.toPlain(p.getOpenInventory().title());
+            if (title.contains("Shields")) {
+                p.closeInventory();
+            }
+        }
+    }
+    
     // Challenge reminder
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
@@ -62,14 +75,13 @@ public class UAListener implements Listener {
             
             Kingdom k = kp.getKingdom();
             long ctime = System.currentTimeMillis();
-            long wartime = 1000 * 3600 * UltimaAddons.WAR_HOURS;
             for (Entry<UUID, Long> challenge : k.getChallenges().entrySet()) {
                 Kingdom attacker = Kingdom.getKingdom(challenge.getKey());
                 if (attacker == null) {
                     continue;
                 }
                 
-                if (ctime > challenge.getValue() + wartime) {
+                if (ctime > challenge.getValue() + UltimaAddons.WAR_TIME) {
                     continue;
                 }
                 
@@ -82,18 +94,16 @@ public class UAListener implements Listener {
                 
             }
             
-            KingdomMetadataHandler lckh = new StandardKingdomMetadataHandler(UltimaAddons.LCK);
-            StandardKingdomMetadata metalck = (StandardKingdomMetadata) k.getMetadata().get(lckh);
-            if (metalck != null) {
-                Bukkit.getLogger().log(Level.INFO, metalck.getString());
-                String[] slck = metalck.getString().split("@");
+            String lastChallenge = ConfigUtils.getLastChallenge(k);
+            if (lastChallenge != null) {
+                String[] slck = lastChallenge.split("@");
                 long lcd = Long.valueOf(slck[1]);
                 Kingdom target = Kingdom.getKingdom(UUID.fromString(slck[0]));
                 if (target == null) {
                     return;
                 }
                 
-                if (ctime > lcd + wartime) {
+                if (ctime > lcd + UltimaAddons.WAR_TIME) {
                     return;
                 }
 

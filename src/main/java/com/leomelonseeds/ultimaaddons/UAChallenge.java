@@ -10,9 +10,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.group.model.relationships.StandardRelationAttribute;
-import org.kingdoms.constants.metadata.KingdomMetadataHandler;
-import org.kingdoms.constants.metadata.StandardKingdomMetadata;
-import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.constants.player.StandardKingdomPermission;
 
@@ -37,7 +34,13 @@ public class UAChallenge implements CommandExecutor {
         KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(player);
         Kingdom attacker = kp.getKingdom();
         if (attacker == null) {
-            sendMsg(sender, "&cYou must be in a Kingdom to use this!");
+            sendMsg(sender, "&cYou must be in a kingdom to use this!");
+            return true;
+        }
+        
+        // Cannot be pacifist
+        if (attacker.isPacifist()) {
+            sendMsg(sender, "&cYour kingdom is pacifist, and cannot attack other kingdoms!");
             return true;
         }
         
@@ -59,6 +62,12 @@ public class UAChallenge implements CommandExecutor {
             return true;
         }
         
+        // Cannot be pacifist
+        if (target.isPacifist()) {
+            sendMsg(sender, "&cYou cannot attack pacifist kingdoms!");
+            return true;
+        }
+        
         // Must not be allies or truced
         StandardRelationAttribute ceasefire = StandardRelationAttribute.CEASEFIRE;
         if (ceasefire.hasAttribute(attacker, target)) {
@@ -77,20 +86,19 @@ public class UAChallenge implements CommandExecutor {
                 return true;
             }
             
-            if (time + UltimaAddons.WAR_HOURS * 1000 * 3600 > date) {
+            if (time + UltimaAddons.WAR_TIME > date) {
                 sendMsg(sender, "&cYour war with &e" + target.getName() + " &cis still ongoing!");
                 return true;
             }
         }
         
         // Kingdom must not already have challenged a kingdom
-        KingdomMetadataHandler lckh = new StandardKingdomMetadataHandler(UltimaAddons.LCK);
-        StandardKingdomMetadata metalck = (StandardKingdomMetadata) attacker.getMetadata().get(lckh);
-        if (metalck != null) {
-            String[] slck = metalck.getString().split("@");
+        String lastChallenge = ConfigUtils.getLastChallenge(attacker);
+        if (lastChallenge != null) {
+            String[] slck = lastChallenge.split("@");
             long lcd = Long.valueOf(slck[1]);
             Kingdom cur = Kingdom.getKingdom(UUID.fromString(slck[0]));
-            long cooldown = lcd + 1000 * 60 * 60 * UltimaAddons.CHALLENGE_COOLDOWN_HOURS;
+            long cooldown = lcd + UltimaAddons.CHALLENGE_COOLDOWN_TIME;
             
             // A challenge is pending
             if (cur != null && lcd > date) {

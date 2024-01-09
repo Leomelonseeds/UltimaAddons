@@ -13,9 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.kingdoms.constants.group.Kingdom;
-import org.kingdoms.constants.metadata.KingdomMetadataHandler;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
-import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
 
 import com.leomelonseeds.ultimaaddons.ConfigUtils;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
@@ -89,8 +87,7 @@ public class ChallengeInv implements UAInventory {
             long timeleft = (long) days * 1000 * 60 * 60 * 24;
             long wartime = System.currentTimeMillis() + timeleft;
             String data = target.getId().toString() + "@" + wartime;
-            KingdomMetadataHandler lckh = new StandardKingdomMetadataHandler(UltimaAddons.LCK);
-            attacker.getMetadata().put(lckh, new StandardKingdomMetadata(data));
+            attacker.getMetadata().put(UltimaAddons.lckh, new StandardKingdomMetadata(data));
             target.getChallenges().put(attacker.getId(), wartime);
             
             for (Player p : attacker.getOnlineMembers()) {

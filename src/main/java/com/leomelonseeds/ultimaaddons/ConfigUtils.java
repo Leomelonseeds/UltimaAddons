@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.kingdoms.constants.group.Kingdom;
+import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.utils.time.TimeFormatter;
 
 import net.kyori.adventure.text.Component;
@@ -26,6 +27,11 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 public class ConfigUtils {
     
     private static Map<UUID, UUID> chalreminders = new HashMap<>(); // Attacker, Defender (since attacker can only challenge 1)
+    
+    public static String getLastChallenge(Kingdom k) {
+        StandardKingdomMetadata skm = (StandardKingdomMetadata) k.getMetadata().get(UltimaAddons.lckh);
+        return skm == null ? null : skm.getString();
+    }
     
     public static void setupReminders(Kingdom k, Kingdom target, long timeleft) {
         if (chalreminders.containsKey(k.getId())) {
@@ -46,13 +52,13 @@ public class ConfigUtils {
                 for (Player q : involved) {
                     q.playSound(q.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_2, SoundCategory.MASTER, 1, 0.8F);
                     q.sendMessage(ConfigUtils.toComponent("&cWar between &e" + k.getName() + " &cand &e" + target.getName() +
-                            " &chas begun! Each kingdom has &6" + UltimaAddons.WAR_HOURS + " hours &cto &4/k invade &ceach other's lands."));
+                            " &chas begun! Each kingdom has &6" + UltimaAddons.WAR_TIME / 1000 / 3600 + " hours &cto &4/k invade &ceach other's lands."));
                 }
             }, wartime * 20);
         }
         
         // Wartime over announcement
-        int wartimeover = wartime + 3600 * UltimaAddons.WAR_HOURS;
+        int wartimeover = wartime + (int) (UltimaAddons.WAR_TIME / 1000);
         if (wartimeover > 0) {
             Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
                 if (k.getMembers().isEmpty() || target.getMembers().isEmpty()) {
