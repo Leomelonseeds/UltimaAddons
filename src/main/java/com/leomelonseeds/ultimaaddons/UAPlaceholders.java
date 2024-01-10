@@ -58,18 +58,23 @@ public class UAPlaceholders extends PlaceholderExpansion {
         }
         
         // Has the cooldown from the last purchased shield expired?
-        if (ctime > k.getShieldSince() + k.getShieldTime() * 2) {
+        long nextbuytime = k.getShieldSince() + k.getShieldTime() * 2;
+        if (ctime > nextbuytime) {
             lastShieldExpired = true;
         }
         
-        if (params.contains("canbuyshield")) {
-            return lastShieldExpired && !hasChallenged ? "true" : "false";
+        if (params.contains("lastshieldexpired")) {
+            return lastShieldExpired + "";
         }
         
-        if (params.contains("noshieldreason")) {
+        if (params.contains("haschallenged")) {
+            return hasChallenged + "";
+        }
+        
+        if (params.contains("remainingtime")) {
+            return ConfigUtils.formatDate(nextbuytime - ctime);
         }
         
         return null;
     }
-
 }
