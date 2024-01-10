@@ -25,17 +25,16 @@ import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.land.location.SimpleLocation;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.events.general.GroupShieldPurchaseEvent;
+import org.kingdoms.events.general.KingdomDisbandEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEndEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEvent;
 import org.kingdoms.events.lands.UnclaimLandEvent.Reason;
+import org.kingdoms.events.members.KingdomLeaveEvent;
 import org.kingdoms.managers.PvPManager;
 import org.kingdoms.managers.invasions.Plunder;
 
 import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 import com.leomelonseeds.ultimaaddons.invs.UAInventory;
-
-import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 
 public class UAListener implements Listener {
     
@@ -46,7 +45,8 @@ public class UAListener implements Listener {
         new InvasionHandler(e.getInvasion());
     }
     
-    @EventHandler
+    // Close GUIs to stop bad things from happening
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onShield(GroupShieldPurchaseEvent e) {
         if (!(e.getGroup() instanceof Kingdom)) {
             return;
@@ -54,12 +54,17 @@ public class UAListener implements Listener {
         
         // Close other shield buyers to stop abuse
         Kingdom k = (Kingdom) e.getGroup();
-        for (Player p : k.getOnlineMembers()) {
-            String title = ConfigUtils.toPlain(p.getOpenInventory().title());
-            if (title.contains("Shields")) {
-                p.closeInventory();
-            }
-        }
+        k.getOnlineMembers().forEach(p -> ConfigUtils.closeInventory(p, "Shields"));
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onDisband(KingdomDisbandEvent e) {
+        e.getKingdom().getOnlineMembers().forEach(p -> ConfigUtils.closeInventory(p, "Challenge"));
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onLeave(KingdomLeaveEvent e) {
+        ConfigUtils.closeInventory(e.getPlayer().getPlayer(), "Challenge");
     }
     
     // Challenge reminder
@@ -175,8 +180,7 @@ public class UAListener implements Listener {
                             + "All enemy resource points were transferred to your kingdom.");
                 });
                 
-                TextChannel discordChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("war");
-                discordChannel.sendMessage(":dart: **" + defender.getName() + "**'s nexus chunk was captured by **" + 
+                UltimaAddons.warChannel.sendMessage(":dart: **" + defender.getName() + "**'s nexus chunk was captured by **" + 
                         attacker.getName() + "**, and all their land was unclaimed!").queue();
             } else {
                 long rp = defender.getResourcePoints() / defender.getLands().size();

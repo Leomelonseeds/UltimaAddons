@@ -22,7 +22,7 @@ public class ConfirmAction implements UAInventory {
         this.callback = callback;
         this.mwinv = mwinv;
         
-        inv = Bukkit.createInventory(null, 27, ConfigUtils.toComponent("Confirm - " + action));
+        inv = Bukkit.createInventory(null, 27, ConfigUtils.toComponent("Confirm: " + action));
         manager.registerInventory(player, this);
     }
 

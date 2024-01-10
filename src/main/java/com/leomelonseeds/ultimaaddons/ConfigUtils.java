@@ -33,6 +33,24 @@ public class ConfigUtils {
         return skm == null ? null : skm.getString();
     }
     
+    /**
+     * Close inventory player which contain titles
+     * 
+     * @param k
+     * @param titles
+     */
+    public static void closeInventory(Player p, String... titles) {
+        String ctitle = ConfigUtils.toPlain(p.getOpenInventory().title());
+        for (String t : titles) {
+            if (!ctitle.contains(t)) {
+                continue;
+            }
+            
+            p.closeInventory();
+            return;
+        }
+    }
+    
     public static void setupReminders(Kingdom k, Kingdom target, long timeleft) {
         if (chalreminders.containsKey(k.getId())) {
             return;

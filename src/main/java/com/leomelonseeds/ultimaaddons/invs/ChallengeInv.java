@@ -13,13 +13,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.kingdoms.constants.group.Kingdom;
+import org.kingdoms.constants.group.model.logs.misc.challenge.LogKingdomChallenged;
+import org.kingdoms.constants.group.model.logs.misc.challenge.LogKingdomChallenger;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
+import org.kingdoms.constants.player.KingdomPlayer;
 
 import com.leomelonseeds.ultimaaddons.ConfigUtils;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
-
-import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 
 public class ChallengeInv implements UAInventory {
     
@@ -74,7 +74,7 @@ public class ChallengeInv implements UAInventory {
         }
         
         double days = meta.getPersistentDataContainer().get(nkey, PersistentDataType.DOUBLE);
-        new ConfirmAction("Battle " + target.getName() + " in " + days + "d", player, this, result -> {
+        new ConfirmAction("Challenge " + target.getName() + " in " + days + "d", player, this, result -> {
             if (result == null || !result) {
                 return;
             }
@@ -84,28 +84,36 @@ public class ChallengeInv implements UAInventory {
                 return;
             }
             
+            // Setup Kingdom challenge
             long timeleft = (long) days * 1000 * 60 * 60 * 24;
             long wartime = System.currentTimeMillis() + timeleft;
             String data = target.getId().toString() + "@" + wartime;
             attacker.getMetadata().put(UltimaAddons.lckh, new StandardKingdomMetadata(data));
             target.getChallenges().put(attacker.getId(), wartime);
             
+            // Log in audit logs
+            attacker.log(new LogKingdomChallenger(target, KingdomPlayer.getKingdomPlayer(player), wartime));
+            target.log(new LogKingdomChallenged(attacker, KingdomPlayer.getKingdomPlayer(player), wartime));
+            
+            // Send warning messages and close GUIs
             for (Player p : attacker.getOnlineMembers()) {
                 p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.MASTER, 1, 1.2F);
                 p.sendMessage(ConfigUtils.toComponent("&e" + player.getName() + " &chas declared war on &e" + target.getName() + 
                         "&c, with &6" + days + " &cday(s) of preparation!"));
+                ConfigUtils.closeInventory(p, "Challenge", "Shields");
             }
             
             for (Player p : target.getOnlineMembers()) {
                 p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.MASTER, 1, 1.2F);
                 p.sendMessage(ConfigUtils.toComponent("&e" + player.getName() + " &cfrom &e" + attacker.getName() + 
                         " has declared war on your kingdom, with &6" + days + " &cday(s) of preparation!"));
+                ConfigUtils.closeInventory(p, "Challenge", "Shields");
             }
 
-            TextChannel discordChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("war");
-            discordChannel.sendMessage(":scroll: " + player.getName() + " from **" + attacker.getName() + "** has declared war on **" + 
+            UltimaAddons.warChannel.sendMessage(":scroll: " + player.getName() + " from **" + attacker.getName() + "** has declared war on **" + 
                     target.getName() + "**, with " + days + " day(s) of preparation!").queue();
             
+            // Setup reminders
             ConfigUtils.setupReminders(attacker, target, timeleft);
         });
         

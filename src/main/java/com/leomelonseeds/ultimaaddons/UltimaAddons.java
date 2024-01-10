@@ -7,6 +7,9 @@ import org.kingdoms.constants.namespace.Namespace;
 
 import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
+
 
 public class UltimaAddons extends JavaPlugin {
 
@@ -18,6 +21,9 @@ public class UltimaAddons extends JavaPlugin {
 
     // Last challenged kingdom, Last challenged date
     public static KingdomMetadataHandler lckh = new StandardKingdomMetadataHandler(new Namespace("UltimaAddons", "LCK"));
+    
+    // Discord war channel
+    public static TextChannel warChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("war");
     
 	@Override
     public void onEnable() {
