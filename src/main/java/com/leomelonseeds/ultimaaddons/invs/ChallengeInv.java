@@ -18,7 +18,7 @@ import org.kingdoms.constants.group.model.logs.misc.challenge.LogKingdomChalleng
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 
-import com.leomelonseeds.ultimaaddons.ConfigUtils;
+import com.leomelonseeds.ultimaaddons.Utils;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 
 public class ChallengeInv implements UAInventory {
@@ -35,7 +35,7 @@ public class ChallengeInv implements UAInventory {
         this.player = player;
         this.nkey = new NamespacedKey(UltimaAddons.getPlugin(), "time");
         
-        inv = Bukkit.createInventory(null, 27, ConfigUtils.toComponent("Challenge " + target.getName()));
+        inv = Bukkit.createInventory(null, 27, Utils.toComponent("Challenge " + target.getName()));
         manager.registerInventory(player, this);
     }
 
@@ -43,7 +43,7 @@ public class ChallengeInv implements UAInventory {
     public void updateInventory() {
         ItemStack red = new ItemStack(Material.RED_STAINED_GLASS_PANE);
         ItemMeta redmeta = red.getItemMeta();
-        redmeta.displayName(ConfigUtils.toComponent(""));
+        redmeta.displayName(Utils.toComponent(""));
         red.setItemMeta(redmeta);
         for (int i : new int[] {0, 8, 9, 17, 18, 26}) {
             inv.setItem(i, red);
@@ -53,7 +53,7 @@ public class ChallengeInv implements UAInventory {
         for (String key : config.getKeys(false)) {
             int slot = config.getInt(key + ".slot");
             double days = config.getDouble(key + ".days");
-            ItemStack citem = ConfigUtils.createItem(config.getConfigurationSection(key));
+            ItemStack citem = Utils.createItem(config.getConfigurationSection(key));
             ItemMeta cmeta = citem.getItemMeta();
             cmeta.getPersistentDataContainer().set(nkey, PersistentDataType.DOUBLE, days);
             citem.setItemMeta(cmeta);
@@ -80,8 +80,8 @@ public class ChallengeInv implements UAInventory {
             }
 
             inv.close();
-            if (target.getMembers().isEmpty()) {
-                player.sendMessage(ConfigUtils.toComponent("&cThe kingdom you are trying to challenge no longer exists..."));
+            if (target.getMembers().isEmpty() || target.hasShield()) {
+                player.sendMessage(Utils.toComponent("&cThe target kingdom either bought a shield or no longer exists..."));
                 return;
             }
             
@@ -99,23 +99,23 @@ public class ChallengeInv implements UAInventory {
             // Send warning messages and close GUIs
             for (Player p : attacker.getOnlineMembers()) {
                 p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.MASTER, 1, 1.2F);
-                p.sendMessage(ConfigUtils.toComponent("&e" + player.getName() + " &chas declared war on &e" + target.getName() + 
+                p.sendMessage(Utils.toComponent("&e" + player.getName() + " &chas declared war on &e" + target.getName() + 
                         "&c, with &6" + days + " &cday(s) of preparation!"));
-                ConfigUtils.closeInventory(p, "Challenge", "Shields");
+                Utils.closeInventory(p, "Challenge", "Shields");
             }
             
             for (Player p : target.getOnlineMembers()) {
                 p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.MASTER, 1, 1.2F);
-                p.sendMessage(ConfigUtils.toComponent("&e" + player.getName() + " &cfrom &e" + attacker.getName() + 
+                p.sendMessage(Utils.toComponent("&e" + player.getName() + " &cfrom &e" + attacker.getName() + 
                         " has declared war on your kingdom, with &6" + days + " &cday(s) of preparation!"));
-                ConfigUtils.closeInventory(p, "Challenge", "Shields");
+                Utils.closeInventory(p, "Challenge", "Shields");
             }
 
-            UltimaAddons.warChannel.sendMessage(":scroll: " + player.getName() + " from **" + attacker.getName() + "** has declared war on **" + 
-                    target.getName() + "**, with " + days + " day(s) of preparation!").queue();
+            Utils.discord(":scroll: " + player.getName() + " from **" + attacker.getName() + "** has declared war on **" + 
+                    target.getName() + "**, with " + days + " day(s) of preparation!");
             
             // Setup reminders
-            ConfigUtils.setupReminders(attacker, target, timeleft);
+            Utils.setupReminders(attacker, target, timeleft);
         });
         
     }

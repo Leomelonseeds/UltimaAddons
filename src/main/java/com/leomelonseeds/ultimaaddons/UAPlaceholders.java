@@ -40,7 +40,7 @@ public class UAPlaceholders extends PlaceholderExpansion {
         boolean lastShieldExpired = false;
         
         // Is the kingdom challenging or at war with another
-        String lastChallenge = ConfigUtils.getLastChallenge(k);
+        String lastChallenge = Utils.getLastChallenge(k);
         if (lastChallenge != null) {
             long lastChallengeTime = Long.valueOf(lastChallenge.split("@")[1]);
             if (ctime < lastChallengeTime + UltimaAddons.WAR_TIME) {
@@ -72,7 +72,7 @@ public class UAPlaceholders extends PlaceholderExpansion {
         }
         
         if (params.contains("remainingtime")) {
-            return ConfigUtils.formatDate(nextbuytime - ctime);
+            return Utils.formatDate(nextbuytime - ctime);
         }
         
         return null;

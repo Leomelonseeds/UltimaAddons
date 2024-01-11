@@ -25,7 +25,9 @@ import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.land.location.SimpleLocation;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.events.general.GroupShieldPurchaseEvent;
+import org.kingdoms.events.general.KingdomCreateEvent;
 import org.kingdoms.events.general.KingdomDisbandEvent;
+import org.kingdoms.events.general.KingdomPacifismStateChangeEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEndEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEvent;
 import org.kingdoms.events.lands.UnclaimLandEvent.Reason;
@@ -40,13 +42,13 @@ public class UAListener implements Listener {
     
     private static Map<Player, String> lastMessage = new HashMap<>();
     
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInvasionStart(KingdomInvadeEvent e) {
         new InvasionHandler(e.getInvasion());
     }
     
     // Close GUIs to stop bad things from happening
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onShield(GroupShieldPurchaseEvent e) {
         if (!(e.getGroup() instanceof Kingdom)) {
             return;
@@ -54,17 +56,36 @@ public class UAListener implements Listener {
         
         // Close other shield buyers to stop abuse
         Kingdom k = (Kingdom) e.getGroup();
-        k.getOnlineMembers().forEach(p -> ConfigUtils.closeInventory(p, "Shields"));
+        k.getOnlineMembers().forEach(p -> Utils.closeInventory(p, "Shields", "Challenge"));
+        Utils.discord(":shield: **" + k.getName() + "** has activated a shield for " + Utils.formatDate(e.getShieldDuration()));
     }
     
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onDisband(KingdomDisbandEvent e) {
-        e.getKingdom().getOnlineMembers().forEach(p -> ConfigUtils.closeInventory(p, "Challenge"));
+        Kingdom k = e.getKingdom();
+        k.getOnlineMembers().forEach(p -> Utils.closeInventory(p, "Challenge"));
+        Utils.discord(":pencil: **" + k.getName() + "** has been disbanded");
     }
     
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onCreate(KingdomCreateEvent e) {
+        Kingdom k = e.getKingdom();
+        Utils.discord(":fleur_de_lis: **" + k.getName() + "** was founded!");
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onLeave(KingdomLeaveEvent e) {
-        ConfigUtils.closeInventory(e.getPlayer().getPlayer(), "Challenge");
+        Utils.closeInventory(e.getPlayer().getPlayer(), "Challenge");
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPacifist(KingdomPacifismStateChangeEvent e) {
+        Kingdom k = e.getKingdom();
+        if (e.isPacifist()) {
+            Utils.discord(":peace: **" + k.getName() + "** is a pacifist kingdom");
+        } else {
+            Utils.discord(":fire: **" + k.getName() + "** is now an aggressor kingdom");
+        }
     }
     
     // Challenge reminder
@@ -91,15 +112,15 @@ public class UAListener implements Listener {
                 }
                 
                 if (ctime < challenge.getValue()) {
-                    p.sendMessage(ConfigUtils.toComponent("&cYour kingdom has &e" + ConfigUtils.formatDate(challenge.getValue() - ctime) + 
+                    p.sendMessage(Utils.toComponent("&cYour kingdom has &e" + Utils.formatDate(challenge.getValue() - ctime) + 
                             " &cto prepare for war with &e" + attacker.getName()));
                 } else {
-                    p.sendMessage(ConfigUtils.toComponent("&4&l[!] &c&lYour kingdom is currently at war with &e&l" + attacker.getName() + "&c&l!"));
+                    p.sendMessage(Utils.toComponent("&4&l[!] &c&lYour kingdom is currently at war with &e&l" + attacker.getName() + "&c&l!"));
                 }
                 
             }
             
-            String lastChallenge = ConfigUtils.getLastChallenge(k);
+            String lastChallenge = Utils.getLastChallenge(k);
             if (lastChallenge != null) {
                 String[] slck = lastChallenge.split("@");
                 long lcd = Long.valueOf(slck[1]);
@@ -115,13 +136,13 @@ public class UAListener implements Listener {
                 long timeleft = lcd - ctime;
                 
                 if (timeleft > 0) {
-                    p.sendMessage(ConfigUtils.toComponent("&cYour kingdom has &e" + ConfigUtils.formatDate(timeleft) + 
+                    p.sendMessage(Utils.toComponent("&cYour kingdom has &e" + Utils.formatDate(timeleft) + 
                             " &cto prepare for war with &c" + target.getName()));
                 } else {
-                    p.sendMessage(ConfigUtils.toComponent("&4&l[!] &c&lYour kingdom is currently at war with &e&l" + target.getName() + "&c&l!"));
+                    p.sendMessage(Utils.toComponent("&4&l[!] &c&lYour kingdom is currently at war with &e&l" + target.getName() + "&c&l!"));
                 }
                 
-                ConfigUtils.setupReminders(k, target, timeleft);
+                Utils.setupReminders(k, target, timeleft);
             }
         }, 5);
     }
@@ -180,8 +201,8 @@ public class UAListener implements Listener {
                             + "All enemy resource points were transferred to your kingdom.");
                 });
                 
-                UltimaAddons.warChannel.sendMessage(":dart: **" + defender.getName() + "**'s nexus chunk was captured by **" + 
-                        attacker.getName() + "**, and all their land was unclaimed!").queue();
+                Utils.discord(":dart: **" + defender.getName() + "**'s nexus chunk was captured by **" + 
+                        attacker.getName() + "**, and all their land was unclaimed!");
             } else {
                 long rp = defender.getResourcePoints() / defender.getLands().size();
                 defender.getPlayerMembers().forEach(op -> {
@@ -323,7 +344,7 @@ public class UAListener implements Listener {
 	        return;
 	    }
 	    
-	    p.sendMessage(ConfigUtils.toComponent(m));
+	    p.sendMessage(Utils.toComponent(m));
 	    lastMessage.put(p, m);
 	    Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
 	        lastMessage.remove(p);

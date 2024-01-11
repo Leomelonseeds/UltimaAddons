@@ -8,7 +8,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.leomelonseeds.ultimaaddons.ConfigUtils;
+import com.leomelonseeds.ultimaaddons.Utils;
 
 public class ConfirmAction implements UAInventory {
     
@@ -22,7 +22,7 @@ public class ConfirmAction implements UAInventory {
         this.callback = callback;
         this.mwinv = mwinv;
         
-        inv = Bukkit.createInventory(null, 27, ConfigUtils.toComponent("Confirm: " + action));
+        inv = Bukkit.createInventory(null, 27, Utils.toComponent("Confirm: " + action));
         manager.registerInventory(player, this);
     }
 
@@ -44,7 +44,7 @@ public class ConfirmAction implements UAInventory {
             }
             ItemStack item = new ItemStack(material);
             ItemMeta meta = item.getItemMeta();
-            meta.displayName(ConfigUtils.toComponent(name));
+            meta.displayName(Utils.toComponent(name));
             item.setItemMeta(meta);
             inv.setItem(i, item);
         }

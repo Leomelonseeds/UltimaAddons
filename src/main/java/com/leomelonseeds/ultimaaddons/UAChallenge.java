@@ -49,6 +49,14 @@ public class UAChallenge implements CommandExecutor {
             return true;
         }
         
+        // Attacker cannot be new
+        long date = System.currentTimeMillis();
+        if (Utils.isNew(attacker)) {
+            sendMsg(sender, "&cYour kingdom is new! You will have to wait &e" + Utils.timeUntilNotNew(attacker) + 
+                    " &cbefore you can challenge another kingdom.");
+            return true;
+        }
+        
         // Challenged kingdom must exist
         Kingdom target = Kingdom.getKingdom(args[0]);
         if (target == null) {
@@ -62,15 +70,23 @@ public class UAChallenge implements CommandExecutor {
             return true;
         }
         
-        // Cannot have a shield
-        if (target.hasShield()) {
-            sendMsg(sender, "&cThe kingdom you are trying to attack is shielded!");
-            return true;
-        }
-        
         // Cannot be pacifist
         if (target.isPacifist()) {
             sendMsg(sender, "&cYou cannot attack pacifist kingdoms!");
+            return true;
+        }
+        
+        // Attacker cannot be new
+        if (Utils.isNew(target)) {
+            sendMsg(sender, "&cThat kingdom is new! You will have to wait &e" + Utils.timeUntilNotNew(target) + 
+                    " &cbefore you can challenge them.");
+            return true;
+        }
+        
+        // Cannot have a shield
+        if (target.hasShield()) {
+            sendMsg(sender, "&cThe kingdom you are trying to attack is shielded for &e" + 
+                    Utils.formatDate(target.getShieldTimeLeft()));
             return true;
         }
         
@@ -82,13 +98,12 @@ public class UAChallenge implements CommandExecutor {
         }
         
         // Challenger kingdom must not have been challenged by the target kingdom already
-        long date = System.currentTimeMillis();
         Map<UUID, Long> challenges = attacker.getChallenges();
         if (challenges.containsKey(target.getId())) {
             long time = challenges.get(target.getId());
             if (time > date) {
                 sendMsg(sender, "&e" + target.getName() + " &chas already challenged your kingdom! " + 
-                        "War starts in &e" + ConfigUtils.formatDate(time - date));
+                        "War starts in &e" + Utils.formatDate(time - date));
                 return true;
             }
             
@@ -99,7 +114,7 @@ public class UAChallenge implements CommandExecutor {
         }
         
         // Kingdom must not already have challenged a kingdom
-        String lastChallenge = ConfigUtils.getLastChallenge(attacker);
+        String lastChallenge = Utils.getLastChallenge(attacker);
         if (lastChallenge != null) {
             String[] slck = lastChallenge.split("@");
             long lcd = Long.valueOf(slck[1]);
@@ -109,19 +124,40 @@ public class UAChallenge implements CommandExecutor {
             // A challenge is pending
             if (cur != null && lcd > date) {
                 sendMsg(sender, "&cYour kingdom has already challenged &e" + cur.getName() + 
-                        "&c! War starts in &e" + ConfigUtils.formatDate(lcd - date));
+                        "&c! War starts in &e" + Utils.formatDate(lcd - date));
                 return true;
             }
             
             // After invasion cooldown
             if (cooldown > date) {
-                sendMsg(sender, "&cYou must wait &e" + ConfigUtils.formatDate(cooldown - date) + 
+                sendMsg(sender, "&cYou must wait &e" + Utils.formatDate(cooldown - date) + 
                         " &cbefore you can challenge again.");
                 return true;
             }
         }
         
-        sendMsg(sender, "&cYou are sending a declaration of war to &e" + target.getName() + "&c. After a chosen amount of time, "
+        // Remove kingdom shield if they have one
+        if (attacker.hasShield()) {
+            sendMsg(sender, "&cYour kingdom is shielded for &e" + Utils.formatDate(attacker.getShieldTimeLeft()) +
+                    "&c. Challenging another kingdom will remove this shield, and you will have to wait &e" + 
+                    Utils.formatDate(Utils.getNextShield(attacker)) + " &cbefore you can buy another one. " +
+                    "Please type 'confirm' in the chat within 15 seconds to continue.");
+            new ChatConfirm(player, "confirm", result -> {
+                if (result == null || !result) {
+                    return;
+                }
+                attacker.deactivateShield();
+                confirmChallenge(target, attacker, player);
+             });
+             return true;
+        }
+
+        confirmChallenge(target, attacker, player);
+        return true;
+    }
+    
+    private void confirmChallenge(Kingdom target, Kingdom attacker, Player player) {
+        sendMsg(player, "&cYou are sending a declaration of war to &e" + target.getName() + "&c. After a chosen amount of time, "
                 + "both you and the enemy will have &62 hours &cto invade each other's lands. You can only challenge 1 kingdom at a time, "
                 + "and after the war you will need to wait &61 day &cbefore challenging another kingdom. Please type 'confirm' in the "
                 + "chat within 15 seconds to continue.");
@@ -131,7 +167,6 @@ public class UAChallenge implements CommandExecutor {
            }
            new ChallengeInv(target, attacker, player);
         });
-        return true;
     }
     
     /**
@@ -141,6 +176,6 @@ public class UAChallenge implements CommandExecutor {
      * @param msg the error message
      */
     private void sendMsg(CommandSender target, String msg) {
-        target.sendMessage(ConfigUtils.toComponent(msg));
+        target.sendMessage(Utils.toComponent(msg));
     }
 }

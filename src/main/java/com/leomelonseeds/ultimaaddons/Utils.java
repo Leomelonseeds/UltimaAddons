@@ -20,11 +20,13 @@ import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.utils.time.TimeFormatter;
 
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
-public class ConfigUtils {
+public class Utils {
     
     private static Map<UUID, UUID> chalreminders = new HashMap<>(); // Attacker, Defender (since attacker can only challenge 1)
     
@@ -34,13 +36,41 @@ public class ConfigUtils {
     }
     
     /**
+     * Fetch the next time the kingdom may buy a shield.
+     * Only use if the kingdom currently has a shield.
+     * 
+     * @param k
+     * @return
+     */
+    public static long getNextShield(Kingdom k) {
+        return k.getShieldSince() + k.getShieldTime() * 2;
+    }
+    
+    public static boolean isNew(Kingdom k) {
+        long since = k.getSince();
+        long ctime = System.currentTimeMillis();
+        return ctime < since + UltimaAddons.NEWBIE_TIME;
+    }
+    
+    public static String timeUntilNotNew(Kingdom k) {
+        long since = k.getSince();
+        long ctime = System.currentTimeMillis();
+        return formatDate(since + UltimaAddons.NEWBIE_TIME - ctime);
+    }
+    
+    public static void discord(String s) {
+        TextChannel warChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("war");
+        warChannel.sendMessage(s).queue();
+    }
+    
+    /**
      * Close inventory player which contain titles
      * 
      * @param k
      * @param titles
      */
     public static void closeInventory(Player p, String... titles) {
-        String ctitle = ConfigUtils.toPlain(p.getOpenInventory().title());
+        String ctitle = Utils.toPlain(p.getOpenInventory().title());
         for (String t : titles) {
             // Stop chat confirm from happening
             if (t.equals("Challenge")) {
@@ -77,8 +107,9 @@ public class ConfigUtils {
                 involved.addAll(target.getOnlineMembers());
                 for (Player q : involved) {
                     q.playSound(q.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_2, SoundCategory.MASTER, 1, 0.8F);
-                    q.sendMessage(ConfigUtils.toComponent("&cWar between &e" + k.getName() + " &cand &e" + target.getName() +
+                    q.sendMessage(toComponent("&cWar between &e" + k.getName() + " &cand &e" + target.getName() +
                             " &chas begun! Each kingdom has &6" + UltimaAddons.WAR_TIME / 1000 / 3600 + " hours &cto &4/k invade &ceach other's lands."));
+                    discord(":bangbang: War between **" + k.getName() + "** and **" + target.getName() + "** has begun");
                 }
             }, wartime * 20);
         }
@@ -95,7 +126,8 @@ public class ConfigUtils {
                 involved.addAll(target.getOnlineMembers());
                 for (Player q : involved) {
                     q.playSound(q.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_6, SoundCategory.MASTER, 1, 1);
-                    q.sendMessage(ConfigUtils.toComponent("&cWar between &e" + k.getName() + " &cand &e" + target.getName() + " &chas ended!"));
+                    q.sendMessage(toComponent("&cWar between &e" + k.getName() + " &cand &e" + target.getName() + " &chas ended!"));
+                    discord(":checkered_flag: War between **" + k.getName() + "** and **" + target.getName() + "** has ended");
                 }
             }, wartimeover * 20);
         }
@@ -112,7 +144,7 @@ public class ConfigUtils {
                 involved.addAll(target.getOnlineMembers());
                 for (Player q : involved) {
                     q.playSound(q.getLocation(), Sound.ENTITY_GHAST_SCREAM, SoundCategory.MASTER, 1, 1);
-                    q.sendMessage(ConfigUtils.toComponent("&cThere is &61 minute left &cuntil war between &e" + k.getName() + " &cand &e" + target.getName() + " &cstarts!"));
+                    q.sendMessage(toComponent("&cThere is &61 minute left &cuntil war between &e" + k.getName() + " &cand &e" + target.getName() + " &cstarts!"));
                 }
             }, oneminremind * 20);
         }

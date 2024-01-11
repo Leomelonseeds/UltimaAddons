@@ -27,6 +27,7 @@ public class ChatConfirm implements Listener {
         this.req = req;
         this.success = false;
         this.player = player;
+        instances.put(player, this);
         Bukkit.getServer().getPluginManager().registerEvents(this, UltimaAddons.getPlugin());
         Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
             if (!success) {
@@ -42,7 +43,7 @@ public class ChatConfirm implements Listener {
             return;
         }
         
-        if (!ConfigUtils.toPlain(e.originalMessage()).equals(req)) {
+        if (!Utils.toPlain(e.originalMessage()).equals(req)) {
             return;
         }
         
@@ -54,5 +55,6 @@ public class ChatConfirm implements Listener {
     
     public void stop() {
         HandlerList.unregisterAll(this);
+        instances.remove(player);
     }
 }
