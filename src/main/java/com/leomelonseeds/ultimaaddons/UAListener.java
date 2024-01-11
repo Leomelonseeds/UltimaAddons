@@ -23,6 +23,7 @@ import org.bukkit.inventory.Inventory;
 import org.kingdoms.config.KingdomsConfig;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.land.location.SimpleLocation;
+import org.kingdoms.constants.land.structures.Structure;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.events.general.GroupShieldPurchaseEvent;
@@ -31,6 +32,7 @@ import org.kingdoms.events.general.KingdomDisbandEvent;
 import org.kingdoms.events.general.KingdomPacifismStateChangeEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEndEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEvent;
+import org.kingdoms.events.items.KingdomItemBreakEvent;
 import org.kingdoms.events.lands.UnclaimLandEvent.Reason;
 import org.kingdoms.events.members.KingdomLeaveEvent;
 import org.kingdoms.managers.PvPManager;
@@ -91,6 +93,15 @@ public class UAListener implements Listener {
         } else {
             Utils.discord(":fire: **" + k.getName() + "** is now an aggressor kingdom");
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onOutpostBreak(KingdomItemBreakEvent<Structure> e) {
+        if (!(e.getKingdomItem() instanceof Structure)) {
+            return;
+        }
+        
+        Structure structure = e.getKingdomItem();
     }
     
     // Challenge reminder
