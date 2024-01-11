@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -33,6 +34,7 @@ import org.kingdoms.events.general.KingdomPacifismStateChangeEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEndEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEvent;
 import org.kingdoms.events.items.KingdomItemBreakEvent;
+import org.kingdoms.events.lands.ClaimLandEvent;
 import org.kingdoms.events.lands.UnclaimLandEvent.Reason;
 import org.kingdoms.events.members.KingdomLeaveEvent;
 import org.kingdoms.managers.PvPManager;
@@ -102,6 +104,21 @@ public class UAListener implements Listener {
         }
         
         Structure structure = e.getKingdomItem();
+        Bukkit.getLogger().log(Level.INFO, "Structure is " + structure.getNameOrDefault());
+        Bukkit.getLogger().log(Level.INFO, "Outpost? " + structure.getNameOrDefault());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onLandClaim(ClaimLandEvent e) {
+        Kingdom k = e.getKingdom();
+        if (k.getLands().size() == 0) {
+            return;
+        }
+        
+        if (!k.getAllStructures().stream().anyMatch(s -> s.getNameOrDefault().equals("Nexus"))) {
+            e.setCancelled(true);
+            e.getPlayer().getPlayer().sendMessage(Utils.toComponent("&cYou must place your nexus using &a/k nexus &cbefore you can claim lands!"));
+        }
     }
     
     // Challenge reminder
