@@ -35,7 +35,7 @@ public class ChallengeInv implements UAInventory {
         this.player = player;
         this.nkey = new NamespacedKey(UltimaAddons.getPlugin(), "time");
         
-        inv = Bukkit.createInventory(null, 27, Utils.toComponent("Challenge " + target.getName()));
+        inv = Bukkit.createInventory(null, 27, Utils.toComponent("&8-=( &cChallenge &e" + target.getName() + " &8)=-"));
         manager.registerInventory(player, this);
     }
 
