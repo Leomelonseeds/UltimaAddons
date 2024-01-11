@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
@@ -135,6 +136,12 @@ public class UAListener implements Listener {
         
         // Must be a right click (place) action 
         if (!e.getAction().toString().contains("RIGHT")) {
+            return;
+        }
+        
+        // Must be able to place
+        Block pb = b.getRelative(e.getBlockFace());
+        if (pb.getType() != Material.AIR) {
             return;
         }
         
