@@ -58,7 +58,7 @@ public class UAPlaceholders extends PlaceholderExpansion {
         }
         
         // Has the cooldown from the last purchased shield expired?
-        long nextbuytime = k.getShieldSince() + k.getShieldTime() * 2;
+        long nextbuytime = Utils.getNextShield(k);
         if (ctime > nextbuytime) {
             lastShieldExpired = true;
         }

@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.kingdoms.constants.group.Kingdom;
+import org.kingdoms.constants.metadata.KingdomMetadata;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.utils.time.TimeFormatter;
 
@@ -37,13 +38,18 @@ public class Utils {
     
     /**
      * Fetch the next time the kingdom may buy a shield.
-     * Only use if the kingdom currently has a shield.
+     * Only use if the kingdom has bought a shield before
      * 
      * @param k
      * @return
      */
     public static long getNextShield(Kingdom k) {
-        return k.getShieldSince() + k.getShieldTime() * 2;
+        KingdomMetadata smeta = k.getMetadata().get(UltimaAddons.shield_time);
+        if (smeta == null) {
+            return 0;
+        }
+        
+        return ((StandardKingdomMetadata) smeta).getLong();
     }
     
     public static boolean isNew(Kingdom k) {
@@ -100,6 +106,7 @@ public class Utils {
         if (wartime > 0) {
             Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
                 if (k.getMembers().isEmpty() || target.getMembers().isEmpty()) {
+                    chalreminders.remove(k.getId());
                     return;
                 }
                 
@@ -114,29 +121,29 @@ public class Utils {
             }, wartime * 20);
         }
         
-        // Wartime over announcement
+        // Wartime over announcement (if this method is called it must be positive)
         int wartimeover = wartime + (int) (UltimaAddons.WAR_TIME / 1000);
-        if (wartimeover > 0) {
-            Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
-                if (k.getMembers().isEmpty() || target.getMembers().isEmpty()) {
-                    return;
-                }
-                
-                List<Player> involved = k.getOnlineMembers();
-                involved.addAll(target.getOnlineMembers());
-                for (Player q : involved) {
-                    q.playSound(q.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_6, SoundCategory.MASTER, 1, 1);
-                    q.sendMessage(toComponent("&cWar between &e" + k.getName() + " &cand &e" + target.getName() + " &chas ended!"));
-                    discord(":checkered_flag: War between **" + k.getName() + "** and **" + target.getName() + "** has ended");
-                }
-            }, wartimeover * 20);
-        }
+        Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
+            chalreminders.remove(k.getId());
+            if (k.getMembers().isEmpty() || target.getMembers().isEmpty()) {
+                return;
+            }
+            
+            List<Player> involved = k.getOnlineMembers();
+            involved.addAll(target.getOnlineMembers());
+            for (Player q : involved) {
+                q.playSound(q.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_6, SoundCategory.MASTER, 1, 1);
+                q.sendMessage(toComponent("&cWar between &e" + k.getName() + " &cand &e" + target.getName() + " &chas ended!"));
+                discord(":checkered_flag: War between **" + k.getName() + "** and **" + target.getName() + "** has ended");
+            }
+        }, wartimeover * 20);
         
         // Remind 1 min before
         int oneminremind = (int) (timeleft / 1000 - 60);
         if (oneminremind > 0) {
             Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
                 if (k.getMembers().isEmpty() || target.getMembers().isEmpty()) {
+                    chalreminders.remove(k.getId());
                     return;
                 }
                 

@@ -23,6 +23,7 @@ import org.bukkit.inventory.Inventory;
 import org.kingdoms.config.KingdomsConfig;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.land.location.SimpleLocation;
+import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.events.general.GroupShieldPurchaseEvent;
 import org.kingdoms.events.general.KingdomCreateEvent;
@@ -54,10 +55,14 @@ public class UAListener implements Listener {
             return;
         }
         
-        // Close other shield buyers to stop abuse
+        // Register next latest time to buy shield
         Kingdom k = (Kingdom) e.getGroup();
-        k.getOnlineMembers().forEach(p -> Utils.closeInventory(p, "Shields", "Challenge"));
+        long shieldtime = System.currentTimeMillis() + e.getShieldDuration() * 2;
+        k.getMetadata().put(UltimaAddons.shield_time, new StandardKingdomMetadata(shieldtime));
         Utils.discord(":shield: **" + k.getName() + "** has activated a shield for " + Utils.formatDate(e.getShieldDuration()));
+        
+        // Close other shield buyers to stop abuse
+        k.getOnlineMembers().forEach(p -> Utils.closeInventory(p, "Shields", "Challenge"));
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

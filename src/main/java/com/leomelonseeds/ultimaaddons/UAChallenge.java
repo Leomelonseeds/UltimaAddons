@@ -140,7 +140,7 @@ public class UAChallenge implements CommandExecutor {
         if (attacker.hasShield()) {
             sendMsg(sender, "&cYour kingdom is shielded for &e" + Utils.formatDate(attacker.getShieldTimeLeft()) +
                     "&c. Challenging another kingdom will remove this shield, and you will have to wait &e" + 
-                    Utils.formatDate(Utils.getNextShield(attacker)) + " &cbefore you can buy another one. " +
+                    Utils.formatDate(Utils.getNextShield(attacker) - date) + " &cbefore you can buy another one. " +
                     "Please type 'confirm' in the chat within 15 seconds to continue.");
             new ChatConfirm(player, "confirm", result -> {
                 if (result == null || !result) {
@@ -157,10 +157,16 @@ public class UAChallenge implements CommandExecutor {
     }
     
     private void confirmChallenge(Kingdom target, Kingdom attacker, Player player) {
+        sendMsg(player, "");
         sendMsg(player, "&cYou are sending a declaration of war to &e" + target.getName() + "&c. After a chosen amount of time, "
                 + "both you and the enemy will have &62 hours &cto invade each other's lands. You can only challenge 1 kingdom at a time, "
-                + "and after the war you will need to wait &61 day &cbefore challenging another kingdom. Please type 'confirm' in the "
-                + "chat within 15 seconds to continue.");
+                + "and after the war you will need to wait &61 day &cbefore challenging another kingdom.");
+        sendMsg(player, "");
+        sendMsg(player, "&cAdditionally, you will need to pay resource points to begin invasion when war starts, depending on how "
+                + "many lands you have. Currently, it is estimated that each invasion will cost &e" + attacker.getLands().size() 
+                + " &cresource points.");
+        sendMsg(player, "");
+        sendMsg(player, "&cPlease type 'confirm' in the chat within 15 seconds to continue.");
         new ChatConfirm(player, "confirm", result -> {
            if (result == null || !result) {
                return;

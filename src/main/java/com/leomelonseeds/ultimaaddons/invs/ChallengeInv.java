@@ -18,8 +18,8 @@ import org.kingdoms.constants.group.model.logs.misc.challenge.LogKingdomChalleng
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 
-import com.leomelonseeds.ultimaaddons.Utils;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.Utils;
 
 public class ChallengeInv implements UAInventory {
     
@@ -86,15 +86,16 @@ public class ChallengeInv implements UAInventory {
             }
             
             // Setup Kingdom challenge
-            long timeleft = (long) days * 1000 * 60 * 60 * 24;
+            long timeleft = (long) (days * 1000 * 60 * 60 * 24);
             long wartime = System.currentTimeMillis() + timeleft;
             String data = target.getId().toString() + "@" + wartime;
             attacker.getMetadata().put(UltimaAddons.lckh, new StandardKingdomMetadata(data));
             target.getChallenges().put(attacker.getId(), wartime);
             
             // Log in audit logs
-            attacker.log(new LogKingdomChallenger(target, KingdomPlayer.getKingdomPlayer(player), wartime));
-            target.log(new LogKingdomChallenged(attacker, KingdomPlayer.getKingdomPlayer(player), wartime));
+            KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(player);
+            attacker.log(new LogKingdomChallenger(target, kp, wartime));
+            target.log(new LogKingdomChallenged(attacker, kp, wartime));
             
             // Send warning messages and close GUIs
             for (Player p : attacker.getOnlineMembers()) {

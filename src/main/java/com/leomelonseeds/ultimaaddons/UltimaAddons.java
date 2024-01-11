@@ -16,6 +16,7 @@ public class UltimaAddons extends JavaPlugin {
     private static UltimaAddons plugin;
     private InventoryManager invManager;
     public static KingdomMetadataHandler lckh;
+    public static KingdomMetadataHandler shield_time;
     
 	@Override
     public void onEnable() {
@@ -26,6 +27,7 @@ public class UltimaAddons extends JavaPlugin {
         getCommand("uchallenge").setExecutor(new UAChallenge());
         new UAPlaceholders().register();
         lckh = new StandardKingdomMetadataHandler(new Namespace("UltimaAddons", "LCK")); // Last challenged kingdom, Last challenged date
+        shield_time = new StandardKingdomMetadataHandler(new Namespace("UltimaAddons", "SHIELD_TIME"));  // (long) Next available time a kingdom can buy a shield
 	}
 
 

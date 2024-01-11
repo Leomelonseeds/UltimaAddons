@@ -9,10 +9,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import com.leomelonseeds.ultimaaddons.invs.ConfirmCallback;
-
-import io.papermc.paper.event.player.AsyncChatEvent;
 
 public class ChatConfirm implements Listener {
     
@@ -21,36 +20,48 @@ public class ChatConfirm implements Listener {
     private Player player;
     private boolean success;
     private String req;
+    private UltimaAddons plugin;
     
     public ChatConfirm(Player player, String req, ConfirmCallback callback) {
         this.callback = callback;
         this.req = req;
         this.success = false;
         this.player = player;
+        
+        // Return if player already is in a chat window
+        if (instances.containsKey(player)) {
+            callback.onConfirm(false);
+            return;
+        }
+        
         instances.put(player, this);
-        Bukkit.getServer().getPluginManager().registerEvents(this, UltimaAddons.getPlugin());
-        Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
-            if (!success) {
-                callback.onConfirm(false);
-                stop();
+        this.plugin = UltimaAddons.getPlugin();
+        Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (success) {
+                return;
             }
+            
+            callback.onConfirm(false);
+            stop();
         }, 15 * 20);
     }
     
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onChat(AsyncChatEvent e) {
+    @SuppressWarnings("deprecation")
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onChat(AsyncPlayerChatEvent e) {
         if (!e.getPlayer().equals(player)) {
             return;
         }
         
-        if (!Utils.toPlain(e.originalMessage()).equals(req)) {
+        if (!e.getMessage().equals(req)) {
             return;
         }
         
         success = true;
         e.setCancelled(true);
         stop();
-        Bukkit.getScheduler().runTask(UltimaAddons.getPlugin(), () -> callback.onConfirm(true));
+        Bukkit.getScheduler().runTask(plugin, () -> callback.onConfirm(true));
     }
     
     public void stop() {
