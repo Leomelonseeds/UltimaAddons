@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -19,14 +20,23 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.kingdoms.config.KingdomsConfig;
 import org.kingdoms.constants.group.Kingdom;
+import org.kingdoms.constants.land.Land;
+import org.kingdoms.constants.land.abstraction.data.KingdomItemBuilder;
+import org.kingdoms.constants.land.location.SimpleChunkLocation;
 import org.kingdoms.constants.land.location.SimpleLocation;
 import org.kingdoms.constants.land.structures.Structure;
+import org.kingdoms.constants.land.structures.StructureRegistry;
+import org.kingdoms.constants.land.structures.StructureStyle;
+import org.kingdoms.constants.land.structures.StructureType;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
+import org.kingdoms.constants.player.StandardKingdomPermission;
 import org.kingdoms.events.general.GroupShieldPurchaseEvent;
 import org.kingdoms.events.general.KingdomCreateEvent;
 import org.kingdoms.events.general.KingdomDisbandEvent;
@@ -37,8 +47,12 @@ import org.kingdoms.events.items.KingdomItemBreakEvent;
 import org.kingdoms.events.lands.ClaimLandEvent;
 import org.kingdoms.events.lands.UnclaimLandEvent.Reason;
 import org.kingdoms.events.members.KingdomLeaveEvent;
+import org.kingdoms.main.Kingdoms;
 import org.kingdoms.managers.PvPManager;
 import org.kingdoms.managers.invasions.Plunder;
+import org.kingdoms.utils.nbt.ItemNBT;
+import org.kingdoms.utils.nbt.NBTType;
+import org.kingdoms.utils.nbt.NBTWrappers;
 
 import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 import com.leomelonseeds.ultimaaddons.invs.UAInventory;
@@ -104,8 +118,74 @@ public class UAListener implements Listener {
         }
         
         Structure structure = e.getKingdomItem();
-        Bukkit.getLogger().log(Level.INFO, "Structure is " + structure.getNameOrDefault());
-        Bukkit.getLogger().log(Level.INFO, "Outpost? " + structure.getNameOrDefault());
+        if (!structure.getNameOrDefault().equals("Outpost")) {
+            return;
+        }
+        
+        Bukkit.getLogger().log(Level.INFO, "Outpost broken");
+    }
+
+    @EventHandler
+    public void onOutpostPlace(PlayerInteractEvent e) {
+        // Check if item is kingdom item
+        Block b = e.getClickedBlock();
+        if (b == null) {
+            return;
+        }
+        
+        // Must be a right click (place) action 
+        if (!e.getAction().toString().contains("RIGHT")) {
+            return;
+        }
+        
+        ItemStack item = e.getItem();
+        NBTWrappers.NBTTagCompound nbt = ItemNBT.getTag(item);
+        nbt = nbt.getCompound(Kingdoms.NBT);
+        if (nbt == null) {
+            return;
+        }
+        
+        // Check if its a structure
+        String tag = nbt.get(StructureType.METADATA, NBTType.STRING);
+        if (!tag.equals("outpost")) {
+            return;
+        }
+
+        // Only allow outpost to be placed on unclaimed land
+        Player p = e.getPlayer();
+        Land land = Land.getLand(b.getLocation());
+        if (land != null) {
+            p.sendMessage(Utils.toComponent("&cYou can only place outposts in unclaimed land!"));
+            return;
+        }
+        
+        e.setCancelled(true);
+        KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(p);
+        Kingdom k = kp.getKingdom();
+        
+        // Must have kingdom
+        if (k == null) {
+            p.sendMessage(Utils.toComponent("&cYou must be in a kingdom to use this!"));
+            return;
+        }
+        
+        // Must have appropriate perms
+        if (!kp.hasPermission(StandardKingdomPermission.CLAIM) || !kp.hasPermission(StandardKingdomPermission.STRUCTURES)) {
+            p.sendMessage(Utils.toComponent("&cYou must have both CLAIM and STRUCTURES permissions to create an outpost!"));
+            return;
+        }
+        
+        // Must be less than max lands
+        if (k.getLands().size() >= k.getMaxClaims()) {
+            p.sendMessage(Utils.toComponent("&cYour kingdom has already reached its claim limit!"));
+            return;
+        }
+        
+        SimpleLocation sl = SimpleLocation.of(b.getRelative(e.getBlockFace()));
+        Land claim = k.claim(SimpleChunkLocation.of(b), kp, ClaimLandEvent.Reason.CLAIMED).getLands().iterator().next();
+        StructureStyle outpostStyle = StructureRegistry.getStyle("outpost");
+        Structure outpost = outpostStyle.getType().build(
+                new KingdomItemBuilder<Structure, StructureStyle, StructureType>(outpostStyle, SimpleLocation.of(b), kp));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -117,7 +197,7 @@ public class UAListener implements Listener {
         
         if (!k.getAllStructures().stream().anyMatch(s -> s.getNameOrDefault().equals("Nexus"))) {
             e.setCancelled(true);
-            e.getPlayer().getPlayer().sendMessage(Utils.toComponent("&cYou must place your nexus using &a/k nexus &cbefore you can claim lands!"));
+            e.getPlayer().getPlayer().sendMessage(Utils.toComponent("&cYou must place your nexus using &a/k nexus &cbefore you can claim more lands!"));
         }
     }
     
