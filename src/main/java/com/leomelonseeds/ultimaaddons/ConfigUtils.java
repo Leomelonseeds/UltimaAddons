@@ -42,6 +42,14 @@ public class ConfigUtils {
     public static void closeInventory(Player p, String... titles) {
         String ctitle = ConfigUtils.toPlain(p.getOpenInventory().title());
         for (String t : titles) {
+            // Stop chat confirm from happening
+            if (t.equals("Challenge")) {
+                ChatConfirm pc = ChatConfirm.instances.get(p);
+                if (pc != null) {
+                    pc.stop();
+                }
+            }
+            
             if (!ctitle.contains(t)) {
                 continue;
             }

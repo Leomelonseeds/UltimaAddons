@@ -78,7 +78,8 @@ public class ChallengeInv implements UAInventory {
             if (result == null || !result) {
                 return;
             }
-            
+
+            inv.close();
             if (target.getMembers().isEmpty()) {
                 player.sendMessage(ConfigUtils.toComponent("&cThe kingdom you are trying to challenge no longer exists..."));
                 return;

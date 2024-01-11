@@ -62,6 +62,12 @@ public class UAChallenge implements CommandExecutor {
             return true;
         }
         
+        // Cannot have a shield
+        if (target.hasShield()) {
+            sendMsg(sender, "&cThe kingdom you are trying to attack is shielded!");
+            return true;
+        }
+        
         // Cannot be pacifist
         if (target.isPacifist()) {
             sendMsg(sender, "&cYou cannot attack pacifist kingdoms!");
@@ -119,7 +125,7 @@ public class UAChallenge implements CommandExecutor {
                 + "both you and the enemy will have &62 hours &cto invade each other's lands. You can only challenge 1 kingdom at a time, "
                 + "and after the war you will need to wait &61 day &cbefore challenging another kingdom. Please type 'confirm' in the "
                 + "chat within 15 seconds to continue.");
-        new ChatConfirm("confirm", result -> {
+        new ChatConfirm(player, "confirm", result -> {
            if (result == null || !result) {
                return;
            }
