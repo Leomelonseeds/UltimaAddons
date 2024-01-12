@@ -177,8 +177,16 @@ public class UAListener implements Listener {
         }
         
         // Must have appropriate perms
-        if (!kp.hasPermission(StandardKingdomPermission.CLAIM) || !kp.hasPermission(StandardKingdomPermission.STRUCTURES)) {
+        if (!kp.hasPermission(StandardKingdomPermission.CLAIM) || 
+            !kp.hasPermission(StandardKingdomPermission.STRUCTURES)) {
             p.sendMessage(Utils.toComponent("&cYou must have both CLAIM and STRUCTURES permissions to create an outpost!"));
+            return;
+        }
+        
+        // Must have less than 3 placed outposts
+        if (k.getAllStructures().stream().filter(s -> s.getNameOrDefault().equals("Outpost"))
+                .count() >= UltimaAddons.MAX_OUTPOSTS) {
+            p.sendMessage(Utils.toComponent("&cYour kingdom has already reached its outpost limit!"));
             return;
         }
         
@@ -187,12 +195,25 @@ public class UAListener implements Listener {
             p.sendMessage(Utils.toComponent("&cYour kingdom has already reached its claim limit!"));
             return;
         }
+
+        // Handle block and item settings
+        item.setAmount(item.getAmount() - 1);
+        pb.setType(item.getType());
         
-        SimpleLocation sl = SimpleLocation.of(b.getRelative(e.getBlockFace()));
-        Land claim = k.claim(SimpleChunkLocation.of(b), kp, ClaimLandEvent.Reason.CLAIMED).getLands().iterator().next();
+        // Kingdoms spawn structure
+        SimpleLocation sl = SimpleLocation.of(pb);
+        Land claim = k.claim(SimpleChunkLocation.of(pb), kp, ClaimLandEvent.Reason.CLAIMED).getLands().iterator().next();
         StructureStyle outpostStyle = StructureRegistry.getStyle("outpost");
         Structure outpost = outpostStyle.getType().build(
-                new KingdomItemBuilder<Structure, StructureStyle, StructureType>(outpostStyle, SimpleLocation.of(b), kp));
+                new KingdomItemBuilder<Structure, StructureStyle, StructureType>(outpostStyle, SimpleLocation.of(pb), kp));
+        claim.getStructures().put(sl, outpost);
+        outpost.spawnHolograms(k);
+        
+        // Add metadata
+        // ID is simply cur time, no way 2 people put an outpost at the same milisecond...
+        long id = System.currentTimeMillis();
+        claim.getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(id));
+        outpost.getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(id));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

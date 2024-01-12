@@ -13,10 +13,12 @@ public class UltimaAddons extends JavaPlugin {
     public static final long WAR_TIME = 2 * 3600 * 1000; // 2 hours
     public static final long CHALLENGE_COOLDOWN_TIME = 1 * 24 * 3600 * 1000; // 1 day
     public static final long NEWBIE_TIME = 5 * 24 * 3600 * 1000; // 5 days
+    public static final long MAX_OUTPOSTS = 3;
     private static UltimaAddons plugin;
     private InventoryManager invManager;
     public static KingdomMetadataHandler lckh;
     public static KingdomMetadataHandler shield_time;
+    public static KingdomMetadataHandler outpost_id;
     
 	@Override
     public void onEnable() {
