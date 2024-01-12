@@ -1,8 +1,6 @@
 package com.leomelonseeds.ultimaaddons;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -12,13 +10,10 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -49,7 +44,6 @@ import org.kingdoms.events.lands.ClaimLandEvent;
 import org.kingdoms.events.lands.UnclaimLandEvent.Reason;
 import org.kingdoms.events.members.KingdomLeaveEvent;
 import org.kingdoms.main.Kingdoms;
-import org.kingdoms.managers.PvPManager;
 import org.kingdoms.managers.invasions.Plunder;
 import org.kingdoms.utils.nbt.ItemNBT;
 import org.kingdoms.utils.nbt.NBTType;
@@ -59,8 +53,6 @@ import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 import com.leomelonseeds.ultimaaddons.invs.UAInventory;
 
 public class UAListener implements Listener {
-    
-    private static Map<Player, String> lastMessage = new HashMap<>();
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInvasionStart(KingdomInvadeEvent e) {
@@ -162,7 +154,7 @@ public class UAListener implements Listener {
         Player p = e.getPlayer();
         Land land = Land.getLand(b.getLocation());
         if (land != null) {
-            p.sendMessage(Utils.toComponent("&cYou can only place outposts in unclaimed land!"));
+            message(p, "&cYou can only place outposts in unclaimed land!");
             return;
         }
         
@@ -172,27 +164,27 @@ public class UAListener implements Listener {
         
         // Must have kingdom
         if (k == null) {
-            p.sendMessage(Utils.toComponent("&cYou must be in a kingdom to use this!"));
+            message(p, "&cYou must be in a kingdom to use this!");
             return;
         }
         
         // Must have appropriate perms
         if (!kp.hasPermission(StandardKingdomPermission.CLAIM) || 
             !kp.hasPermission(StandardKingdomPermission.STRUCTURES)) {
-            p.sendMessage(Utils.toComponent("&cYou must have both CLAIM and STRUCTURES permissions to create an outpost!"));
+            message(p, "&cYou must have both CLAIM and STRUCTURES permissions to create an outpost!");
             return;
         }
         
         // Must have less than 3 placed outposts
         if (k.getAllStructures().stream().filter(s -> s.getNameOrDefault().equals("Outpost"))
                 .count() >= UltimaAddons.MAX_OUTPOSTS) {
-            p.sendMessage(Utils.toComponent("&cYour kingdom has already reached its outpost limit!"));
+            message(p, "&cYour kingdom has already reached its outpost limit!");
             return;
         }
         
         // Must be less than max lands
         if (k.getLands().size() >= k.getMaxClaims()) {
-            p.sendMessage(Utils.toComponent("&cYour kingdom has already reached its claim limit!"));
+            message(p, "&cYour kingdom has already reached its claim limit!");
             return;
         }
 
@@ -225,7 +217,7 @@ public class UAListener implements Listener {
         
         if (!k.getAllStructures().stream().anyMatch(s -> s.getNameOrDefault().equals("Nexus"))) {
             e.setCancelled(true);
-            e.getPlayer().getPlayer().sendMessage(Utils.toComponent("&cYou must place your nexus using &a/k nexus &cbefore you can claim more lands!"));
+            message(e.getPlayer().getPlayer(), "&cYou must place your nexus using &a/k nexus &cbefore you can claim more lands!");
         }
     }
     
@@ -253,10 +245,10 @@ public class UAListener implements Listener {
                 }
                 
                 if (ctime < challenge.getValue()) {
-                    p.sendMessage(Utils.toComponent("&cYour kingdom has &e" + Utils.formatDate(challenge.getValue() - ctime) + 
-                            " &cto prepare for war with &e" + attacker.getName()));
+                    message(p, "&cYour kingdom has &e" + Utils.formatDate(challenge.getValue() - ctime) + 
+                            " &cto prepare for war with &e" + attacker.getName());
                 } else {
-                    p.sendMessage(Utils.toComponent("&4&l[!] &c&lYour kingdom is currently at war with &e&l" + attacker.getName() + "&c&l!"));
+                    message(p, "&4&l[!] &c&lYour kingdom is currently at war with &e&l" + attacker.getName() + "&c&l!");
                 }
                 
             }
@@ -277,10 +269,10 @@ public class UAListener implements Listener {
                 long timeleft = lcd - ctime;
                 
                 if (timeleft > 0) {
-                    p.sendMessage(Utils.toComponent("&cYour kingdom has &e" + Utils.formatDate(timeleft) + 
-                            " &cto prepare for war with &c" + target.getName()));
+                    message(p, "&cYour kingdom has &e" + Utils.formatDate(timeleft) + 
+                            " &cto prepare for war with &c" + target.getName());
                 } else {
-                    p.sendMessage(Utils.toComponent("&4&l[!] &c&lYour kingdom is currently at war with &e&l" + target.getName() + "&c&l!"));
+                    message(p, "&4&l[!] &c&lYour kingdom is currently at war with &e&l" + target.getName() + "&c&l!");
                 }
                 
                 Utils.setupReminders(k, target, timeleft);
@@ -368,74 +360,6 @@ public class UAListener implements Listener {
             }
         }, 1);
     }
-	
-    // Show message for pacifist pvp
-    @EventHandler(priority = EventPriority.MONITOR)
-	public void onPlayerDamage(EntityDamageByEntityEvent e) {
-        // Must be cancelled already
-        if (!e.isCancelled()) {
-            return;
-        }
-        
-	    // Player only
-	    if (!(e.getEntity() instanceof Player)) {
-	        return;
-	    }
-	    
-	    // NPC check
-		Player victim = (Player) e.getEntity();
-		if (victim.hasMetadata("NPC")) {
-		    return;
-		}
-		
-		// Damager projectile check
-		Entity entityDamager = e.getDamager();
-		Player damager;
-		if (entityDamager instanceof Projectile) {
-			Projectile p = (Projectile) entityDamager;
-			if (!(p.getShooter() instanceof Player)) {
-			    return;
-			}
-            damager = (Player) p.getShooter();
-		} else if (entityDamager instanceof Player) {
-			damager = (Player) entityDamager;
-		} else {
-			return;
-		}
-		
-		// Add extra restrictions if they already can fight
-		if (!PvPManager.canFight(damager, victim)) {
-		    return;
-		}
-			
-		KingdomPlayer damagerKp = KingdomPlayer.getKingdomPlayer(damager);
-		KingdomPlayer victimKp = KingdomPlayer.getKingdomPlayer(victim);
-		if (damagerKp.hasKingdom() && victimKp.hasKingdom()) {
-			Kingdom damagerKingdom = damagerKp.getKingdom();
-			Kingdom victimKingdom = victimKp.getKingdom();
-			if (damagerKingdom.isPacifist() && !victimKingdom.isPacifist()) {
-				if (!damagerKp.isPvp()) {
-					message(damager, "&7You are pacifist, and have PVP disabled! Use &a/k pvp &7to turn it on.");
-				}
-			} else if (!damagerKingdom.isPacifist() && victimKingdom.isPacifist()) {
-				if (!victimKp.isPvp()) {
-					message(damager, "&7The player you are attacking is pacifist, and has PVP disabled.");
-				}
-			} else if (damagerKingdom.isPacifist() && victimKingdom.isPacifist()) {
-				if (!(victimKp.isPvp() && damagerKp.isPvp())) {
-					message(damager, "&7Pacifist players must both have PVP enabled using &a/k pvp &7to fight.");
-				}
-			}
-		} else if (damagerKp.hasKingdom() && !victimKp.hasKingdom()) {
-			if (!damagerKp.isPvp() && damagerKp.getKingdom().isPacifist()) {
-				message(damager, "&7You are pacifist, and have PVP disabled! Use &a/k pvp &7to turn it on.");
-			}
-		} else if (!damagerKp.hasKingdom() && victimKp.hasKingdom()) {
-			if (!victimKp.isPvp() && victimKp.getKingdom().isPacifist()) {
-				message(damager, "&7The player you are attacking is in a pacifist Kingdom and has PVP disabled.");
-			}
-		}
-	}
     
     /** Handle clicking of custom GUIs */
     @EventHandler
@@ -481,14 +405,6 @@ public class UAListener implements Listener {
 	
 	// Prevent message spam
 	private void message(Player p, String m) {
-	    if (lastMessage.get(p) != null && lastMessage.get(p).equals(m)) {
-	        return;
-	    }
-	    
 	    p.sendMessage(Utils.toComponent(m));
-	    lastMessage.put(p, m);
-	    Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
-	        lastMessage.remove(p);
-	    }, 60);
 	}
 }
