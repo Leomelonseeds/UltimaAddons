@@ -3,7 +3,6 @@ package com.leomelonseeds.ultimaaddons;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -45,6 +44,7 @@ import org.kingdoms.events.lands.UnclaimLandEvent.Reason;
 import org.kingdoms.events.members.KingdomLeaveEvent;
 import org.kingdoms.main.Kingdoms;
 import org.kingdoms.managers.invasions.Plunder;
+import org.kingdoms.services.managers.ServiceHandler;
 import org.kingdoms.utils.nbt.ItemNBT;
 import org.kingdoms.utils.nbt.NBTType;
 import org.kingdoms.utils.nbt.NBTWrappers;
@@ -115,10 +115,14 @@ public class UAListener implements Listener {
             return;
         }
         
-        Bukkit.getLogger().log(Level.INFO, "Outpost broken");
+        if (e.getPlayer().getPlayer().isFlying()) {
+            e.setCancelled(true);
+        }
     }
+    
+    // NOTE TO SELF TRY USING KINGDOMITEMPLACEEVENT TO HANDLE CANCELLING PLACING OUTPOSTS IN CLAIMED LAND
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onOutpostPlace(PlayerInteractEvent e) {
         // Check if item is kingdom item
         Block b = e.getClickedBlock();
@@ -152,18 +156,28 @@ public class UAListener implements Listener {
 
         // Only allow outpost to be placed on unclaimed land
         Player p = e.getPlayer();
-        Land land = Land.getLand(b.getLocation());
-        if (land != null) {
-            message(p, "&cYou can only place outposts in unclaimed land!");
+        SimpleChunkLocation scl = SimpleChunkLocation.of(pb);
+        if (ServiceHandler.isInRegion(scl)) {
+            message(p, "&cYou cannot create an outpost here!");
             return;
         }
         
+        // Check if land is claimed. If it is, the KingdomItemPlaceEvent will handle
+        // cancelling the event instead...
+        Land land = Land.getLand(scl);
+        if (land == null) {
+            land = new Land(scl);
+        }
+        
+        if (land.isClaimed()) {
+            return;
+        }
+
         e.setCancelled(true);
-        KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(p);
-        Kingdom k = kp.getKingdom();
         
         // Must have kingdom
-        if (k == null) {
+        KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(p);
+        if (!kp.hasKingdom()) {
             message(p, "&cYou must be in a kingdom to use this!");
             return;
         }
@@ -176,6 +190,7 @@ public class UAListener implements Listener {
         }
         
         // Must have less than 3 placed outposts
+        Kingdom k = kp.getKingdom();
         if (k.getAllStructures().stream().filter(s -> s.getNameOrDefault().equals("Outpost"))
                 .count() >= UltimaAddons.MAX_OUTPOSTS) {
             message(p, "&cYour kingdom has already reached its outpost limit!");
@@ -194,17 +209,17 @@ public class UAListener implements Listener {
         
         // Kingdoms spawn structure
         SimpleLocation sl = SimpleLocation.of(pb);
-        Land claim = k.claim(SimpleChunkLocation.of(pb), kp, ClaimLandEvent.Reason.CLAIMED).getLands().iterator().next();
+        k.claim(scl, kp, ClaimLandEvent.Reason.CLAIMED);
         StructureStyle outpostStyle = StructureRegistry.getStyle("outpost");
         Structure outpost = outpostStyle.getType().build(
                 new KingdomItemBuilder<Structure, StructureStyle, StructureType>(outpostStyle, SimpleLocation.of(pb), kp));
-        claim.getStructures().put(sl, outpost);
+        land.getStructures().put(sl, outpost);
         outpost.spawnHolograms(k);
         
         // Add metadata
         // ID is simply cur time, no way 2 people put an outpost at the same milisecond...
         long id = System.currentTimeMillis();
-        claim.getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(id));
+        land.getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(id));
         outpost.getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(id));
     }
 
