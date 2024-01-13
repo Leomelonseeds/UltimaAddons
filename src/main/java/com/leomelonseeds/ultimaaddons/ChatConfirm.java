@@ -44,7 +44,7 @@ public class ChatConfirm implements Listener {
             
             callback.onConfirm(false);
             stop();
-        }, 15 * 20);
+        }, 30 * 20);
     }
     
     @SuppressWarnings("deprecation")

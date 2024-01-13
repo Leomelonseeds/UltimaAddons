@@ -57,6 +57,12 @@ public class UAChallenge implements CommandExecutor {
             return true;
         }
         
+        // Attacker must have a nexus
+        if (attacker.getNexus() == null) {
+            sendMsg(sender, "&cYou must place your nexus using &a/k nexus &cbefore you can declare war!");
+            return true;
+        }
+        
         // Challenged kingdom must exist
         Kingdom target = Kingdom.getKingdom(args[0]);
         if (target == null) {
@@ -141,7 +147,7 @@ public class UAChallenge implements CommandExecutor {
             sendMsg(sender, "&cYour kingdom is shielded for &e" + Utils.formatDate(attacker.getShieldTimeLeft()) +
                     "&c. Challenging another kingdom will remove this shield, and you will have to wait &e" + 
                     Utils.formatDate(Utils.getNextShield(attacker) - date) + " &cbefore you can buy another one. " +
-                    "Please type 'confirm' in the chat within 15 seconds to continue.");
+                    "Please type 'confirm' in the chat within 30 seconds to continue.");
             new ChatConfirm(player, "confirm", result -> {
                 if (result == null || !result) {
                     return;
@@ -166,7 +172,7 @@ public class UAChallenge implements CommandExecutor {
                 + "many lands you have. Currently, it is estimated that each invasion will cost &e" + attacker.getLands().size() 
                 + " &cresource points.");
         sendMsg(player, "");
-        sendMsg(player, "&cPlease type 'confirm' in the chat within 15 seconds to continue.");
+        sendMsg(player, "&cPlease type 'confirm' in the chat within 30 seconds to continue.");
         new ChatConfirm(player, "confirm", result -> {
            if (result == null || !result) {
                return;
