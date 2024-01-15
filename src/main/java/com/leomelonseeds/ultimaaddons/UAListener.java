@@ -443,13 +443,19 @@ public class UAListener implements Listener {
         Kingdom attacker = invasion.getAttacker();
         long defrp = defender.getResourcePoints();
         SimpleLocation nexus = defender.getNexus();
+        Set<SimpleChunkLocation> affected = invasion.getAffectedLands(); // This should be a size 1 set
+        Land outpost = Utils.getOutpost(affected);
         Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
-            if (nexus != null && invasion.getAffectedLands().stream().
-                    anyMatch(land -> nexus.toSimpleChunkLocation().equals(land))) {
+            long loss = defrp;
+            if (nexus != null && affected.stream().anyMatch(land -> nexus.toSimpleChunkLocation().equals(land))) {
                 Bukkit.getOnlinePlayers().forEach(p -> {
                     message(p, "&e" + defender.getName() + " &cwas disbanded due to an invasion from &e" + attacker.getName() + "&c!");
                 });
             } else {
+                if (outpost != null) {
+                    int extra = Utils.unclaimOutpost(null, defender, outpost);
+                }
+                
                 long rp = defrp / defender.getLands().size();
                 defender.getOnlineMembers().forEach(p -> {
                     p.playSound(p.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.MASTER, 1, 0.8F);
@@ -459,7 +465,7 @@ public class UAListener implements Listener {
             
             invasion.getAttacker().getOnlineMembers().forEach(p -> {
                 p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.MASTER, 1, 0.8F);
-                message(p, "&2Your kingdom gained &6" + defrp + " &2resource points.");
+                message(p, "&2Your kingdom gained &6" + loss + " &2resource points.");
             });
         }, 1);
     }

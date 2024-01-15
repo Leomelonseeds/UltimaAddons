@@ -22,6 +22,7 @@ import org.kingdoms.config.KingdomsConfig;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.land.Land;
 import org.kingdoms.constants.land.location.SimpleChunkLocation;
+import org.kingdoms.constants.land.structures.Structure;
 import org.kingdoms.constants.metadata.KingdomMetadata;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
@@ -52,33 +53,57 @@ public class Utils {
      * Unclaim all associated lands given outpost land
      * 
      * @param l
+     * @return the number of unclaimed lands
      */
-    public static void unclaimOutpost(KingdomPlayer kp, Kingdom k, Land l) {
-        Bukkit.getScheduler().runTaskAsynchronously(UltimaAddons.getPlugin(), () -> {
-            KingdomMetadata outpostdata = l.getMetadata().get(UltimaAddons.outpost_id);
-            if (outpostdata == null) {
+    public static int unclaimOutpost(KingdomPlayer kp, Kingdom k, Land l) {
+        KingdomMetadata outpostdata = l.getMetadata().get(UltimaAddons.outpost_id);
+        if (outpostdata == null) {
+            return 0;
+        }
+        
+        long outpostid = ((StandardKingdomMetadata) outpostdata).getLong();
+        Set<SimpleChunkLocation> toUnclaim = new HashSet<>();
+        k.getLands().forEach(kl -> {
+            KingdomMetadata kld = kl.getMetadata().get(UltimaAddons.outpost_id);
+            if (kld == null) {
+                return;
+            }
+
+            if (((StandardKingdomMetadata) kld).getLong() != outpostid) {
                 return;
             }
             
-            long outpostid = ((StandardKingdomMetadata) outpostdata).getLong();
-            Set<SimpleChunkLocation> toUnclaim = new HashSet<>();
-            k.getLands().forEach(kl -> {
-                KingdomMetadata kld = kl.getMetadata().get(UltimaAddons.outpost_id);
-                if (kld == null) {
-                    return;
-                }
-
-                if (((StandardKingdomMetadata) kld).getLong() != outpostid) {
-                    return;
-                }
-                
-                toUnclaim.add(kl.getLocation());
-            });
-            
-            Bukkit.getScheduler().runTask(UltimaAddons.getPlugin(), () -> {
-               k.unclaim(new HashSet<>(toUnclaim), kp, UnclaimLandEvent.Reason.UNCLAIMED, true);
-            });
+            toUnclaim.add(kl.getLocation());
         });
+        
+        Bukkit.getScheduler().runTask(UltimaAddons.getPlugin(), () -> {
+           k.unclaim(new HashSet<>(toUnclaim), kp, UnclaimLandEvent.Reason.UNCLAIMED, kp != null);
+        });
+        
+        return toUnclaim.size();
+    }
+    
+    /**
+     * Attempts to find a land with an outpost
+     * 
+     * @param set
+     * @return null if not found
+     */
+    public static Land getOutpost(Set<SimpleChunkLocation> set) {
+        for (SimpleChunkLocation scl : set) {
+            Land l = scl.getLand();
+            if (l == null) {
+                continue;
+            }
+            
+            for (Structure s : l.getStructures().values()) {
+                if (s.getNameOrDefault().equals("Outpost")) {
+                    return l;
+                }
+            }
+        }
+        
+        return null;
     }
     
     // Hacky method of invoking my own disconnectslands function
