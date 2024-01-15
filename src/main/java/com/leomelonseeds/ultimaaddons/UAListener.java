@@ -215,7 +215,7 @@ public class UAListener implements Listener {
         }
         
         // Must be less than max lands
-        if (k.getLands().size() >= k.getMaxClaims()) {
+        if (k.getLandLocations().size() >= k.getMaxClaims()) {
             message(p, "&cYour kingdom has already reached its claim limit!");
             return;
         }
@@ -258,7 +258,7 @@ public class UAListener implements Listener {
 
         // Allow claiming if currently kingdom has 0 lands
         Kingdom k = e.getKingdom();
-        if (k.getLands().size() == 0) {
+        if (k.getLandLocations().size() == 0) {
             return;
         }
         
