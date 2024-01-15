@@ -31,9 +31,11 @@ import org.kingdoms.constants.land.structures.Structure;
 import org.kingdoms.constants.land.structures.StructureRegistry;
 import org.kingdoms.constants.land.structures.StructureStyle;
 import org.kingdoms.constants.land.structures.StructureType;
+import org.kingdoms.constants.metadata.KingdomMetadata;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.constants.player.StandardKingdomPermission;
+import org.kingdoms.events.general.GroupDisband;
 import org.kingdoms.events.general.GroupShieldPurchaseEvent;
 import org.kingdoms.events.general.KingdomCreateEvent;
 import org.kingdoms.events.general.KingdomDisbandEvent;
@@ -42,7 +44,6 @@ import org.kingdoms.events.invasion.KingdomInvadeEndEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEvent;
 import org.kingdoms.events.items.KingdomItemBreakEvent;
 import org.kingdoms.events.lands.ClaimLandEvent;
-import org.kingdoms.events.lands.UnclaimLandEvent.Reason;
 import org.kingdoms.events.members.KingdomLeaveEvent;
 import org.kingdoms.main.Kingdoms;
 import org.kingdoms.managers.invasions.Plunder;
@@ -56,8 +57,6 @@ import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 import com.leomelonseeds.ultimaaddons.invs.UAInventory;
 
 public class UAListener implements Listener {
-    
-    private static Set<UUID> disabledClaims = new HashSet<>();
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInvasionStart(KingdomInvadeEvent e) {
@@ -85,13 +84,17 @@ public class UAListener implements Listener {
     public void onDisband(KingdomDisbandEvent e) {
         Kingdom k = e.getKingdom();
         k.getOnlineMembers().forEach(p -> Utils.closeInventory(p, "Challenge"));
-        Utils.discord(":pencil: **" + k.getName() + "** has been disbanded");
+        if (e.getReason() == GroupDisband.Reason.INVASION) {
+            Utils.discord(":dart: **" + k.getName() + "** was disbanded because their nexus chunk was captured");
+        } else {
+            Utils.discord(":pencil: **" + k.getName() + "** has been disbanded");
+        }
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onCreate(KingdomCreateEvent e) {
         Kingdom k = e.getKingdom();
-        Utils.discord(":fleur_de_lis: **" + k.getName() + "** was founded!");
+        Utils.discord(":fleur_de_lis: **" + k.getName() + "** has been founded");
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -165,9 +168,9 @@ public class UAListener implements Listener {
         Material type = item.getType();
         item.setType(Material.AIR);
         
-        // Only allow outpost to be placed on unclaimed land
+        // Only allow outpost to be placed on unclaimed land not in the end
         SimpleChunkLocation scl = SimpleChunkLocation.of(pb);
-        if (ServiceHandler.isInRegion(scl)) {
+        if (p.getWorld().getName().equals("world_the_end") || ServiceHandler.isInRegion(scl)) {
             message(p, "&cYou cannot create an outpost here!");
             return;
         }
@@ -197,14 +200,8 @@ public class UAListener implements Listener {
             return;
         }
         
-        // Must not have been recently invaded
-        Kingdom k = kp.getKingdom();
-        if (disabledClaims.contains(k.getId())) {
-            message(p, "&cYou must wait &e" + UltimaAddons.CLAIM_DISABLED_TIME / 60000 + " minutes &cafter a nexus invasion before you can claim again!");
-            return;
-        }
-        
         // Must have a nexus
+        Kingdom k = kp.getKingdom();
         if (k.getNexus() == null) {
             message(p, "&cYou must place your nexus using &a/k nexus &cbefore you can claim more lands!");
             return;
@@ -258,35 +255,89 @@ public class UAListener implements Listener {
         if (e.getReason() == ClaimLandEvent.Reason.INVASION) {
             return;
         }
-        
-        // Must not have been recently invaded
-        Kingdom k = e.getKingdom();
-        Player p = e.getPlayer().getPlayer();
-        if (disabledClaims.contains(k.getId())) {
-            e.setCancelled(true);
-            message(p, "&cYou must wait &e" + UltimaAddons.CLAIM_DISABLED_TIME / 60000 + " minutes &cafter a nexus invasion before you can claim again!");
-            return;
-        }
-        
+
         // Allow claiming if currently kingdom has 0 lands
+        Kingdom k = e.getKingdom();
         if (k.getLands().size() == 0) {
             return;
         }
         
         // Must have a nexus
+        Player p = e.getPlayer().getPlayer();
         if (k.getNexus() == null) {
             e.setCancelled(true);
             message(p, "&cYou must place your nexus using &a/k nexus &cbefore you can claim more lands!");
             return;
         }
         
-        Bukkit.getLogger().log(Level.INFO, "Lands: " + e.getLands().size());
-        Bukkit.getLogger().log(Level.INFO, "LandLocs: " + e.getLandLocations().size());
-        
         // Find outpost metadata and add it if available
-        e.getLands().forEach(l -> {
-           
-        });
+        Set<SimpleChunkLocation> chunks = e.getLandLocations();
+        Bukkit.getLogger().log(Level.INFO, "Size: " + chunks.size()); 
+        Bukkit.getScheduler().runTaskLaterAsynchronously(UltimaAddons.getPlugin(), () -> {
+            UUID kid = k.getId();
+            Set<SimpleChunkLocation> checked = new HashSet<>();
+            long outpost_id = 0;
+            for (SimpleChunkLocation scl : chunks) {
+                Land cl = scl.getLand();
+                if (cl == null) {
+                    continue;
+                }
+                
+                UUID claimedby = cl.getKingdomId();
+                if (claimedby == null || !claimedby.equals(kid)) {
+                    continue;
+                }
+
+                // Don't check if the claiming chunk already has an outpost id
+                KingdomMetadata cldata = cl.getMetadata().get(UltimaAddons.outpost_id);
+                if (cldata != null) {
+                    continue;
+                }
+                
+                // Iterate through bordering chunks
+                for (SimpleChunkLocation sclnear : scl.getChunksAround(1)) {
+                    // Continue if this was one of the recently claimed lands
+                    if (chunks.contains(sclnear)) {
+                        continue;
+                    }
+                    
+                    // Continue if we already checked this land before
+                    if (checked.contains(sclnear)) {
+                        continue;
+                    }
+                    
+                    // Continue if the land is unclaimed, or not claimed by same kingdom
+                    Land scll = sclnear.getLand();
+                    if (scll == null) {
+                        checked.add(sclnear);
+                        continue;
+                    }
+                    
+                    UUID nearclaim = scll.getKingdomId();
+                    if (nearclaim == null || !claimedby.equals(kid)) {
+                        checked.add(sclnear);
+                        continue;
+                    }
+                    
+                    // If any surrounding land doesn't have metadata, it means its a nexus land
+                    KingdomMetadata data = scll.getMetadata().get(UltimaAddons.outpost_id);
+                    if (data == null) {
+                        Bukkit.getLogger().log(Level.INFO, "Found nexus land! Returning..."); 
+                        return;
+                    }
+                    
+                    // Otherwise use the first outpost id
+                    outpost_id = ((StandardKingdomMetadata) data).getLong();
+                    break;
+                }
+                
+                if (outpost_id != 0) {
+                    break;
+                }
+            }
+
+            Bukkit.getLogger().log(Level.INFO, "Found outpost id with timestamp " + outpost_id); 
+        }, 1);
     }
     
     // Challenge reminder
@@ -300,6 +351,7 @@ public class UAListener implements Listener {
                 return;
             }
             
+            long wartime = Utils.getWarTime();
             Kingdom k = kp.getKingdom();
             long ctime = System.currentTimeMillis();
             for (Entry<UUID, Long> challenge : k.getChallenges().entrySet()) {
@@ -308,7 +360,7 @@ public class UAListener implements Listener {
                     continue;
                 }
                 
-                if (ctime > challenge.getValue() + UltimaAddons.WAR_TIME) {
+                if (ctime > challenge.getValue() + wartime) {
                     continue;
                 }
                 
@@ -330,7 +382,7 @@ public class UAListener implements Listener {
                     return;
                 }
                 
-                if (ctime > lcd + UltimaAddons.WAR_TIME) {
+                if (ctime > lcd + wartime) {
                     return;
                 }
 
@@ -368,49 +420,30 @@ public class UAListener implements Listener {
             return;
         }
         
-        // Unclaim all lands if nexus land was invaded.
-        // Play custom sounds and send custom messages either way
+        // Play custom sounds and send custom messages
         // Do everything after a tick to let Kingdoms do its thing first
         Kingdom defender = invasion.getDefender();
+        Kingdom attacker = invasion.getAttacker();
+        long defrp = defender.getResourcePoints();
         SimpleLocation nexus = defender.getNexus();
         Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
             if (nexus != null && invasion.getAffectedLands().stream().
                     anyMatch(land -> nexus.toSimpleChunkLocation().equals(land))) {
-                // Unclaim all defender lands
-                defender.unclaim(new HashSet<>(defender.getLandLocations()), null, Reason.INVASION, false);
-                UUID kid = defender.getId();
-                disabledClaims.add(kid);
-                Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
-                    disabledClaims.remove(kid);
-                }, UltimaAddons.CLAIM_DISABLED_TIME / 50);
-                
-                defender.getOnlineMembers().forEach(p -> {
-                    p.playSound(p.getLocation(), Sound.ENTITY_WITHER_DEATH, SoundCategory.MASTER, 1, 1);
-                    message(p, "&4&l[!] &c&lYour kingdom's nexus chunk was invaded and all lands were unclaimed. "
-                            + "All your resource points were transferred to the enemy.");
+                Bukkit.getOnlinePlayers().forEach(p -> {
+                    message(p, "&e" + defender.getName() + " &cwas disbanded due to an invasion from &e" + attacker.getName() + "&c!");
                 });
-
-                Kingdom attacker = invasion.getAttacker();
-                invasion.getAttacker().getOnlineMembers().forEach(p -> {
-                    p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.MASTER, 1, 1);
-                    message(p, "&2&l[!] &a&lYou invaded your enemy's nexus chunk and all their lands were unclaimed. "
-                            + "All enemy resource points were transferred to your kingdom.");
-                });
-                
-                Utils.discord(":dart: **" + defender.getName() + "**'s nexus chunk was captured by **" + 
-                        attacker.getName() + "**, and all their land was unclaimed!");
             } else {
-                long rp = defender.getResourcePoints() / defender.getLands().size();
+                long rp = defrp / defender.getLands().size();
                 defender.getOnlineMembers().forEach(p -> {
                     p.playSound(p.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.MASTER, 1, 0.8F);
                     message(p, "&cYour kingdom lost &6" + rp + " &cresource points.");
                 });
-                
-                invasion.getAttacker().getOnlineMembers().forEach(p -> {
-                    p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.MASTER, 1, 0.8F);
-                    message(p, "&2Your kingdom gained &6" + rp + " &2resource points.");
-                });
             }
+            
+            invasion.getAttacker().getOnlineMembers().forEach(p -> {
+                p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.MASTER, 1, 0.8F);
+                message(p, "&2Your kingdom gained &6" + defrp + " &2resource points.");
+            });
         }, 1);
     }
     

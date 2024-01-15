@@ -13,6 +13,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import com.leomelonseeds.ultimaaddons.invs.ConfirmCallback;
 
+@SuppressWarnings("deprecation")
 public class ChatConfirm implements Listener {
     
     public static Map<Player, ChatConfirm> instances = new HashMap<>();
@@ -22,7 +23,7 @@ public class ChatConfirm implements Listener {
     private String req;
     private UltimaAddons plugin;
     
-    public ChatConfirm(Player player, String req, ConfirmCallback callback) {
+    public ChatConfirm(Player player, String req, int time, ConfirmCallback callback) {
         this.callback = callback;
         this.req = req;
         this.success = false;
@@ -44,10 +45,9 @@ public class ChatConfirm implements Listener {
             
             callback.onConfirm(false);
             stop();
-        }, 30 * 20);
+        }, time * 20);
     }
     
-    @SuppressWarnings("deprecation")
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncPlayerChatEvent e) {
         if (!e.getPlayer().equals(player)) {

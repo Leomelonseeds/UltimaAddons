@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -16,7 +17,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.kingdoms.config.KingdomsConfig;
 import org.kingdoms.constants.group.Kingdom;
+import org.kingdoms.constants.land.location.SimpleChunkLocation;
 import org.kingdoms.constants.metadata.KingdomMetadata;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.utils.time.TimeFormatter;
@@ -30,6 +33,21 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 public class Utils {
     
     private static Map<UUID, UUID> chalreminders = new HashMap<>(); // Attacker, Defender (since attacker can only challenge 1)
+    
+    // Kingdoms config constants
+    public static long getNewbieTime() {
+        return KingdomsConfig.CREATION_KINGDOMS_NEWBIE_PROTECTION.getManager().getTimeMillis();
+    }
+    
+    public static long getWarTime() {
+        return KingdomsConfig.Invasions.CHALLENGES_DURATION.getManager().getTimeMillis();
+    }
+    
+    // Hacky method of invoking my own disconnectslands function
+    public static boolean disconnectsLandsAfterUnclaim(SimpleChunkLocation set, Kingdom kingdom) {
+        Bukkit.getLogger().log(Level.INFO, "HELLO THERE");
+        return false;
+    }
     
     public static String getLastChallenge(Kingdom k) {
         StandardKingdomMetadata skm = (StandardKingdomMetadata) k.getMetadata().get(UltimaAddons.lckh);
@@ -55,13 +73,13 @@ public class Utils {
     public static boolean isNew(Kingdom k) {
         long since = k.getSince();
         long ctime = System.currentTimeMillis();
-        return ctime < since + UltimaAddons.NEWBIE_TIME;
+        return ctime < since + getNewbieTime();
     }
     
     public static String timeUntilNotNew(Kingdom k) {
         long since = k.getSince();
         long ctime = System.currentTimeMillis();
-        return formatDate(since + UltimaAddons.NEWBIE_TIME - ctime);
+        return formatDate(since + getNewbieTime() - ctime);
     }
     
     public static void discord(String s) {
@@ -115,14 +133,15 @@ public class Utils {
                 for (Player q : involved) {
                     q.playSound(q.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_2, SoundCategory.MASTER, 1, 0.8F);
                     q.sendMessage(toComponent("&cWar between &e" + k.getName() + " &cand &e" + target.getName() +
-                            " &chas begun! Each kingdom has &6" + UltimaAddons.WAR_TIME / 1000 / 3600 + " hours &cto &4/k invade &ceach other's lands."));
-                    discord(":bangbang: War between **" + k.getName() + "** and **" + target.getName() + "** has begun");
+                            " &chas begun! Each kingdom has &6" + getWarTime() / 1000 / 3600 + " hours &cto &4/k invade &ceach other's lands."));
                 }
+                
+                discord(":bangbang: War between **" + k.getName() + "** and **" + target.getName() + "** has begun");
             }, wartime * 20);
         }
         
         // Wartime over announcement (if this method is called it must be positive)
-        int wartimeover = wartime + (int) (UltimaAddons.WAR_TIME / 1000);
+        int wartimeover = wartime + (int) (getWarTime() / 1000);
         Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
             chalreminders.remove(k.getId());
             if (k.getMembers().isEmpty() || target.getMembers().isEmpty()) {
@@ -134,8 +153,9 @@ public class Utils {
             for (Player q : involved) {
                 q.playSound(q.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_6, SoundCategory.MASTER, 1, 1);
                 q.sendMessage(toComponent("&cWar between &e" + k.getName() + " &cand &e" + target.getName() + " &chas ended!"));
-                discord(":checkered_flag: War between **" + k.getName() + "** and **" + target.getName() + "** has ended");
             }
+            
+            discord(":checkered_flag: War between **" + k.getName() + "** and **" + target.getName() + "** has ended");
         }, wartimeover * 20);
         
         // Remind 1 min before

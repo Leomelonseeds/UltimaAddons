@@ -15,6 +15,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.kingdoms.config.KingdomsConfig;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.group.model.relationships.KingdomRelation;
 import org.kingdoms.managers.invasions.Invasion;
@@ -56,6 +57,8 @@ public class InvasionHandler implements Listener {
         
         // Champion target task
         double invloc = plunder.getStartLocation().getY();
+        int above = KingdomsConfig.Invasions.PLUNDER_VERTICAL_BOUNDARIES_UPWARDS.getManager().getInt();
+        int below = KingdomsConfig.Invasions.PLUNDER_VERTICAL_BOUNDARIES_DOWNWARDS.getManager().getInt();
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -69,7 +72,7 @@ public class InvasionHandler implements Listener {
                 inArea.clear();
                 plunder.getEntitiesInArea().forEach(e -> {
                     double y = e.getLocation().getY();
-                    if (y >= invloc - 10 && y <= invloc + 20 && !e.isDead()) {
+                    if (y >= invloc - below && y <= invloc + above && !e.isDead()) {
                         inArea.add(e.getUniqueId());
                     }
                 });

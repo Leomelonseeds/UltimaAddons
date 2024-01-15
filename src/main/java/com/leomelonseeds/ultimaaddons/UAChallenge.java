@@ -113,7 +113,7 @@ public class UAChallenge implements CommandExecutor {
                 return true;
             }
             
-            if (time + UltimaAddons.WAR_TIME > date) {
+            if (time + Utils.getWarTime() > date) {
                 sendMsg(sender, "&cYour war with &e" + target.getName() + " &cis still ongoing!");
                 return true;
             }
@@ -148,7 +148,7 @@ public class UAChallenge implements CommandExecutor {
                     "&c. Challenging another kingdom will remove this shield, and you will have to wait &e" + 
                     Utils.formatDate(Utils.getNextShield(attacker) - date) + " &cbefore you can buy another one. " +
                     "Please type 'confirm' in the chat within 30 seconds to continue.");
-            new ChatConfirm(player, "confirm", result -> {
+            new ChatConfirm(player, "confirm", 30, result -> {
                 if (result == null || !result) {
                     return;
                 }
@@ -172,8 +172,10 @@ public class UAChallenge implements CommandExecutor {
                 + "many lands you have. Currently, it is estimated that each invasion will cost &e" + attacker.getLands().size() 
                 + " &cresource points.");
         sendMsg(player, "");
-        sendMsg(player, "&cPlease type 'confirm' in the chat within 30 seconds to continue.");
-        new ChatConfirm(player, "confirm", result -> {
+        sendMsg(player, "&cFinally, neither kingdom will be able to claim or unclaim lands during the preparation period.");
+        sendMsg(player, "");
+        sendMsg(player, "&cPlease type 'confirm' in the chat within 1 minute to continue.");
+        new ChatConfirm(player, "confirm", 60, result -> {
            if (result == null || !result) {
                return;
            }
