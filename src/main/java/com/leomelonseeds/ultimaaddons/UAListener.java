@@ -44,6 +44,7 @@ import org.kingdoms.events.invasion.KingdomInvadeEndEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEvent;
 import org.kingdoms.events.items.KingdomItemBreakEvent;
 import org.kingdoms.events.lands.ClaimLandEvent;
+import org.kingdoms.events.lands.UnclaimLandEvent;
 import org.kingdoms.events.members.KingdomLeaveEvent;
 import org.kingdoms.main.Kingdoms;
 import org.kingdoms.managers.invasions.Plunder;
@@ -250,13 +251,7 @@ public class UAListener implements Listener {
 
     // Only allow claiming lands if nexus was placed
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onLandClaim(ClaimLandEvent e) {
-        // Allow invasion claims still
-        if (e.getReason() == ClaimLandEvent.Reason.INVASION) {
-            return;
-        }
-
-        // Allow claiming if currently kingdom has 0 lands
+    public void onLandClaim(ClaimLandEvent e) {// Allow claiming if currently kingdom has 0 lands
         Kingdom k = e.getKingdom();
         if (k.getLandLocations().size() == 0) {
             return;
@@ -271,6 +266,7 @@ public class UAListener implements Listener {
         }
         
         // Find outpost metadata and add it if available
+        // Assume getLandLocations only returns successful claims
         Set<SimpleChunkLocation> chunks = e.getLandLocations();
         Bukkit.getLogger().log(Level.INFO, "Size: " + chunks.size()); 
         Bukkit.getScheduler().runTaskLaterAsynchronously(UltimaAddons.getPlugin(), () -> {
@@ -278,17 +274,8 @@ public class UAListener implements Listener {
             Set<SimpleChunkLocation> checked = new HashSet<>();
             long outpost_id = 0;
             for (SimpleChunkLocation scl : chunks) {
-                Land cl = scl.getLand();
-                if (cl == null) {
-                    continue;
-                }
-                
-                UUID claimedby = cl.getKingdomId();
-                if (claimedby == null || !claimedby.equals(kid)) {
-                    continue;
-                }
-
                 // Don't check if the claiming chunk already has an outpost id
+                Land cl = scl.getLand();
                 KingdomMetadata cldata = cl.getMetadata().get(UltimaAddons.outpost_id);
                 if (cldata != null) {
                     continue;
@@ -314,7 +301,7 @@ public class UAListener implements Listener {
                     }
                     
                     UUID nearclaim = scll.getKingdomId();
-                    if (nearclaim == null || !claimedby.equals(kid)) {
+                    if (nearclaim == null || !k.getId().equals(kid)) {
                         checked.add(sclnear);
                         continue;
                     }
@@ -322,7 +309,6 @@ public class UAListener implements Listener {
                     // If any surrounding land doesn't have metadata, it means its a nexus land
                     KingdomMetadata data = scll.getMetadata().get(UltimaAddons.outpost_id);
                     if (data == null) {
-                        Bukkit.getLogger().log(Level.INFO, "Found nexus land! Returning..."); 
                         return;
                     }
                     
@@ -331,13 +317,44 @@ public class UAListener implements Listener {
                     break;
                 }
                 
-                if (outpost_id != 0) {
-                    break;
+                // This checks if this is the first chunk that a kingdom claimed during an invasion
+                // we return after because invasions can only have 1 land claim at a time
+                if (e.getReason() == ClaimLandEvent.Reason.INVASION && checked.size() == 9) {
+                    long ctime = System.currentTimeMillis();
+                    cl.getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(ctime));
+                    return;
                 }
             }
-
-            Bukkit.getLogger().log(Level.INFO, "Found outpost id with timestamp " + outpost_id); 
+            
+            if (outpost_id == 0) {
+                return;
+            }
+            
+            // If we got to this point, an outpost land must've been found. Then add the metadata to all claimed chunks
+            long finalid = outpost_id;
+            chunks.forEach(c -> c.getLand().getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(finalid)));
         }, 1);
+    }
+    
+    // Stop unclaiming of outpost chunk
+    public void onUnclaim(UnclaimLandEvent e) {
+        // Don't check if unclaimall was done
+        if (e.getLandLocations().size() > 1) {
+            return;
+        }
+        
+        // Don't check if cause was invasion - OnInvadeSuccess checks for that instead
+        if (e.getReason() == UnclaimLandEvent.Reason.INVASION) {
+            return;
+        }
+        
+        for (Land l : e.getLands()) {
+            if (l.getStructures().values().stream().anyMatch(s -> s.getNameOrDefault().equals("Outpost"))) {
+                e.setCancelled(true);
+                message(e.getPlayer().getPlayer(), "&cTo unclaim a land with an outpost on it, you must break the outpost.");
+                return;
+            }
+        }
     }
     
     // Challenge reminder

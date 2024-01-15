@@ -2,10 +2,11 @@ package com.leomelonseeds.ultimaaddons;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -19,9 +20,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.kingdoms.config.KingdomsConfig;
 import org.kingdoms.constants.group.Kingdom;
+import org.kingdoms.constants.land.Land;
 import org.kingdoms.constants.land.location.SimpleChunkLocation;
 import org.kingdoms.constants.metadata.KingdomMetadata;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
+import org.kingdoms.constants.player.KingdomPlayer;
+import org.kingdoms.events.lands.UnclaimLandEvent;
+import org.kingdoms.utils.LandUtil;
 import org.kingdoms.utils.time.TimeFormatter;
 
 import github.scarsz.discordsrv.DiscordSRV;
@@ -43,10 +48,65 @@ public class Utils {
         return KingdomsConfig.Invasions.CHALLENGES_DURATION.getManager().getTimeMillis();
     }
     
+    /**
+     * Unclaim all associated lands given outpost land
+     * 
+     * @param l
+     */
+    public static void unclaimOutpost(KingdomPlayer kp, Kingdom k, Land l) {
+        Bukkit.getScheduler().runTaskAsynchronously(UltimaAddons.getPlugin(), () -> {
+            KingdomMetadata outpostdata = l.getMetadata().get(UltimaAddons.outpost_id);
+            if (outpostdata == null) {
+                return;
+            }
+            
+            long outpostid = ((StandardKingdomMetadata) outpostdata).getLong();
+            Set<SimpleChunkLocation> toUnclaim = new HashSet<>();
+            k.getLands().forEach(kl -> {
+                KingdomMetadata kld = kl.getMetadata().get(UltimaAddons.outpost_id);
+                if (kld == null) {
+                    return;
+                }
+
+                if (((StandardKingdomMetadata) kld).getLong() != outpostid) {
+                    return;
+                }
+                
+                toUnclaim.add(kl.getLocation());
+            });
+            
+            Bukkit.getScheduler().runTask(UltimaAddons.getPlugin(), () -> {
+               k.unclaim(new HashSet<>(toUnclaim), kp, UnclaimLandEvent.Reason.UNCLAIMED, true);
+            });
+        });
+    }
+    
     // Hacky method of invoking my own disconnectslands function
     public static boolean disconnectsLandsAfterUnclaim(SimpleChunkLocation set, Kingdom kingdom) {
-        Bukkit.getLogger().log(Level.INFO, "HELLO THERE");
-        return false;
+        Set<SimpleChunkLocation> toCheck = new HashSet<>();
+        Land cur = set.getLand();
+        String curWorld = set.getWorld();
+        KingdomMetadata outpostdata = cur.getMetadata().get(UltimaAddons.outpost_id);
+        Long outpostId = outpostdata == null ? null : ((StandardKingdomMetadata) outpostdata).getLong();
+        kingdom.getLands().forEach(l -> {
+            SimpleChunkLocation scl = l.getLocation();
+            if (!scl.getWorld().equals(curWorld) || scl.equals(set)) {
+                return;
+            }
+
+            KingdomMetadata ldata = l.getMetadata().get(UltimaAddons.outpost_id);
+            if (outpostId == null) {
+                if (ldata == null) {
+                    toCheck.add(scl);
+                }
+                return;
+            }
+            
+            if (outpostId.equals(((StandardKingdomMetadata) ldata).getLong())) {
+                toCheck.add(scl);
+            }
+        });
+        return LandUtil.getConnectedClusters(1, toCheck).size() > 1;
     }
     
     public static String getLastChallenge(Kingdom k) {
