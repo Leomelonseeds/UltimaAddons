@@ -58,7 +58,11 @@ public class ConfirmAction implements UAInventory {
             return;
         }
         
-        manager.registerInventory(player, mwinv);
+        if (mwinv != null) {
+            manager.registerInventory(player, mwinv);
+        } else {
+            player.closeInventory();
+        }
         
         if (material == Material.EMERALD_BLOCK) {
             callback.onConfirm(true);

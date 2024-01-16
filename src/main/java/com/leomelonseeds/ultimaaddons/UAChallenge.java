@@ -172,7 +172,7 @@ public class UAChallenge implements CommandExecutor {
                 + "many lands you have. Currently, it is estimated that each invasion will cost &e" + attacker.getLands().size() 
                 + " &cresource points.");
         sendMsg(player, "");
-        sendMsg(player, "&cFinally, neither kingdom will be able to claim or unclaim lands during the preparation period.");
+        sendMsg(player, "&cFinally, neither kingdom will be able to claim/unclaim lands or move their nexus during the preparation period.");
         sendMsg(player, "");
         sendMsg(player, "&cPlease type 'confirm' in the chat within 1 minute to continue.");
         new ChatConfirm(player, "confirm", 60, result -> {

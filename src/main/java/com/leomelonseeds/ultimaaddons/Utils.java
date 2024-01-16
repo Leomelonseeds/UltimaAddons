@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -24,6 +25,7 @@ import org.kingdoms.constants.land.Land;
 import org.kingdoms.constants.land.location.SimpleChunkLocation;
 import org.kingdoms.constants.land.structures.Structure;
 import org.kingdoms.constants.metadata.KingdomMetadata;
+import org.kingdoms.constants.metadata.KingdomsObject;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.events.lands.UnclaimLandEvent;
@@ -49,13 +51,36 @@ public class Utils {
         return KingdomsConfig.Invasions.CHALLENGES_DURATION.getManager().getTimeMillis();
     }
     
+    public static boolean hasChallenged(Kingdom k) {
+        long wartime = Utils.getWarTime();
+        long ctime = System.currentTimeMillis();
+        String lastChallenge = Utils.getLastChallenge(k);
+        if (lastChallenge != null) {
+            String[] lcs = lastChallenge.split("@");
+            if (Kingdom.getKingdom(UUID.fromString(lcs[0])) != null 
+                    && ctime < Long.valueOf(lcs[1]) + wartime) {
+                return true;
+            }
+        }
+        
+        for (Entry<UUID, Long> e : k.getChallenges().entrySet()) {
+            if (Kingdom.getKingdom(e.getKey()) != null && 
+                    ctime < e.getValue() + wartime) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     /**
      * Unclaim all associated lands given outpost land
+     * @param <T>
      * 
      * @param l
      * @return the number of unclaimed lands
      */
-    public static int unclaimOutpost(KingdomPlayer kp, Kingdom k, Land l) {
+    public static <T> int unclaimOutpost(KingdomPlayer kp, Kingdom k, KingdomsObject<T> l) {
         KingdomMetadata outpostdata = l.getMetadata().get(UltimaAddons.outpost_id);
         if (outpostdata == null) {
             return 0;
@@ -76,8 +101,12 @@ public class Utils {
             toUnclaim.add(kl.getLocation());
         });
         
+        if (toUnclaim.size() == 0) {
+            return 0;
+        }
+        
         Bukkit.getScheduler().runTask(UltimaAddons.getPlugin(), () -> {
-           k.unclaim(new HashSet<>(toUnclaim), kp, UnclaimLandEvent.Reason.UNCLAIMED, kp != null);
+           k.unclaim(new HashSet<>(toUnclaim), kp, UnclaimLandEvent.Reason.ADMIN, kp != null);
         });
         
         return toUnclaim.size();
@@ -106,13 +135,13 @@ public class Utils {
         return null;
     }
     
-    // Hacky method of invoking my own disconnectslands function
+    // Hacked Kingdoms and edited bytecode to invoke this disconnectsLands function
     public static boolean disconnectsLandsAfterUnclaim(SimpleChunkLocation set, Kingdom kingdom) {
         Set<SimpleChunkLocation> toCheck = new HashSet<>();
         Land cur = set.getLand();
         String curWorld = set.getWorld();
         KingdomMetadata outpostdata = cur.getMetadata().get(UltimaAddons.outpost_id);
-        Long outpostId = outpostdata == null ? null : ((StandardKingdomMetadata) outpostdata).getLong();
+        long outpostId = outpostdata == null ? 0 : ((StandardKingdomMetadata) outpostdata).getLong();
         kingdom.getLands().forEach(l -> {
             SimpleChunkLocation scl = l.getLocation();
             if (!scl.getWorld().equals(curWorld) || scl.equals(set)) {
@@ -120,14 +149,14 @@ public class Utils {
             }
 
             KingdomMetadata ldata = l.getMetadata().get(UltimaAddons.outpost_id);
-            if (outpostId == null) {
-                if (ldata == null) {
+            if (ldata == null) {
+                if (outpostId == 0) {
                     toCheck.add(scl);
                 }
                 return;
             }
             
-            if (outpostId.equals(((StandardKingdomMetadata) ldata).getLong())) {
+            if (outpostId == ((StandardKingdomMetadata) ldata).getLong()) {
                 toCheck.add(scl);
             }
         });

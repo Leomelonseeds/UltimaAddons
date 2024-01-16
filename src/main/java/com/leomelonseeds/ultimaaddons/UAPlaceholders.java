@@ -1,8 +1,5 @@
 package com.leomelonseeds.ultimaaddons;
 
-import java.util.Map.Entry;
-import java.util.UUID;
-
 import org.bukkit.OfflinePlayer;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.player.KingdomPlayer;
@@ -37,33 +34,15 @@ public class UAPlaceholders extends PlaceholderExpansion {
         if (k == null) {
             return null;
         }
-
-        long ctime = System.currentTimeMillis();
         
         // Is the kingdom challenging or at war with another
         if (params.contains("haschallenged")) {
-            long wartime = Utils.getWarTime();
-            String lastChallenge = Utils.getLastChallenge(k);
-            if (lastChallenge != null) {
-                String[] lcs = lastChallenge.split("@");
-                if (Kingdom.getKingdom(UUID.fromString(lcs[0])) != null 
-                        && ctime < Long.valueOf(lcs[1]) + wartime) {
-                    return "true";
-                }
-            }
-            
-            for (Entry<UUID, Long> e : k.getChallenges().entrySet()) {
-                if (Kingdom.getKingdom(e.getKey()) != null && 
-                        ctime < e.getValue() + wartime) {
-                    return "true";
-                }
-            }
-            
-            return "false";
+            return Utils.hasChallenged(k) + "";
         }
         
         // Has the cooldown from the last purchased shield expired?
         boolean lastShieldExpired = false;
+        long ctime = System.currentTimeMillis();
         long nextbuytime = Utils.getNextShield(k);
         if (ctime > nextbuytime) {
             lastShieldExpired = true;

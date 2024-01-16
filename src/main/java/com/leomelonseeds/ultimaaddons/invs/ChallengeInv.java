@@ -108,7 +108,7 @@ public class ChallengeInv implements UAInventory {
             for (Player p : target.getOnlineMembers()) {
                 p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.MASTER, 1, 1.2F);
                 p.sendMessage(Utils.toComponent("&e" + player.getName() + " &cfrom &e" + attacker.getName() + 
-                        " has declared war on your kingdom, with &6" + days + " &cday(s) of preparation!"));
+                        " &chas declared war on your kingdom, with &6" + days + " &cday(s) of preparation!"));
                 Utils.closeInventory(p, "Challenge", "Shields");
             }
 

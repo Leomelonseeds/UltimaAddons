@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -44,6 +43,7 @@ import org.kingdoms.events.invasion.KingdomInvadeEndEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEvent;
 import org.kingdoms.events.items.KingdomItemBreakEvent;
 import org.kingdoms.events.lands.ClaimLandEvent;
+import org.kingdoms.events.lands.NexusMoveEvent;
 import org.kingdoms.events.lands.UnclaimLandEvent;
 import org.kingdoms.events.members.KingdomLeaveEvent;
 import org.kingdoms.main.Kingdoms;
@@ -54,10 +54,13 @@ import org.kingdoms.utils.nbt.ItemNBT;
 import org.kingdoms.utils.nbt.NBTType;
 import org.kingdoms.utils.nbt.NBTWrappers;
 
+import com.leomelonseeds.ultimaaddons.invs.ConfirmAction;
 import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 import com.leomelonseeds.ultimaaddons.invs.UAInventory;
 
 public class UAListener implements Listener {
+    
+    private static Set<Structure> justRemoved = new HashSet<>();
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInvasionStart(KingdomInvadeEvent e) {
@@ -124,9 +127,46 @@ public class UAListener implements Listener {
             return;
         }
         
-        if (e.getPlayer().getPlayer().isFlying()) {
-            e.setCancelled(true);
+        // Stop recursion
+        if (justRemoved.contains(structure)) {
+            justRemoved.remove(structure);
+            return;
         }
+        
+        // Allow if structure was removed by Kingdoms or a player w/o kingdom
+        KingdomPlayer kp = e.getPlayer();
+        if (kp == null || !kp.hasKingdom()) {
+            return;
+        }
+
+        e.setCancelled(true);
+        
+        // Must not be in war
+        Player p = kp.getPlayer();
+        if (Utils.hasChallenged(kp.getKingdom())) {
+            message(p, "&cYou cannot do this as you either challenged or have been challenged by another kingdom.");
+            return;
+        }
+        
+        if (!kp.hasPermission(StandardKingdomPermission.UNCLAIM)) {
+            message(p, "&cYour kingdom rank must have UNCLAIM permissions to remove outposts!");
+            return;
+        }
+        
+        // For some reason without the 1 tick delay it skips the confirmation screen
+        p.closeInventory();
+        Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
+            new ConfirmAction("Unclaim Outpost Lands", p, null, result -> {
+                if (result == null || !result) {
+                    return;
+                }
+                
+                justRemoved.add(structure);
+                structure.remove();
+                int amt = Utils.unclaimOutpost(kp, kp.getKingdom(), structure);
+                message(p, "&2You unclaimed &6" + amt + " &2land(s).");
+            });
+        }, 1);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -209,8 +249,8 @@ public class UAListener implements Listener {
         }
         
         // Must have less than 3 placed outposts
-        if (k.getAllStructures().stream().filter(s -> s.getNameOrDefault().equals("Outpost"))
-                .count() >= UltimaAddons.MAX_OUTPOSTS) {
+        if (k.getAllStructures().stream().filter(s -> s.getNameOrDefault().equals("Outpost")).count() >= 
+                StructureRegistry.getStyle("outpost").getOption("limits", "total").getInt()) {
             message(p, "&cYour kingdom has already reached its outpost limit!");
             return;
         }
@@ -221,11 +261,17 @@ public class UAListener implements Listener {
             return;
         }
         
+        // Must not be in war
+        if (Utils.hasChallenged(k)) {
+            message(p, "&cYou cannot use this as you either challenged or have been challenged by another kingdom.");
+            return;
+        }
+        
         pb.setType(type);
         
         // Kingdoms spawn structure
         SimpleLocation sl = SimpleLocation.of(pb);
-        k.claim(scl, kp, ClaimLandEvent.Reason.CLAIMED);
+        k.claim(scl, kp, ClaimLandEvent.Reason.ADMIN);
         StructureStyle outpostStyle = StructureRegistry.getStyle("outpost");
         Structure outpost = outpostStyle.getType().build(
                 new KingdomItemBuilder<Structure, StructureStyle, StructureType>(outpostStyle, SimpleLocation.of(pb), kp));
@@ -237,9 +283,9 @@ public class UAListener implements Listener {
         
         // Add metadata
         // ID is simply cur time, no way 2 people put an outpost at the same milisecond...
-        long id = System.currentTimeMillis();
-        land.getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(id));
-        outpost.getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(id));
+        StandardKingdomMetadata skm = new StandardKingdomMetadata(System.currentTimeMillis());
+        land.getMetadata().put(UltimaAddons.outpost_id, skm);
+        outpost.getMetadata().put(UltimaAddons.outpost_id, skm);
         
         // Remove item amount
         ItemStack hand = p.getInventory().getItem(e.getHand());
@@ -251,9 +297,15 @@ public class UAListener implements Listener {
 
     // Only allow claiming lands if nexus was placed
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onLandClaim(ClaimLandEvent e) {// Allow claiming if currently kingdom has 0 lands
+    public void onLandClaim(ClaimLandEvent e) {
+        // Allow claiming if currently kingdom has 0 lands
         Kingdom k = e.getKingdom();
         if (k.getLandLocations().size() == 0) {
+            return;
+        }
+        
+        // Also returns if this land was claimed through means of an outpost
+        if (e.getReason() == ClaimLandEvent.Reason.ADMIN) {
             return;
         }
         
@@ -265,23 +317,21 @@ public class UAListener implements Listener {
             return;
         }
         
+        // Disable claiming if there are no other claims in the same world
+        Set<SimpleChunkLocation> chunks = e.getLandLocations();
+        if (!k.getLandLocations().stream().anyMatch(scl -> scl.getWorld().equals(p.getWorld().getName()))) {
+            e.setCancelled(true);
+            message(p, "&cYour land must be connected to your other kingdom lands.");
+            return;
+        }
+        
         // Find outpost metadata and add it if available
         // Assume getLandLocations only returns successful claims
-        Set<SimpleChunkLocation> chunks = e.getLandLocations();
-        Bukkit.getLogger().log(Level.INFO, "Size: " + chunks.size()); 
         Bukkit.getScheduler().runTaskLaterAsynchronously(UltimaAddons.getPlugin(), () -> {
             UUID kid = k.getId();
             Set<SimpleChunkLocation> checked = new HashSet<>();
             long outpost_id = 0;
             for (SimpleChunkLocation scl : chunks) {
-                // Don't check if the claiming chunk already has an outpost id
-                Land cl = scl.getLand();
-                KingdomMetadata cldata = cl.getMetadata().get(UltimaAddons.outpost_id);
-                if (cldata != null) {
-                    continue;
-                }
-                
-                // Iterate through bordering chunks
                 for (SimpleChunkLocation sclnear : scl.getChunksAround(1)) {
                     // Continue if this was one of the recently claimed lands
                     if (chunks.contains(sclnear)) {
@@ -299,9 +349,9 @@ public class UAListener implements Listener {
                         checked.add(sclnear);
                         continue;
                     }
-                    
+
                     UUID nearclaim = scll.getKingdomId();
-                    if (nearclaim == null || !k.getId().equals(kid)) {
+                    if (nearclaim == null || !nearclaim.equals(kid)) {
                         checked.add(sclnear);
                         continue;
                     }
@@ -312,16 +362,17 @@ public class UAListener implements Listener {
                         return;
                     }
                     
-                    // Otherwise use the first outpost id
+                    // Otherwise log an outpost id
                     outpost_id = ((StandardKingdomMetadata) data).getLong();
-                    break;
                 }
                 
-                // This checks if this is the first chunk that a kingdom claimed during an invasion
-                // we return after because invasions can only have 1 land claim at a time
-                if (e.getReason() == ClaimLandEvent.Reason.INVASION && checked.size() == 9) {
+                // This checks if this is the first chunk that a kingdom claimed during an invasion.
+                // We return after because invasions can only have 1 land claim at a time.
+                // Assign a negative outpost ID so that this land still works with custom disconnectLands
+                // function, and also to allow nexus to be moved to an invasion spot.
+                if (e.getReason() == ClaimLandEvent.Reason.INVASION && checked.size() == 8) {
                     long ctime = System.currentTimeMillis();
-                    cl.getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(ctime));
+                    scl.getLand().getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(-1 * ctime));
                     return;
                 }
             }
@@ -337,23 +388,32 @@ public class UAListener implements Listener {
     }
     
     // Stop unclaiming of outpost chunk
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onUnclaim(UnclaimLandEvent e) {
-        // Don't check if unclaimall was done
-        if (e.getLandLocations().size() > 1) {
+        // This method checks if this event would unclaim an outpost
+        if (cancelUnclaim(e)) {
             return;
         }
         
-        // Don't check if cause was invasion - OnInvadeSuccess checks for that instead
-        if (e.getReason() == UnclaimLandEvent.Reason.INVASION) {
+        // Remove metadata
+        e.getLandLocations().forEach(scl -> {
+            scl.getLand().getMetadata().remove(UltimaAddons.outpost_id);
+        });
+    }
+    
+    // Disallow nexus to be moved to an outpost chunk
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onNexusMove(NexusMoveEvent e) {
+        Land l = e.getTo().toSimpleChunkLocation().getLand();
+        KingdomMetadata meta = l.getMetadata().get(UltimaAddons.outpost_id);
+        if (meta == null) {
             return;
         }
         
-        for (Land l : e.getLands()) {
-            if (l.getStructures().values().stream().anyMatch(s -> s.getNameOrDefault().equals("Outpost"))) {
-                e.setCancelled(true);
-                message(e.getPlayer().getPlayer(), "&cTo unclaim a land with an outpost on it, you must break the outpost.");
-                return;
-            }
+        // Only check if meta is positive, meaning time > 0
+        if (((StandardKingdomMetadata) meta).getLong() > 0) {
+            e.setCancelled(true);
+            message(e.getPlayer().getPlayer(), "&cYou cannot move your nexus to an outpost land.");
         }
     }
     
@@ -441,32 +501,45 @@ public class UAListener implements Listener {
         // Do everything after a tick to let Kingdoms do its thing first
         Kingdom defender = invasion.getDefender();
         Kingdom attacker = invasion.getAttacker();
-        long defrp = defender.getResourcePoints();
         SimpleLocation nexus = defender.getNexus();
         Set<SimpleChunkLocation> affected = invasion.getAffectedLands(); // This should be a size 1 set
         Land outpost = Utils.getOutpost(affected);
         Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
-            long loss = defrp;
+            // Send messages
+            long loss = defender.getResourcePoints();
             if (nexus != null && affected.stream().anyMatch(land -> nexus.toSimpleChunkLocation().equals(land))) {
                 Bukkit.getOnlinePlayers().forEach(p -> {
                     message(p, "&e" + defender.getName() + " &cwas disbanded due to an invasion from &e" + attacker.getName() + "&c!");
                 });
             } else {
+                int extra = 1;
                 if (outpost != null) {
-                    int extra = Utils.unclaimOutpost(null, defender, outpost);
+                    extra += Utils.unclaimOutpost(null, defender, outpost);
                 }
                 
-                long rp = defrp / defender.getLands().size();
+                loss = loss * extra / (defender.getLandLocations().size() + 1);
+                long floss = loss;
                 defender.getOnlineMembers().forEach(p -> {
                     p.playSound(p.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.MASTER, 1, 0.8F);
-                    message(p, "&cYour kingdom lost &6" + rp + " &cresource points.");
+                    if (outpost != null) {
+                        message(p, "&cYour outpost land was invaded, and all claims made from the outpost have been lost.");
+                    }
+                    message(p, "&cYour kingdom lost &6" + floss + " &cresource points.");
                 });
+                
+                defender.addResourcePoints(-1 * floss);
             }
             
-            invasion.getAttacker().getOnlineMembers().forEach(p -> {
+            long floss = loss;
+            attacker.getOnlineMembers().forEach(p -> {
                 p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.MASTER, 1, 0.8F);
-                message(p, "&2Your kingdom gained &6" + loss + " &2resource points.");
+                if (outpost != null) {
+                    message(p, "&2You invaded an enemy outpost, and all enemy claims made from that outpost were unclaimed.");
+                }
+                message(p, "&2Your kingdom gained &6" + floss + " &2resource points.");
             });
+            
+            attacker.addResourcePoints(floss);
         }, 1);
     }
     
@@ -515,5 +588,28 @@ public class UAListener implements Listener {
 	// Prevent message spam
 	private void message(Player p, String m) {
 	    p.sendMessage(Utils.toComponent(m));
+	}
+	
+	// Checks if a land can be unclaimed
+	private boolean cancelUnclaim(UnclaimLandEvent e) {
+	    // Don't check if unclaimall was done
+        if (e.getLandLocations().size() > 1) {
+            return false;
+        }
+        
+        // Don't check if cause was invasion - OnInvadeSuccess checks for that instead
+        if (e.getReason() == UnclaimLandEvent.Reason.INVASION || e.getReason() == UnclaimLandEvent.Reason.ADMIN) {
+            return false;
+        }
+        
+        for (SimpleChunkLocation scl : e.getLandLocations()) {
+            if (scl.getLand().getStructures().values().stream().anyMatch(s -> s.getNameOrDefault().equals("Outpost"))) {
+                e.setCancelled(true);
+                message(e.getPlayer().getPlayer(), "&cTo unclaim a land with an outpost on it, you must break the outpost.");
+                return true;
+            }
+        }
+        
+        return false;
 	}
 }

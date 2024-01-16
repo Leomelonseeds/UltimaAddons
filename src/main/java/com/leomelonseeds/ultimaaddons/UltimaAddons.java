@@ -11,7 +11,6 @@ import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 public class UltimaAddons extends JavaPlugin {
 
     public static final long CHALLENGE_COOLDOWN_TIME = 1 * 24 * 3600 * 1000; // 1 day
-    public static final int MAX_OUTPOSTS = 3;
     private static UltimaAddons plugin;
     private InventoryManager invManager;
     public static KingdomMetadataHandler lckh;
@@ -33,7 +32,6 @@ public class UltimaAddons extends JavaPlugin {
 
 	@Override
     public void onDisable() {
-	    
 	}
 	
 	public static UltimaAddons getPlugin() {
