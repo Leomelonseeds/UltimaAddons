@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -14,6 +15,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.kingdoms.config.KingdomsConfig;
@@ -25,10 +27,14 @@ import org.kingdoms.managers.invasions.Plunder.State;
 
 public class InvasionHandler implements Listener {
     
+    private final static int CHAMPION_MAX_OUT = 15;
+    
     private Player target;
     private Creature champion;
     private Set<UUID> inArea;
-
+    private Location init;
+    private int championOut;
+    
     public InvasionHandler(Invasion invasion) {
         if (!(invasion instanceof Plunder)) {
             Bukkit.getLogger().log(Level.WARNING, "Detected an invasion that is not a plunder! Not using custom invasion handler...");
@@ -38,6 +44,8 @@ public class InvasionHandler implements Listener {
         this.inArea = new HashSet<>();
         this.champion = invasion.getChampion();
         this.target = invasion.getInvaderPlayer();
+        this.init = invasion.getStartLocation();
+        this.championOut = 0;
         champion.setTarget(target);
         
         // Register event
@@ -83,6 +91,17 @@ public class InvasionHandler implements Listener {
                     return;
                 }
                 
+                // Teleport champion to initial location if he has been out for 15 sec
+                if (!inArea.contains(champion.getUniqueId())) {
+                    championOut++;
+                } else {
+                    championOut = 0;
+                }
+                
+                if (championOut >= 15) {
+                    champion.teleport(init);
+                }
+                
                 // If target is still in the area continue targetting him
                 if (inArea.contains(target.getUniqueId())) {
                     return;
@@ -115,6 +134,19 @@ public class InvasionHandler implements Listener {
     @EventHandler
     public void onChampionDamage(EntityDamageEvent e) {
         if (!e.getEntity().getUniqueId().equals(champion.getUniqueId())) {
+            return;
+        }
+        
+        // Stop fall damage
+        if (e.getCause() == DamageCause.FALL) {
+            e.setCancelled(true);
+            return;
+        }
+        
+        // TP back if void damage somehow
+        if (e.getCause() == DamageCause.VOID) {
+            e.setCancelled(true);
+            champion.teleport(init);
             return;
         }
     }
