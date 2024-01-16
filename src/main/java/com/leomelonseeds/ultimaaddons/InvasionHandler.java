@@ -151,8 +151,6 @@ public class InvasionHandler implements Listener {
         }
     }
     
-    // TODO: teleport champion back if more than 15 seconds are spent outside the chunk
-    
     private Player findAttacker(Kingdom attacker) {
         for (Player p : attacker.getOnlineMembers()) {
             if (inArea.contains(p.getUniqueId())) {
