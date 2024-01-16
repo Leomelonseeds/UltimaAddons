@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.kingdoms.config.KingdomsConfig;
@@ -96,6 +97,7 @@ public class InvasionHandler implements Listener {
         }.runTaskTimer(UltimaAddons.getPlugin(), 0, 20);
     }
     
+    // Crypto said I needed this so here it is
     @EventHandler(priority = EventPriority.MONITOR)
     public void onChampionTarget(EntityTargetEvent event) {
         if (!event.getEntity().getUniqueId().equals(champion.getUniqueId())) {
@@ -106,6 +108,14 @@ public class InvasionHandler implements Listener {
         
         if (ctarget == null || !target.getUniqueId().equals(ctarget.getUniqueId())) {
             event.setTarget(target);
+        }
+    }
+
+    // Handle various champion damages
+    @EventHandler
+    public void onChampionDamage(EntityDamageEvent e) {
+        if (!e.getEntity().getUniqueId().equals(champion.getUniqueId())) {
+            return;
         }
     }
     
