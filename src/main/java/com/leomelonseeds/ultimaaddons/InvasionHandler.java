@@ -7,6 +7,8 @@ import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -16,11 +18,14 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.kingdoms.config.KingdomsConfig;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.group.model.relationships.KingdomRelation;
+import org.kingdoms.constants.group.upgradable.champion.ChampionUpgrade;
+import org.kingdoms.events.general.ChampionAbilityEvent;
 import org.kingdoms.managers.invasions.Invasion;
 import org.kingdoms.managers.invasions.Plunder;
 import org.kingdoms.managers.invasions.Plunder.State;
@@ -34,6 +39,7 @@ public class InvasionHandler implements Listener {
     private Set<UUID> inArea;
     private Location init;
     private int championOut;
+    private Kingdom defender;
     
     public InvasionHandler(Invasion invasion) {
         if (!(invasion instanceof Plunder)) {
@@ -45,6 +51,7 @@ public class InvasionHandler implements Listener {
         this.champion = invasion.getChampion();
         this.target = invasion.getInvaderPlayer();
         this.init = invasion.getStartLocation();
+        this.defender = invasion.getDefender();
         this.championOut = 0;
         champion.setTarget(target);
         
@@ -52,7 +59,6 @@ public class InvasionHandler implements Listener {
         Bukkit.getServer().getPluginManager().registerEvents(this, UltimaAddons.getPlugin());
         
         // Stop capture progress if one defender present
-        Kingdom defender = invasion.getDefender();
         plunder.setTickProcessor(data -> {
             if (inArea.contains(champion.getUniqueId()) || hasPlayerInArea(defender) || 
                     defender.getKingdomsWithRelation(KingdomRelation.ALLY).stream().anyMatch(k -> hasPlayerInArea(k))) {
@@ -98,8 +104,9 @@ public class InvasionHandler implements Listener {
                     championOut = 0;
                 }
                 
-                if (championOut >= 15) {
+                if (championOut >= CHAMPION_MAX_OUT) {
                     champion.teleport(init);
+                    championOut = 0;
                 }
                 
                 // If target is still in the area continue targetting him
@@ -147,8 +154,48 @@ public class InvasionHandler implements Listener {
         if (e.getCause() == DamageCause.VOID) {
             e.setCancelled(true);
             champion.teleport(init);
+            championOut = 0;
             return;
         }
+    }
+    
+    // Disable shields on THOR
+    @EventHandler
+    public void onChampionAbility(ChampionAbilityEvent e) {
+        if (!e.getInvasion().getChampion().equals(champion)) {
+            return;
+        }
+        
+        if (e.getAbility().getName() != ChampionUpgrade.THOR) {
+            return;
+        }
+        
+        Set<UUID> defenders = new HashSet<>();
+        defender.getOnlineMembers().forEach(p -> defenders.add(p.getUniqueId()));
+        for (UUID uuid : inArea) {
+            Player ap = Bukkit.getPlayer(uuid);
+            if (ap == null) {
+                continue;
+            }
+            
+            if (!defenders.contains(uuid)) {
+                ap.setCooldown(Material.SHIELD, 100);
+            }
+        }
+    }
+    
+    // Add PIERCING to skeleton arrows
+    @EventHandler
+    public void onBowFire(EntityShootBowEvent e) {
+        if (!e.getEntity().getUniqueId().equals(champion.getUniqueId())) {
+            return;
+        }
+        
+        if (!(e.getProjectile() instanceof Arrow)) {
+            return;
+        }
+        
+        ((Arrow) e.getProjectile()).setPierceLevel(4);
     }
     
     private Player findAttacker(Kingdom attacker) {
