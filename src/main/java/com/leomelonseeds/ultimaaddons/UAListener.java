@@ -60,12 +60,9 @@ import com.leomelonseeds.ultimaaddons.invs.UAInventory;
 
 public class UAListener implements Listener {
     
-    private static Set<Structure> justRemoved = new HashSet<>();
-    
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onInvasionStart(KingdomInvadeEvent e) {
-        new InvasionHandler(e.getInvasion());
-    }
+    // -------------------------------------------------
+    // EXTRA DISCORDSRV MESSAGES
+    // -------------------------------------------------
     
     // Close GUIs to stop bad things from happening
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -102,11 +99,6 @@ public class UAListener implements Listener {
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onLeave(KingdomLeaveEvent e) {
-        Utils.closeInventory(e.getPlayer().getPlayer(), "Challenge");
-    }
-    
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPacifist(KingdomPacifismStateChangeEvent e) {
         Kingdom k = e.getKingdom();
         if (e.isPacifist()) {
@@ -115,6 +107,91 @@ public class UAListener implements Listener {
             Utils.discord(":fire: **" + k.getName() + "** is now an aggressor kingdom");
         }
     }
+    
+    
+
+    // -------------------------------------------------
+    // INVASION HANDLERS
+    // -------------------------------------------------
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onInvasionSuccess(KingdomInvadeEndEvent e) {
+        if (!(e.getInvasion() instanceof Plunder)) {
+            return;
+        }
+
+        // Only process successful invasion
+        Plunder invasion = (Plunder) e.getInvasion();
+        if (!invasion.getResult().isSuccessful()) {
+            return;
+        }
+        
+        // Don't end invasion due to champion death
+        // If the invasion was successful and capture progress < capture goal, the champion must have been the end cause
+        // Plunder kill/death has been set to a high enough amount to not matter
+        if (invasion.getCaptureProgress() < KingdomsConfig.Invasions.PLUNDER_CAPTURE_PROGRESS_GOAL.getManager().getDouble()) {
+            e.setCancelled(true);
+            return;
+        }
+        
+        // Play custom sounds and send custom messages
+        // Do everything after a tick to let Kingdoms do its thing first
+        Kingdom defender = invasion.getDefender();
+        Kingdom attacker = invasion.getAttacker();
+        SimpleLocation nexus = defender.getNexus();
+        Set<SimpleChunkLocation> affected = invasion.getAffectedLands(); // This should be a size 1 set
+        Land outpost = Utils.getOutpost(affected);
+        Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
+            // Send messages
+            long loss = defender.getResourcePoints();
+            if (nexus != null && affected.stream().anyMatch(land -> nexus.toSimpleChunkLocation().equals(land))) {
+                Bukkit.getOnlinePlayers().forEach(p -> {
+                    message(p, "&e" + defender.getName() + " &cwas disbanded due to an invasion from &e" + attacker.getName() + "&c!");
+                });
+            } else {
+                int extra = 1;
+                if (outpost != null) {
+                    extra += Utils.unclaimOutpost(null, defender, outpost);
+                }
+                
+                loss = loss * extra / (defender.getLandLocations().size() + 1);
+                long floss = loss;
+                defender.getOnlineMembers().forEach(p -> {
+                    p.playSound(p.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.MASTER, 1, 0.8F);
+                    if (outpost != null) {
+                        message(p, "&cYour outpost land was invaded, and all claims made from the outpost have been lost.");
+                    }
+                    message(p, "&cYour kingdom lost &6" + floss + " &cresource points.");
+                });
+                
+                defender.addResourcePoints(-1 * floss);
+            }
+            
+            long floss = loss;
+            attacker.getOnlineMembers().forEach(p -> {
+                p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.MASTER, 1, 0.8F);
+                if (outpost != null) {
+                    message(p, "&2You invaded an enemy outpost, and all enemy claims made from that outpost were unclaimed.");
+                }
+                message(p, "&2Your kingdom gained &6" + floss + " &2resource points.");
+            });
+            
+            attacker.addResourcePoints(floss);
+        }, 1);
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onInvasionStart(KingdomInvadeEvent e) {
+        new InvasionHandler(e.getInvasion());
+    }
+
+    
+
+    // -------------------------------------------------
+    // CUSTOM OUTPOST HANDLERS
+    // -------------------------------------------------
+    
+    private static Set<Structure> justRemoved = new HashSet<>();
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onOutpostBreak(KingdomItemBreakEvent<Structure> e) {
@@ -295,7 +372,7 @@ public class UAListener implements Listener {
         new LandVisualizer().forPlayer(p, kp).forLand(land, scl.toChunk()).displayIndicators();
     }
 
-    // Only allow claiming lands if nexus was placed
+    // Only allow claiming lands if nexus was placed/add outpost IDs
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onLandClaim(ClaimLandEvent e) {
         // Allow claiming if currently kingdom has 0 lands
@@ -401,6 +478,29 @@ public class UAListener implements Listener {
         });
     }
     
+    // Checks if a land can be unclaimed
+    private boolean cancelUnclaim(UnclaimLandEvent e) {
+        // Don't check if unclaimall was done
+        if (e.getLandLocations().size() > 1) {
+            return false;
+        }
+        
+        // Don't check if cause was invasion - OnInvadeSuccess checks for that instead
+        if (e.getReason() == UnclaimLandEvent.Reason.INVASION || e.getReason() == UnclaimLandEvent.Reason.ADMIN) {
+            return false;
+        }
+        
+        for (SimpleChunkLocation scl : e.getLandLocations()) {
+            if (scl.getLand().getStructures().values().stream().anyMatch(s -> s.getNameOrDefault().equals("Outpost"))) {
+                e.setCancelled(true);
+                message(e.getPlayer().getPlayer(), "&cTo unclaim a land with an outpost on it, you must break the outpost.");
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     // Disallow nexus to be moved to an outpost chunk
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onNexusMove(NexusMoveEvent e) {
@@ -416,6 +516,18 @@ public class UAListener implements Listener {
             message(e.getPlayer().getPlayer(), "&cYou cannot move your nexus to an outpost land.");
         }
     }
+    
+    
+
+    // -------------------------------------------------
+    // CUSTOM CHALLENGE HANDLERS
+    // -------------------------------------------------
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onLeave(KingdomLeaveEvent e) {
+        Utils.closeInventory(e.getPlayer().getPlayer(), "Challenge");
+    }
+    
     
     // Challenge reminder
     @EventHandler
@@ -477,72 +589,6 @@ public class UAListener implements Listener {
         }, 5);
     }
     
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onInvasionSuccess(KingdomInvadeEndEvent e) {
-        if (!(e.getInvasion() instanceof Plunder)) {
-            return;
-        }
-
-        // Only process successful invasion
-        Plunder invasion = (Plunder) e.getInvasion();
-        if (!invasion.getResult().isSuccessful()) {
-            return;
-        }
-        
-        // Don't end invasion due to champion death
-        // If the invasion was successful and capture progress < capture goal, the champion must have been the end cause
-        // Plunder kill/death has been set to a high enough amount to not matter
-        if (invasion.getCaptureProgress() < KingdomsConfig.Invasions.PLUNDER_CAPTURE_PROGRESS_GOAL.getManager().getDouble()) {
-            e.setCancelled(true);
-            return;
-        }
-        
-        // Play custom sounds and send custom messages
-        // Do everything after a tick to let Kingdoms do its thing first
-        Kingdom defender = invasion.getDefender();
-        Kingdom attacker = invasion.getAttacker();
-        SimpleLocation nexus = defender.getNexus();
-        Set<SimpleChunkLocation> affected = invasion.getAffectedLands(); // This should be a size 1 set
-        Land outpost = Utils.getOutpost(affected);
-        Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
-            // Send messages
-            long loss = defender.getResourcePoints();
-            if (nexus != null && affected.stream().anyMatch(land -> nexus.toSimpleChunkLocation().equals(land))) {
-                Bukkit.getOnlinePlayers().forEach(p -> {
-                    message(p, "&e" + defender.getName() + " &cwas disbanded due to an invasion from &e" + attacker.getName() + "&c!");
-                });
-            } else {
-                int extra = 1;
-                if (outpost != null) {
-                    extra += Utils.unclaimOutpost(null, defender, outpost);
-                }
-                
-                loss = loss * extra / (defender.getLandLocations().size() + 1);
-                long floss = loss;
-                defender.getOnlineMembers().forEach(p -> {
-                    p.playSound(p.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.MASTER, 1, 0.8F);
-                    if (outpost != null) {
-                        message(p, "&cYour outpost land was invaded, and all claims made from the outpost have been lost.");
-                    }
-                    message(p, "&cYour kingdom lost &6" + floss + " &cresource points.");
-                });
-                
-                defender.addResourcePoints(-1 * floss);
-            }
-            
-            long floss = loss;
-            attacker.getOnlineMembers().forEach(p -> {
-                p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.MASTER, 1, 0.8F);
-                if (outpost != null) {
-                    message(p, "&2You invaded an enemy outpost, and all enemy claims made from that outpost were unclaimed.");
-                }
-                message(p, "&2Your kingdom gained &6" + floss + " &2resource points.");
-            });
-            
-            attacker.addResourcePoints(floss);
-        }, 1);
-    }
-    
     /** Handle clicking of custom GUIs */
     @EventHandler
     public void onClick(InventoryClickEvent event) {
@@ -585,31 +631,8 @@ public class UAListener implements Listener {
         }
     }
 	
-	// Prevent message spam
+	// Shorten message call functions
 	private void message(Player p, String m) {
 	    p.sendMessage(Utils.toComponent(m));
-	}
-	
-	// Checks if a land can be unclaimed
-	private boolean cancelUnclaim(UnclaimLandEvent e) {
-	    // Don't check if unclaimall was done
-        if (e.getLandLocations().size() > 1) {
-            return false;
-        }
-        
-        // Don't check if cause was invasion - OnInvadeSuccess checks for that instead
-        if (e.getReason() == UnclaimLandEvent.Reason.INVASION || e.getReason() == UnclaimLandEvent.Reason.ADMIN) {
-            return false;
-        }
-        
-        for (SimpleChunkLocation scl : e.getLandLocations()) {
-            if (scl.getLand().getStructures().values().stream().anyMatch(s -> s.getNameOrDefault().equals("Outpost"))) {
-                e.setCancelled(true);
-                message(e.getPlayer().getPlayer(), "&cTo unclaim a land with an outpost on it, you must break the outpost.");
-                return true;
-            }
-        }
-        
-        return false;
 	}
 }
