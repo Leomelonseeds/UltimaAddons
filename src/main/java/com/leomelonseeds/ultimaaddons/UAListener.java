@@ -215,6 +215,11 @@ public class UAListener implements Listener {
         if (kp == null || !kp.hasKingdom()) {
             return;
         }
+        
+        // Allow if structure has no land (if kingdom did unclaimall or disbanded)
+        if (!structure.getLand().isClaimed()) {
+            return;
+        }
 
         e.setCancelled(true);
         
