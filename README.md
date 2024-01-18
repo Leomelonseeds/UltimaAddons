@@ -23,7 +23,7 @@ This plugin adds a couple features to the Ultima Kingdoms server that are not pr
 ### Outposts
 - Outposts now allow you to claim land that is disconnected from other kingdom lands, including in other worlds (you can no longer create claims in worlds in where you don't already have claims without an Outpost).
 - Outposts no longer sell any items, but you can still access your kingdom Nexus from any placed Outpost.
-- To use, place an Outpost on an *unclaimed* chunk to claim it, requiring both STRUCTURES and CLAIMS kingdom permisiosns.
+- To use, place an Outpost on an *unclaimed* chunk to claim it, requiring both STRUCTURES and CLAIMS kingdom permissions.
 - If the Outpost is broken, all lands claimed from that Outpost will be unclaimed.
 - Invading an enemy Outpost chunk will also unclaim all lands claimed from that Outpost.
 - You cannot move your nexus to a chunk claimed from an Outpost.
