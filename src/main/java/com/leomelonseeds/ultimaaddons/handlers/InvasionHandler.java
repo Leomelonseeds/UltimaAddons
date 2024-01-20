@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons;
+package com.leomelonseeds.ultimaaddons.handlers;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,6 +29,8 @@ import org.kingdoms.events.general.ChampionAbilityEvent;
 import org.kingdoms.managers.invasions.Invasion;
 import org.kingdoms.managers.invasions.Plunder;
 import org.kingdoms.managers.invasions.Plunder.State;
+
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
 
 public class InvasionHandler implements Listener {
     

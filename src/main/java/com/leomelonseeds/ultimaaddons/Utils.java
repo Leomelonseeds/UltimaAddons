@@ -29,7 +29,6 @@ import org.kingdoms.constants.metadata.KingdomsObject;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.events.lands.UnclaimLandEvent;
-import org.kingdoms.utils.LandUtil;
 import org.kingdoms.utils.time.TimeFormatter;
 
 import github.scarsz.discordsrv.DiscordSRV;
@@ -133,34 +132,6 @@ public class Utils {
         }
         
         return null;
-    }
-    
-    // Hacked Kingdoms and edited bytecode to invoke this disconnectsLands function
-    public static boolean disconnectsLandsAfterUnclaim(SimpleChunkLocation set, Kingdom kingdom) {
-        Set<SimpleChunkLocation> toCheck = new HashSet<>();
-        Land cur = set.getLand();
-        String curWorld = set.getWorld();
-        KingdomMetadata outpostdata = cur.getMetadata().get(UltimaAddons.outpost_id);
-        long outpostId = outpostdata == null ? 0 : ((StandardKingdomMetadata) outpostdata).getLong();
-        kingdom.getLands().forEach(l -> {
-            SimpleChunkLocation scl = l.getLocation();
-            if (!scl.getWorld().equals(curWorld) || scl.equals(set)) {
-                return;
-            }
-
-            KingdomMetadata ldata = l.getMetadata().get(UltimaAddons.outpost_id);
-            if (ldata == null) {
-                if (outpostId == 0) {
-                    toCheck.add(scl);
-                }
-                return;
-            }
-            
-            if (outpostId == ((StandardKingdomMetadata) ldata).getLong()) {
-                toCheck.add(scl);
-            }
-        });
-        return LandUtil.getConnectedClusters(1, toCheck).size() > 1;
     }
     
     public static String getLastChallenge(Kingdom k) {
