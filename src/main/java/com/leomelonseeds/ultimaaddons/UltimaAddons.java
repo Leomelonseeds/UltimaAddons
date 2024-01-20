@@ -7,6 +7,7 @@ import org.kingdoms.constants.namespace.Namespace;
 
 import com.leomelonseeds.ultimaaddons.handlers.UAUnclaimProcessor;
 import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
+import com.leomelonseeds.ultimaaddons.utils.UAPlaceholders;
 
 
 public class UltimaAddons extends JavaPlugin {

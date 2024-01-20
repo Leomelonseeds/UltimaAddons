@@ -19,7 +19,7 @@ import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.Utils;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class ChallengeInv implements UAInventory {
     

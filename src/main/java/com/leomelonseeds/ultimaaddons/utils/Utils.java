@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons;
+package com.leomelonseeds.ultimaaddons.utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +30,8 @@ import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.events.lands.UnclaimLandEvent;
 import org.kingdoms.utils.time.TimeFormatter;
+
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
 
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;

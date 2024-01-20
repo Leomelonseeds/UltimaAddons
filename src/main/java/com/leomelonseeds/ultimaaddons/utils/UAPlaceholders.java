@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons;
+package com.leomelonseeds.ultimaaddons.utils;
 
 import org.bukkit.OfflinePlayer;
 import org.kingdoms.constants.group.Kingdom;

@@ -8,7 +8,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.leomelonseeds.ultimaaddons.Utils;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class ConfirmAction implements UAInventory {
     

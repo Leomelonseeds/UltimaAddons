@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons;
+package com.leomelonseeds.ultimaaddons.utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +11,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.invs.ConfirmCallback;
 
 @SuppressWarnings("deprecation")
