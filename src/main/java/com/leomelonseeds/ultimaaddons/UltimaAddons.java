@@ -18,39 +18,39 @@ public class UltimaAddons extends JavaPlugin {
     public static KingdomMetadataHandler shield_time;
     public static KingdomMetadataHandler outpost_id;
     
-	@Override
+    @Override
     public void onEnable() {
-	    plugin = this;
-	    
-	    // Load config
+        plugin = this;
+        
+        // Load config
         saveDefaultConfig();
         
         // Register managers and stuff
-	    invManager = new InventoryManager();
-	    UAUnclaimProcessor.register();
+        invManager = new InventoryManager();
+        UAUnclaimProcessor.register();
         new UAPlaceholders().register();
-	    
-	    // Register listener
-		getServer().getPluginManager().registerEvents(new UAListener(), this);
-		
-		// Register commands
+        
+        // Register listener
+        getServer().getPluginManager().registerEvents(new UAListener(), this);
+        
+        // Register commands
         getCommand("uchallenge").setExecutor(new UAChallenge());
         
         // Define namespaces
         lckh = new StandardKingdomMetadataHandler(new Namespace("UltimaAddons", "LCK")); // Last challenged kingdom, Last challenged date
         shield_time = new StandardKingdomMetadataHandler(new Namespace("UltimaAddons", "SHIELD_TIME"));  // (long) Next available time a kingdom can buy a shield
         outpost_id = new StandardKingdomMetadataHandler(new Namespace("UltimaAddons", "OUTPOST_ID"));  // (long) id of outpost/outpost land
-	}
+    }
 
-	@Override
+    @Override
     public void onDisable() {
-	}
-	
-	public static UltimaAddons getPlugin() {
-	    return plugin;
-	}
-	
-	public InventoryManager getInvs() {
-	    return invManager;
-	}
+    }
+    
+    public static UltimaAddons getPlugin() {
+        return plugin;
+    }
+    
+    public InventoryManager getInvs() {
+        return invManager;
+    }
 }
