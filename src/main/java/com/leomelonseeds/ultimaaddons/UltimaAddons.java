@@ -1,10 +1,14 @@
 package com.leomelonseeds.ultimaaddons;
 
+import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.kingdoms.constants.metadata.KingdomMetadataHandler;
 import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
 import org.kingdoms.constants.namespace.Namespace;
 
+import com.leomelonseeds.ultimaaddons.command.UAChallenge;
+import com.leomelonseeds.ultimaaddons.command.UAGive;
+import com.leomelonseeds.ultimaaddons.handlers.KingdomsListener;
 import com.leomelonseeds.ultimaaddons.handlers.UAUnclaimProcessor;
 import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 import com.leomelonseeds.ultimaaddons.utils.UAPlaceholders;
@@ -18,6 +22,7 @@ public class UltimaAddons extends JavaPlugin {
     public static KingdomMetadataHandler lckh;
     public static KingdomMetadataHandler shield_time;
     public static KingdomMetadataHandler outpost_id;
+    public static NamespacedKey itemKey;
     
     @Override
     public void onEnable() {
@@ -32,15 +37,17 @@ public class UltimaAddons extends JavaPlugin {
         new UAPlaceholders().register();
         
         // Register listener
-        getServer().getPluginManager().registerEvents(new UAListener(), this);
+        getServer().getPluginManager().registerEvents(new KingdomsListener(), this);
         
         // Register commands
         getCommand("uchallenge").setExecutor(new UAChallenge());
+        getCommand("ugive").setExecutor(new UAGive());
         
         // Define namespaces
         lckh = new StandardKingdomMetadataHandler(new Namespace("UltimaAddons", "LCK")); // Last challenged kingdom, Last challenged date
         shield_time = new StandardKingdomMetadataHandler(new Namespace("UltimaAddons", "SHIELD_TIME"));  // (long) Next available time a kingdom can buy a shield
         outpost_id = new StandardKingdomMetadataHandler(new Namespace("UltimaAddons", "OUTPOST_ID"));  // (long) id of outpost/outpost land
+        itemKey = new NamespacedKey(plugin, "uaitem");
     }
 
     @Override
