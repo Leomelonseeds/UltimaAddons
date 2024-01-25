@@ -13,7 +13,7 @@ UltimaAddons uses the KingdomsX API by Crypto Morin to provide several extra fea
 
 ### Invasions
 - The goal of an invasion is now solely to *capture the chunk*, similar to a King of the Hill game. Attackers must stand inside the invasion chunk for 3 minutes in order for the chunk to be captured.
-- Killing the Kingdom champion no longer wins the invasion (the champion is an upgradable boss that spawns whenever someone tries to invade your lands.)
+- Killing the Kingdom champion no longer wins the invasion (the champion is an upgradable boss that spawns whenever someone tries to invade your lands).
 - The champion will now prioritize targetting attackers (and their allies) standing inside the invasion chunk, acting similar to how a player would defend.
 - If *any* defenders, which includes the champion and players from the defending Kingdom and their allies, are standing inside the chunk, the capture progress will not advance.
 - If the attackers fail to capture the chunk within 15 minutes, or if they surrender with `/k surrender`, the invasion fails.
@@ -35,7 +35,7 @@ UltimaAddons uses the KingdomsX API by Crypto Morin to provide several extra fea
 - If you try to declare war on another Kingdom while you are shielded, your shield will be removed, and you are still subject to the original shield buying date as described above.
 
 ### Discord
-- In addition to tracking player joining and leaving kingdoms as well as invasions, the discord channel now also tracks:
+In addition to tracking player joining and leaving kingdoms as well as invasions, the discord channel now also tracks:
 - Kingdoms being created and disbanded,
 - Shield purchases and their durations,
 - War declarations and their preparation time,
