@@ -32,6 +32,7 @@ items:
     flags: 
       - HIDE_ENCHANTS
     custom-model-data: 48720
+    update: true
   blazesword:
     material: GOLDEN_SWORD
     name: "&6Blaze Sword"

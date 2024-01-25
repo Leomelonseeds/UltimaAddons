@@ -347,12 +347,17 @@ public class Utils {
     }
     
     /**
-     * Returns null if item does not have persistent container
+     * Returns null if item is null, does not have meta,
+     * or does not have ultima persistent data container
      * 
      * @param i
      * @return
      */
     public static String getItemID(ItemStack i) {
+        if (i == null || i.getItemMeta() == null) {
+            return null;
+        }
+        
         ItemMeta meta = i.getItemMeta();
         if (!meta.getPersistentDataContainer().has(UltimaAddons.itemKey, PersistentDataType.STRING)) {
             return null;

@@ -62,6 +62,7 @@ public class UltimaAddons extends JavaPlugin {
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new KingdomsListener(), this);
         pm.registerEvents(invManager, this);
+        pm.registerEvents(itemManager, this);
     }
 
     @Override
