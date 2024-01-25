@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons;
+package com.leomelonseeds.ultimaaddons.command;
 
 import java.util.Map;
 import java.util.UUID;
@@ -13,6 +13,7 @@ import org.kingdoms.constants.group.model.relationships.StandardRelationAttribut
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.constants.player.StandardKingdomPermission;
 
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.invs.ChallengeInv;
 import com.leomelonseeds.ultimaaddons.utils.ChatConfirm;
 import com.leomelonseeds.ultimaaddons.utils.Utils;

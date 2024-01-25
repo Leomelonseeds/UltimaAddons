@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons;
+package com.leomelonseeds.ultimaaddons.handlers;
 
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -54,13 +54,13 @@ import org.kingdoms.utils.nbt.ItemNBT;
 import org.kingdoms.utils.nbt.NBTType;
 import org.kingdoms.utils.nbt.NBTWrappers;
 
-import com.leomelonseeds.ultimaaddons.handlers.InvasionHandler;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.invs.ConfirmAction;
 import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 import com.leomelonseeds.ultimaaddons.invs.UAInventory;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
-public class UAListener implements Listener {
+public class KingdomsListener implements Listener {
     
     // -------------------------------------------------
     // EXTRA DISCORDSRV MESSAGES

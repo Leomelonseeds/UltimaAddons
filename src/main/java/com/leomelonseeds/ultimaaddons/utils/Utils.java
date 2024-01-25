@@ -11,15 +11,13 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.kingdoms.config.KingdomsConfig;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.land.Land;
@@ -32,6 +30,7 @@ import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.events.lands.UnclaimLandEvent;
 import org.kingdoms.utils.time.TimeFormatter;
 
+import com.cryptomorin.xseries.XItemStack;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 
 import github.scarsz.discordsrv.DiscordSRV;
@@ -332,25 +331,32 @@ public class Utils {
     }
     
     /**
-     * Create an item from the config section
+     * Create an item from the config section, adding
+     * persistent data for the string
      * 
      * @param config
      * @return
      */
     public static ItemStack createItem(ConfigurationSection sec) {
-        ItemStack item = new ItemStack(Material.valueOf(sec.getString("item")));
-        ItemMeta meta = item.getItemMeta();
-        if (sec.contains("name")) {
-            meta.displayName(toComponent(sec.getString("name")));
+        ItemStack i = XItemStack.deserialize(sec);
+        ItemMeta meta = i.getItemMeta();
+        meta.getPersistentDataContainer().set(UltimaAddons.itemKey, PersistentDataType.STRING, sec.getName());
+        i.setItemMeta(meta);
+        return XItemStack.deserialize(sec);
+    }
+    
+    /**
+     * Returns null if item does not have persistent container
+     * 
+     * @param i
+     * @return
+     */
+    public static String getItemID(ItemStack i) {
+        ItemMeta meta = i.getItemMeta();
+        if (!meta.getPersistentDataContainer().has(UltimaAddons.itemKey, PersistentDataType.STRING)) {
+            return null;
         }
-        if (sec.contains("lore")) {
-            meta.lore(toComponent(sec.getStringList("lore")));
-        }
-        item.setItemMeta(meta);
-        if (sec.contains("glow")) {
-            item.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
-            item.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        }
-        return item;
+        
+        return meta.getPersistentDataContainer().get(UltimaAddons.itemKey, PersistentDataType.STRING);
     }
 }

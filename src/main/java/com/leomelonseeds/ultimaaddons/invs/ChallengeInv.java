@@ -2,7 +2,6 @@ package com.leomelonseeds.ultimaaddons.invs;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.configuration.ConfigurationSection;
@@ -11,7 +10,6 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.group.model.logs.misc.challenge.LogKingdomChallenged;
 import org.kingdoms.constants.group.model.logs.misc.challenge.LogKingdomChallenger;
@@ -23,7 +21,6 @@ import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class ChallengeInv implements UAInventory {
     
-    private NamespacedKey nkey;
     private Inventory inv;
     private Kingdom target;
     private Kingdom attacker;
@@ -33,7 +30,6 @@ public class ChallengeInv implements UAInventory {
         this.target = target;
         this.attacker = attacker;
         this.player = player;
-        this.nkey = new NamespacedKey(UltimaAddons.getPlugin(), "time");
         
         inv = Bukkit.createInventory(null, 27, Utils.toComponent("&8-=( &cChallenge &e" + target.getName() + " &8)=-"));
         manager.registerInventory(player, this);
@@ -52,12 +48,7 @@ public class ChallengeInv implements UAInventory {
         ConfigurationSection config = UltimaAddons.getPlugin().getConfig().getConfigurationSection("challengegui");
         for (String key : config.getKeys(false)) {
             int slot = config.getInt(key + ".slot");
-            double days = config.getDouble(key + ".days");
-            ItemStack citem = Utils.createItem(config.getConfigurationSection(key));
-            ItemMeta cmeta = citem.getItemMeta();
-            cmeta.getPersistentDataContainer().set(nkey, PersistentDataType.DOUBLE, days);
-            citem.setItemMeta(cmeta);
-            inv.setItem(slot, citem);
+            inv.setItem(slot, Utils.createItem(config.getConfigurationSection(key)));
         }
     }
 
@@ -68,12 +59,12 @@ public class ChallengeInv implements UAInventory {
             return;
         }
         
-        ItemMeta meta = clicked.getItemMeta();
-        if (!meta.getPersistentDataContainer().has(nkey)) {
+        String meta = Utils.getItemID(clicked);
+        if (meta == null) {
             return;
         }
         
-        double days = meta.getPersistentDataContainer().get(nkey, PersistentDataType.DOUBLE);
+        double days = Double.parseDouble(meta.split("-")[0]);
         new ConfirmAction("Challenge " + target.getName() + " in " + days + "d", player, this, result -> {
             if (result == null || !result) {
                 return;
