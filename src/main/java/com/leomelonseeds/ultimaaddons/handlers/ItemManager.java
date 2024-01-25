@@ -22,6 +22,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
@@ -164,7 +165,7 @@ public class ItemManager implements Listener {
 
         // Make sure item has the update key
         String path = data + ".update";
-        if (!itemConfig.contains(path) || !itemConfig.getBoolean(path)) {
+        if (!itemConfig.contains(path)) {
             return;
         }
 
@@ -174,9 +175,25 @@ public class ItemManager implements Listener {
             return;
         }
 
-        // Update item by replacing type and meta
-        cur.setType(actual.getType());
-        cur.setItemMeta(actual.getItemMeta());
+        // UPDATE MODES:
+        // 0 (default): No updating
+        // 1: Update everything
+        // 2: Update type, lore, and custom model data only
+        switch (itemConfig.getInt(path)) {
+        case 1:
+            cur.setType(actual.getType());
+            cur.setItemMeta(actual.getItemMeta());
+            break;
+        case 2:
+            cur.setType(actual.getType());
+            ItemMeta curMeta = cur.getItemMeta();
+            curMeta.lore(actual.getItemMeta().lore());
+            if (itemConfig.contains(data + ".custom-model-data")) {
+                curMeta.setCustomModelData(itemConfig.getInt(data + ".custom-model-data"));
+            }
+            cur.setItemMeta(curMeta);
+            break;
+        }
     }
 
 }

@@ -32,7 +32,7 @@ items:
     flags: 
       - HIDE_ENCHANTS
     custom-model-data: 48720
-    update: true
+    update: 1
   blazesword:
     material: GOLDEN_SWORD
     name: "&6Blaze Sword"
@@ -47,6 +47,7 @@ items:
       - "&cweapon to shoot 3 fireballs in quick"
       - "&csuccession at your enemies. This ability"
       - "&chas a &610 second &ccooldown."
+    update: 2
 capture-exclude:
   - ENDER_DRAGON
   - WITHER
