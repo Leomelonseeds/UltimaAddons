@@ -2,6 +2,7 @@
 This plugin adds a couple features to the Ultima Kingdoms server that are not present in other plugins. While this plugin is intended for use on the Ultima server, you may compile this plugin for yourself to use on your own server, but I will provide no guarantees or support that it will work for yourself. There are many configuration changes in plugins listed here and otherwise which aren't noted here that contribute to Ultima's experience. The best way to see these features are simply to log on to play.ultimamc.net and join the Kingdoms server (currently under revamp and coming soon).
 
 ## Kingdoms
+UltimaAddons uses the KingdomsX API by Crypto Morin to provide several extra features.
 ### Challenges
 - Kingdoms can now only challenge 1 Kingdom at a time. However, one Kingdom may get challenged by multiple other Kingdoms.
 - There is now a confirmation process before sending a challenge to make sure that it feels like a commitment.
@@ -44,3 +45,20 @@ This plugin adds a couple features to the Ultima Kingdoms server that are not pr
 ### Other
 - You cannot make additional claims beyond 1 claim if you do not have a nexus.
 - You cannot create outposts or challenge if you do not have a neuxs.
+
+## Custom Enchantments
+The plugin also hooks into AdvancedEnchantments' API to provide the following custom effects:
+ 
+- CAPTURE: Drops a mob's spawn egg. Excludes boss mobs and those defined in the config.
+
+## Custom Items
+The plugin also provides some custom items and recipes that add some fresh gameplay elements to the survival experience. All recipes can be found by using the `/recipes` command in-game.
+
+### Weapons
+- Blaze Sword: Right-click to shoot 3 fireballs in quick succession.
+
+### Armor
+- Coming soon
+
+### Others
+- Diamond Chip: Like iron or gold nuggets, but for diamonds. Used for better economy integration, since Ultima uses a item-based economy with diamonds as its currency.
