@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
@@ -52,6 +53,13 @@ public class Utils {
         return KingdomsConfig.Invasions.CHALLENGES_DURATION.getManager().getTimeMillis();
     }
     
+    /**
+     * Check if a Kingdom is currently challenging or has been
+     * challenged by another kingdom
+     * 
+     * @param k
+     * @return
+     */
     public static boolean hasChallenged(Kingdom k) {
         long wartime = Utils.getWarTime();
         long ctime = System.currentTimeMillis();
@@ -311,6 +319,16 @@ public class Utils {
     
     public static String formatDate(long i) {
         return TimeFormatter.ofRaw(i);
+    }
+    
+    /**
+     * Send a sound
+     * 
+     * @param path
+     * @param location
+     */
+    public static void sendSound(Sound sound, float volume, float pitch, Location location) {
+        location.getWorld().playSound(location, sound, SoundCategory.MASTER, volume, pitch);
     }
     
     /**

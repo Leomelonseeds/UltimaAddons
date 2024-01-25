@@ -37,6 +37,12 @@
 	    <version>1.16.20.2</version>
 	    <scope>provided</scope>
 	</dependency>
+    <dependency>
+	    <groupId>net.advancedplugins</groupId>
+	    <artifactId>ae</artifactId>
+	    <version>9.6.5</version>
+	    <scope>provided</scope>
+	</dependency>
 	<dependency>
 	    <groupId>com.discordsrv</groupId>
 	    <artifactId>discordsrv</artifactId>
