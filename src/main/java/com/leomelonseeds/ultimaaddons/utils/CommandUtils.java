@@ -9,6 +9,15 @@ public class CommandUtils {
         target.sendMessage(Utils.toComponent("&cError: &7" + msg));
     }
     
+    public static boolean isAdmin(CommandSender target) {
+        if (target.hasPermission("ua.admin")) {
+            return true;
+        }
+        
+        sendErrorMsg(target, "You do not have permission for this!");
+        return false;
+    }
+    
     public static void sendSuccessMsg(CommandSender target, String msg) {
         target.sendMessage(Utils.toComponent("&aSuccess: &7" + msg));
     }

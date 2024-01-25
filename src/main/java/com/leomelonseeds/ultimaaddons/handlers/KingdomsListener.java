@@ -14,11 +14,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.kingdoms.config.KingdomsConfig;
 import org.kingdoms.constants.group.Kingdom;
@@ -56,8 +53,6 @@ import org.kingdoms.utils.nbt.NBTWrappers;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.invs.ConfirmAction;
-import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
-import com.leomelonseeds.ultimaaddons.invs.UAInventory;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class KingdomsListener implements Listener {
@@ -594,48 +589,6 @@ public class KingdomsListener implements Listener {
                 Utils.setupReminders(k, target, timeleft);
             }
         }, 5);
-    }
-    
-    /** Handle clicking of custom GUIs */
-    @EventHandler
-    public void onClick(InventoryClickEvent event) {
-        Player player = (Player) event.getWhoClicked();
-        InventoryManager manager = UltimaAddons.getPlugin().getInvs();
-        
-        if (!(manager.getInventory(player) instanceof UAInventory)) {
-            return;
-        }
-        
-        Inventory inv = event.getClickedInventory();
-        
-        if (inv == null) {
-            return;
-        }
-        
-        if (inv.equals(event.getView().getBottomInventory()) && event.getClick().isShiftClick()) {
-            event.setCancelled(true);
-            return;
-        }
-        
-        if (!inv.equals(event.getView().getTopInventory())){
-            return; 
-        }
-        
-        event.setCancelled(true);
-
-        manager.getInventory(player).registerClick(event.getSlot(), event.getClick());
-    }
-    
-    /** Unregister custom mwinventories when they are closed. */
-    @EventHandler
-    public void unregisterCustomInventories(InventoryCloseEvent event) {
-        Player player = (Player) event.getPlayer();
-        
-        // Unregister
-        InventoryManager manager = UltimaAddons.getPlugin().getInvs();
-        if (manager.getInventory(player) instanceof UAInventory) {
-            manager.removePlayer(player);
-        }
     }
 	
 	// Shorten message call functions

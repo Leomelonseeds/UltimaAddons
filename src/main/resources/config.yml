@@ -25,23 +25,29 @@ challengegui:
 #    days: 0.0008
 items:
   dchip:
-    item: PRISMARINE_CRYSTALS
+    material: PRISMARINE_CRYSTALS
     name: "&fDiamond Chip"
     enchants:
       UNBREAKING: 1
-    flags: HIDE_ENCHANTS
-    custom-nodel-data: 48720
+    flags: 
+      - HIDE_ENCHANTS
+    custom-model-data: 48720
   blazesword:
-    item: GOLDEN_SWORD
+    material: GOLDEN_SWORD
     name: "&6Blaze Sword"
     enchants:
       SHARPNESS: 8
       FIRE_ASPECT: 3
       UNBREAKING: 10
-    custom-nodel-data: 48721
+    custom-model-data: 48721
     lore:   
-    - ""
-    - "&cRight-click while holding this flaming"
-    - "&cweapon to shoot 3 fireballs in quick"
-    - "&csuccession at your enemies. This ability"
-    - "&chas a &610 second &ccooldown."
+      - ""
+      - "&cRight-click while holding this flaming"
+      - "&cweapon to shoot 3 fireballs in quick"
+      - "&csuccession at your enemies. This ability"
+      - "&chas a &610 second &ccooldown."
+capture-exclude:
+  - ENDER_DRAGON
+  - WITHER
+  - ELDER_GUARDIAN
+  - WARDEN

@@ -38,6 +38,7 @@ import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.md_5.bungee.api.ChatColor;
 
 public class Utils {
     
@@ -338,11 +339,11 @@ public class Utils {
      * @return
      */
     public static ItemStack createItem(ConfigurationSection sec) {
-        ItemStack i = XItemStack.deserialize(sec);
+        ItemStack i = XItemStack.deserialize(sec, s -> ChatColor.translateAlternateColorCodes('&', s));
         ItemMeta meta = i.getItemMeta();
         meta.getPersistentDataContainer().set(UltimaAddons.itemKey, PersistentDataType.STRING, sec.getName());
         i.setItemMeta(meta);
-        return XItemStack.deserialize(sec);
+        return i;
     }
     
     /**
