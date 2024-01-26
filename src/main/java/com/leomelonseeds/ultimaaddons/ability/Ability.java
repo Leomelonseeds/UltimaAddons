@@ -44,7 +44,7 @@ public abstract class Ability {
     
     /**
      * Calling this method requires that the
-     * player is holding an item with an abilityt
+     * player is holding an item with an ability
      * 
      * @param player
      * @param target can be null
@@ -56,13 +56,13 @@ public abstract class Ability {
             return;
         }
         
-        // Check, according to an event, if the condition was met
-        if (!canExecute(e)) {
+        // Return if on cooldown
+        if (getCooldown(player) > 0) {
             return;
         }
         
-        // Return if on cooldown
-        if (getCooldown(player) > 0) {
+        // Check, according to an event, if the condition was met
+        if (!canExecute(player, target, e)) {
             return;
         }
         
@@ -95,6 +95,14 @@ public abstract class Ability {
     
     public abstract void executeAbility(Player player, LivingEntity target);
     
-    public abstract boolean canExecute(Event e);
+    /**
+     * Assume that the player already is holding the correct 
+     * item for the ability, and that they have no cooldown 
+     * for the ability.
+     * 
+     * @param e
+     * @return
+     */
+    public abstract boolean canExecute(Player player, LivingEntity target, Event e);
 
 }

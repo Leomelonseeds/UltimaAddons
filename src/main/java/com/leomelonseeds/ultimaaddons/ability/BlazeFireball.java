@@ -26,7 +26,7 @@ public class BlazeFireball extends Ability {
     }
 
     @Override
-    public boolean canExecute(Event e) {
+    public boolean canExecute(Player player, LivingEntity target, Event e) {
         return isRightClick(e);
     }
 
