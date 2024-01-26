@@ -1,11 +1,12 @@
 package com.leomelonseeds.ultimaaddons.handlers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -26,6 +27,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
+
+import net.advancedplugins.ae.api.AEAPI;
+import net.kyori.adventure.text.Component;
 
 public class ItemManager implements Listener {
     
@@ -54,7 +58,7 @@ public class ItemManager implements Listener {
                 ItemStack i = Utils.createItem(itemConfig.getConfigurationSection(key));
                 items.put(key, i);
             } catch (Exception e) {
-                Bukkit.getLogger().log(Level.SEVERE, "Something went wrong trying to create item " + key + ":");
+                Bukkit.getLogger().severe("Something went wrong trying to create item " + key + ":");
                 e.printStackTrace();
             }
         }
@@ -177,8 +181,10 @@ public class ItemManager implements Listener {
 
         // UPDATE MODES:
         // 0 (default): No updating
-        // 1: Update everything
+        // 1: Update everything (only use for items that shouldn't be edited)
         // 2: Update type, lore, and custom model data only
+        // 3: Update custom model data only
+        ItemMeta curMeta = cur.getItemMeta();
         switch (itemConfig.getInt(path)) {
         case 1:
             cur.setType(actual.getType());
@@ -186,13 +192,23 @@ public class ItemManager implements Listener {
             break;
         case 2:
             cur.setType(actual.getType());
-            ItemMeta curMeta = cur.getItemMeta();
-            curMeta.lore(actual.getItemMeta().lore());
+            
+            // Update lore without removing enchantments
+            List<Component> updated = new ArrayList<>();
+            for (Component c : curMeta.lore()) {
+                if (!AEAPI.isEnchantLine(Utils.toPlain(c))) {
+                    break;
+                }
+                updated.add(c);
+            }
+            
+            updated.addAll(actual.getItemMeta().lore());
+            curMeta.lore(updated);
+        case 3:
             if (itemConfig.contains(data + ".custom-model-data")) {
                 curMeta.setCustomModelData(itemConfig.getInt(data + ".custom-model-data"));
             }
             cur.setItemMeta(curMeta);
-            break;
         }
     }
 
