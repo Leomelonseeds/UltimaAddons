@@ -26,6 +26,8 @@ import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.ability.Ability;
+import com.leomelonseeds.ultimaaddons.ability.BlazeFireball;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 import net.advancedplugins.ae.api.AEAPI;
@@ -36,27 +38,53 @@ public class ItemManager implements Listener {
     private UltimaAddons plugin;
     private Map<String, ItemStack> items;
     private Map<NamespacedKey, CraftingRecipe> recipes;
+    private AbilityManager abilityManager;
     ConfigurationSection itemConfig;
     
     public ItemManager(UltimaAddons plugin) {
         this.plugin = plugin;
         items = new HashMap<>();
         recipes = new HashMap<>();
+        abilityManager = new AbilityManager();
         loadItems();
     }
     
     /**
-     * Load all items and recipes from config
-     * Recipes are currently hard-coded
+     * Load all items and recipes from config,
+     * adding abilities as necessary.
+     * Recipes are currently hard-coded.
      */
     public void loadItems() {
         // Add all config items
         items.clear();
+        abilityManager.clearAbilities();
         itemConfig = UltimaAddons.getPlugin().getConfig().getConfigurationSection("items");
         for (String key : itemConfig.getKeys(false)) {
             try {
-                ItemStack i = Utils.createItem(itemConfig.getConfigurationSection(key));
+                ConfigurationSection sec = itemConfig.getConfigurationSection(key);
+                ItemStack i = Utils.createItem(sec);
                 items.put(key, i);
+                
+                // Update ability if exists
+                if (!sec.contains("ability")) {
+                    continue;
+                }
+                
+                ConfigurationSection asec = sec.getConfigurationSection("ability");
+                Ability a = null;
+                switch (key) {
+                case "blazesword":
+                    a = new BlazeFireball(asec.getInt("yield"), asec.getInt("randomness"));
+                    break;
+                }
+                
+                if (a == null) {
+                    continue;
+                }
+                
+                a.setCooldown(asec.getInt("cooldown"));
+                a.setDisplayName(asec.getString("name"));
+                abilityManager.addAbility(key, a);
             } catch (Exception e) {
                 Bukkit.getLogger().severe("Something went wrong trying to create item " + key + ":");
                 e.printStackTrace();
@@ -121,6 +149,10 @@ public class ItemManager implements Listener {
         recipes.put(r.getKey(), r);
     }
     
+    public AbilityManager getAbilities() {
+        return abilityManager;
+    }
+    
     // Stop custom items being used for non-custom recipes
     @EventHandler
     public void onPrepareCraft(PrepareItemCraftEvent e) {
@@ -160,6 +192,7 @@ public class ItemManager implements Listener {
             return;
         }
         
+        Bukkit.getLogger().info("a");
         if (!items.containsKey(data)) {
             Player p = (Player) e.getWhoClicked();
             p.sendMessage(Utils.toComponent("&cThe custom item '" + data + "' no longer exists, and may be automatically removed in the future. "
@@ -173,12 +206,14 @@ public class ItemManager implements Listener {
             return;
         }
 
+        Bukkit.getLogger().info("b");
         // No need if item already corresponds
         ItemStack actual = getItem(data);
         if (cur.isSimilar(actual)) {
             return;
         }
 
+        Bukkit.getLogger().info("c");
         // UPDATE MODES:
         // 0 (default): No updating
         // 1: Update everything (only use for items that shouldn't be edited)

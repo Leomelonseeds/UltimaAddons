@@ -7,7 +7,7 @@ import org.kingdoms.constants.metadata.KingdomMetadataHandler;
 import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
 import org.kingdoms.constants.namespace.Namespace;
 
-import com.leomelonseeds.ultimaaddons.ae.CaptureEffect;
+import com.leomelonseeds.ultimaaddons.ability.ae.CaptureEffect;
 import com.leomelonseeds.ultimaaddons.command.UAChallenge;
 import com.leomelonseeds.ultimaaddons.command.UAGive;
 import com.leomelonseeds.ultimaaddons.command.UAReload;
@@ -63,10 +63,12 @@ public class UltimaAddons extends JavaPlugin {
         pm.registerEvents(new KingdomsListener(), this);
         pm.registerEvents(invManager, this);
         pm.registerEvents(itemManager, this);
+        pm.registerEvents(itemManager.getAbilities(), this);
     }
 
     @Override
     public void onDisable() {
+        itemManager.getAbilities().cancelTasks();
     }
     
     public static UltimaAddons getPlugin() {

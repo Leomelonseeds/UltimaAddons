@@ -283,14 +283,13 @@ public class Utils {
     }
     
     /**
-     *  Converted all section symbols to ampersands cause for some reason
-     *  section symbols just would not work properly
+     *  Convert all ampersands to section symbols
      * 
      * @param s
      * @return
      */
     public static String convertAmps(String s) {
-        return s.replaceAll("§", "&");
+        return s.replaceAll("&", "§");
     }
     
     /**
@@ -300,7 +299,7 @@ public class Utils {
      * @return
      */
     public static Component toComponent(String line) {
-        return LegacyComponentSerializer.legacyAmpersand().deserialize(convertAmps(line)).decoration(TextDecoration.ITALIC, false);
+        return LegacyComponentSerializer.legacySection().deserialize(convertAmps(line)).decoration(TextDecoration.ITALIC, false);
     }
     
     /**

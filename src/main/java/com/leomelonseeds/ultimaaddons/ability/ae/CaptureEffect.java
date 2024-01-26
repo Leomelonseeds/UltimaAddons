@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons.ae;
+package com.leomelonseeds.ultimaaddons.ability.ae;
 
 import java.util.List;
 

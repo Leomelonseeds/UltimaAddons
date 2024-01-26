@@ -48,6 +48,11 @@ items:
       - "&csuccession at your enemies. This ability"
       - "&chas a &610 second &ccooldown."
     update: 2
+    ability:
+      name: "Fireball Trio"
+      cooldown: 10
+      yield: 1
+      randomness: 0.05
 capture-exclude:
   - ENDER_DRAGON
   - WITHER
