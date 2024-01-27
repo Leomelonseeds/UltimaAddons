@@ -27,10 +27,7 @@ items:
   dchip:
     material: PRISMARINE_CRYSTALS
     name: "&fDiamond Chip"
-    enchants:
-      UNBREAKING: 1
-    flags: 
-      - HIDE_ENCHANTS
+    glow: true
     custom-model-data: 48720
     update: 1
   blazesword:
@@ -47,12 +44,32 @@ items:
       - "&cweapon to shoot 3 fireballs in quick"
       - "&csuccession at your enemies. This ability"
       - "&chas a &610 second &ccooldown."
-    update: 2
+    update: 3
     ability:
       name: "Fireball Trio"
       cooldown: 10
       yield: 1
       randomness: 0.05
+  tanto:
+    material: STONE_SWORD
+    name: "&aTantō"
+    custom-model-data: 48722
+    lore:   
+      - ""
+      - "&9A short sword that can attack"
+      - "&9extremely fast."
+    update: 2
+    attributes:
+      GENERIC_ATTACK_DAMAGE:
+        name: "Attack Damage"
+        operation: ADD_NUMBER
+        amount: 5
+        slot: HAND
+      GENERIC_ATTACK_SPEED:
+        name: "Attack Speed"
+        operation: ADD_NUMBER
+        amount: 16
+        slot: HAND
 capture-exclude:
   - ENDER_DRAGON
   - WITHER

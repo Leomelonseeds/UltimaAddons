@@ -93,8 +93,6 @@ public abstract class Ability {
         return displayName;
     }
     
-    public abstract void executeAbility(Player player, LivingEntity target);
-    
     /**
      * Assume that the player already is holding the correct 
      * item for the ability, and that they have no cooldown 
@@ -104,5 +102,13 @@ public abstract class Ability {
      * @return
      */
     public abstract boolean canExecute(Player player, LivingEntity target, Event e);
+    
+    /**
+     * Run the ability. Target can be null, make sure to verify in canExecute
+     * 
+     * @param player
+     * @param target
+     */
+    public abstract void executeAbility(Player player, LivingEntity target);
 
 }

@@ -192,7 +192,6 @@ public class ItemManager implements Listener {
             return;
         }
         
-        Bukkit.getLogger().info("a");
         if (!items.containsKey(data)) {
             Player p = (Player) e.getWhoClicked();
             p.sendMessage(Utils.toComponent("&cThe custom item '" + data + "' no longer exists, and may be automatically removed in the future. "
@@ -206,26 +205,29 @@ public class ItemManager implements Listener {
             return;
         }
 
-        Bukkit.getLogger().info("b");
         // No need if item already corresponds
         ItemStack actual = getItem(data);
         if (cur.isSimilar(actual)) {
             return;
         }
 
-        Bukkit.getLogger().info("c");
         // UPDATE MODES:
         // 0 (default): No updating
         // 1: Update everything (only use for items that shouldn't be edited)
-        // 2: Update type, lore, and custom model data only
-        // 3: Update custom model data only
+        // 2: Update attributes, and all below
+        // 3: Update type, lore, and all below
+        // 4: Update custom model data only
         ItemMeta curMeta = cur.getItemMeta();
+        ItemMeta actualMeta = actual.getItemMeta();
         switch (itemConfig.getInt(path)) {
         case 1:
             cur.setType(actual.getType());
-            cur.setItemMeta(actual.getItemMeta());
+            cur.setItemMeta(actualMeta);
             break;
         case 2:
+            curMeta.getAttributeModifiers().keySet().forEach(a -> curMeta.removeAttributeModifier(a));
+            actualMeta.getAttributeModifiers().entries().forEach(a -> curMeta.addAttributeModifier(a.getKey(), a.getValue()));
+        case 3:
             cur.setType(actual.getType());
             
             // Update lore without removing enchantments
@@ -237,9 +239,9 @@ public class ItemManager implements Listener {
                 updated.add(c);
             }
             
-            updated.addAll(actual.getItemMeta().lore());
+            updated.addAll(actualMeta.lore());
             curMeta.lore(updated);
-        case 3:
+        case 4:
             if (itemConfig.contains(data + ".custom-model-data")) {
                 curMeta.setCustomModelData(itemConfig.getInt(data + ".custom-model-data"));
             }
