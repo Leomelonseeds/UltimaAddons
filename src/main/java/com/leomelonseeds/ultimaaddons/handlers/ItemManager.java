@@ -28,6 +28,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.ability.Ability;
 import com.leomelonseeds.ultimaaddons.ability.BlazeFireball;
+import com.leomelonseeds.ultimaaddons.ability.Lifesteal;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 import net.advancedplugins.ae.api.AEAPI;
@@ -76,6 +77,8 @@ public class ItemManager implements Listener {
                 case "blazesword":
                     a = new BlazeFireball(asec.getInt("yield"), asec.getInt("randomness"));
                     break;
+                case "orcus":
+                    a = new Lifesteal(asec.getInt("percent"));
                 }
                 
                 if (a == null) {

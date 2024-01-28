@@ -26,15 +26,15 @@ public class BlazeFireball extends Ability {
     }
 
     @Override
-    public boolean canExecute(Player player, LivingEntity target, Event e) {
-        return isRightClick(e);
-    }
-
-    @Override
-    public void executeAbility(Player player, LivingEntity target) {
+    public boolean executeAbility(Player player, LivingEntity target, Event e) {
+        if (!isRightClick(e)) {
+            return false;
+        }
+        
         shootFireball(player, randomness);
         Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> shootFireball(player, randomness * -1), 6);
         Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> shootFireball(player, 0), 12);
+        return true;
     }
     
     private void shootFireball(Player player, double r) {

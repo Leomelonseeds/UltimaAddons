@@ -43,7 +43,7 @@ items:
       - "&cRight-click while holding this flaming"
       - "&cweapon to shoot 3 fireballs in quick"
       - "&csuccession at your enemies. This ability"
-      - "&chas a &610 second &ccooldown."
+      - "&chas a &610s &ccooldown."
     update: 3
     ability:
       name: "Fireball Trio"
@@ -63,13 +63,33 @@ items:
       GENERIC_ATTACK_DAMAGE:
         name: "Attack Damage"
         operation: ADD_NUMBER
-        amount: 5
+        amount: 4
         slot: HAND
       GENERIC_ATTACK_SPEED:
         name: "Attack Speed"
         operation: ADD_NUMBER
         amount: 16
         slot: HAND
+  orcus:
+    material: NETHERITE_HOE
+    name: "&1Orcus"
+    custom-model-data: 48723
+    lore:
+      - ""
+      - "&eThis scythe was once wielded by the"
+      - "&egod of death himself. Land a critical"
+      - "&ehit on an enemy player to remove"
+      - "&620% &eof their remaining health, and"
+      - "&etemporarily blind and wither them."
+      - "&eThis ability has a &630s &ecooldown."
+    enchants:
+      SHARPNESS: 10
+      CURSE_OF_VANISHING: 1
+    update: 3
+    ability:
+      name: "Lifesteal"
+      cooldown: 30
+      percent: 20
 capture-exclude:
   - ENDER_DRAGON
   - WITHER

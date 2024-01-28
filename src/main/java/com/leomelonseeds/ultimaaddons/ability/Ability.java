@@ -61,15 +61,14 @@ public abstract class Ability {
             return;
         }
         
-        // Check, according to an event, if the condition was met
-        if (!canExecute(player, target, e)) {
+        // Check if the ability was ran
+        if (!executeAbility(player, target, e)) {
             return;
         }
         
         // Add cooldown registration
         long ctime = System.currentTimeMillis();
         cooldowns.put(player, ctime + cooldown * 1000);
-        executeAbility(player, target);
     }
     
     /**
@@ -94,21 +93,13 @@ public abstract class Ability {
     }
     
     /**
-     * Assume that the player already is holding the correct 
-     * item for the ability, and that they have no cooldown 
-     * for the ability.
-     * 
-     * @param e
-     * @return
-     */
-    public abstract boolean canExecute(Player player, LivingEntity target, Event e);
-    
-    /**
-     * Run the ability. Target can be null, make sure to verify in canExecute
+     * Run the ability. Target can be null. Assume
+     * player is off cooldown already.
      * 
      * @param player
      * @param target
+     * @return if the ability successfully executed
      */
-    public abstract void executeAbility(Player player, LivingEntity target);
+    public abstract boolean executeAbility(Player player, LivingEntity target, Event e);
 
 }
