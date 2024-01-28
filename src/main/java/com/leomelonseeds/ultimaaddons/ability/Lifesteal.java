@@ -40,7 +40,7 @@ public class Lifesteal extends Ability {
         target.setHealth(Math.max(target.getHealth() - dmg, 0)); // It shouldn't be possible for the final value to < 0, but just in case...
         target.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 0));
         target.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 60, 0));
-        target.getWorld().spawnParticle(Particle.SCULK_SOUL, target.getLocation().add(0, 1, 0), 15, 0.5, 0.5, 0.5);
+        target.getWorld().spawnParticle(Particle.SCULK_SOUL, target.getLocation().add(0, 1, 0), 15, 0.5, 0.5, 0.5, 0.05);
         Utils.sendSound(Sound.BLOCK_SCULK_SHRIEKER_SHRIEK, 2F, 1.5F, target.getLocation());
         return true;
     }

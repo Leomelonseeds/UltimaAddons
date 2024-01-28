@@ -56,8 +56,8 @@ items:
     custom-model-data: 48722
     lore:   
       - ""
-      - "&9A short sword that can attack"
-      - "&9extremely fast."
+      - "&eA short sword that can attack"
+      - "&eextremely fast."
     update: 2
     attributes:
       GENERIC_ATTACK_DAMAGE:
@@ -90,6 +90,23 @@ items:
       name: "Lifesteal"
       cooldown: 30
       percent: 20
+  shadowblade:
+    material: DIAMOND_SWORD
+    name: "&5Shadowblade"
+    lore:
+      - ""
+      - "&dHarness the power of the barren"
+      - "&dwasteland of the End. Right-click"
+      - "&dto teleport &f10 blocks &din the"
+      - "&ddirection you are looking. If you"
+      - "&dteleport through a player, you will"
+      - "&dautomatically face that player."
+      - "&dThis ability has a &f20s &dcooldown."
+    update: 3
+    ability:
+      name: "Blink"
+      cooldown: 20
+      distance: 10
 capture-exclude:
   - ENDER_DRAGON
   - WITHER

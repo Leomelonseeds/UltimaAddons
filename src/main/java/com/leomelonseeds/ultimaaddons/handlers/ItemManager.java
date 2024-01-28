@@ -28,6 +28,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.ability.Ability;
 import com.leomelonseeds.ultimaaddons.ability.BlazeFireball;
+import com.leomelonseeds.ultimaaddons.ability.Blink;
 import com.leomelonseeds.ultimaaddons.ability.Lifesteal;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
@@ -79,6 +80,10 @@ public class ItemManager implements Listener {
                     break;
                 case "orcus":
                     a = new Lifesteal(asec.getInt("percent"));
+                    break;
+                case "shadowblade":
+                    a = new Blink(asec.getInt("distance"));
+                    break;
                 }
                 
                 if (a == null) {
