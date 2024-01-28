@@ -29,6 +29,7 @@ import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.ability.Ability;
 import com.leomelonseeds.ultimaaddons.ability.BlazeFireball;
 import com.leomelonseeds.ultimaaddons.ability.Blink;
+import com.leomelonseeds.ultimaaddons.ability.DualWield;
 import com.leomelonseeds.ultimaaddons.ability.Lifesteal;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
@@ -83,6 +84,9 @@ public class ItemManager implements Listener {
                     break;
                 case "shadowblade":
                     a = new Blink(asec.getInt("distance"));
+                    break;
+                case "oxtailsaber":
+                    a = new DualWield(key);
                     break;
                 }
                 

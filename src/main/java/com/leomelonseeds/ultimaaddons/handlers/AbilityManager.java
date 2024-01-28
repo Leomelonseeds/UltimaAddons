@@ -40,6 +40,7 @@ public class AbilityManager implements Listener {
     }
     
     public void clearAbilities() {
+        abilities.values().forEach(a -> a.onReload());
         abilities.clear();
     }
     
@@ -115,6 +116,10 @@ public class AbilityManager implements Listener {
                 }
                 
                 Ability a = abilities.get(data);
+                if (a.getCooldown() <= 0) {
+                    return;
+                }
+                
                 int cd = a.getCooldown(p);
                 if (cd > 0) {
                     p.sendActionBar(Utils.toComponent("&c[✕] " + a + ": Cooldown for " + cd + "s"));

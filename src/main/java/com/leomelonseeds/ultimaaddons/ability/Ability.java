@@ -27,6 +27,21 @@ public abstract class Ability {
         cooldown = i;
     }
     
+    /**
+     * Get maximum cooldown
+     * 
+     * @return
+     */
+    public int getCooldown() {
+        return cooldown;
+    }
+    
+    /**
+     * Get cooldown for a specified player
+     * 
+     * @param p
+     * @return
+     */
     public int getCooldown(Player p) {
         Long cd = cooldowns.get(p);
         if (cd == null) {
@@ -67,6 +82,10 @@ public abstract class Ability {
         }
         
         // Add cooldown registration
+        if (cooldown == 0) {
+            return;
+        }
+        
         long ctime = System.currentTimeMillis();
         cooldowns.put(player, ctime + cooldown * 1000);
     }
@@ -101,5 +120,10 @@ public abstract class Ability {
      * @return if the ability successfully executed
      */
     public abstract boolean executeAbility(Player player, LivingEntity target, Event e);
+    
+    /**
+     * Override in order to provide extra events when the plugin is reloaded
+     */
+    public void onReload() {}
 
 }

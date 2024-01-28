@@ -56,8 +56,8 @@ items:
     custom-model-data: 48722
     lore:   
       - ""
-      - "&eA short sword that can attack"
-      - "&eextremely fast."
+      - "&eA short sword that can be"
+      - "&eswung extremely fast."
     update: 2
     attributes:
       GENERIC_ATTACK_DAMAGE:
@@ -93,6 +93,7 @@ items:
   shadowblade:
     material: DIAMOND_SWORD
     name: "&5Shadowblade"
+    custom-model-data: 48724
     lore:
       - ""
       - "&dHarness the power of the barren"
@@ -107,6 +108,30 @@ items:
       name: "Blink"
       cooldown: 20
       distance: 10
+  oxtailsaber:
+    material: IRON_SWORD
+    name: "&6Oxtail Saber"
+    custom-model-data: 48725
+    lore:   
+      - ""
+      - "&eDual wield this weapon to attack"
+      - "&eenemies twice as fast, halving"
+      - "&etheir damage tick cooldown."
+    update: 2
+    attributes:
+      GENERIC_ATTACK_DAMAGE:
+        name: "Attack Damage"
+        operation: ADD_NUMBER
+        amount: 5
+        slot: HAND
+      GENERIC_ATTACK_SPEED:
+        name: "Attack Speed"
+        operation: ADD_NUMBER
+        amount: -0.7
+        slot: HAND
+    ability:
+      name: "Dual"
+      cooldown: 0
 capture-exclude:
   - ENDER_DRAGON
   - WITHER
