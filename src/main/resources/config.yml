@@ -132,6 +132,23 @@ items:
     ability:
       name: "Dual"
       cooldown: 0
+  shiruken:
+    material: NETHER_STAR
+    name: "&6Shiruken"
+    custom-model-data: 48726
+    lore:
+      - ""
+      - "&eA throwable weapon that damages"
+      - "&eenemies extremely rapidly. Drops"
+      - "&eas an item after hitting a block"
+      - "&eor enemy."
+    update: 3
+    ability:
+      name: "Shiruken"
+      cooldown: 0
+      speed: 3
+      damage: 1
+      ticks: 10
 capture-exclude:
   - ENDER_DRAGON
   - WITHER

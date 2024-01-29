@@ -31,6 +31,7 @@ import com.leomelonseeds.ultimaaddons.ability.BlazeFireball;
 import com.leomelonseeds.ultimaaddons.ability.Blink;
 import com.leomelonseeds.ultimaaddons.ability.DualWield;
 import com.leomelonseeds.ultimaaddons.ability.Lifesteal;
+import com.leomelonseeds.ultimaaddons.ability.Shiruken;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 import net.advancedplugins.ae.api.AEAPI;
@@ -87,6 +88,9 @@ public class ItemManager implements Listener {
                     break;
                 case "oxtailsaber":
                     a = new DualWield(key);
+                    break;
+                case "shiruken":
+                    a = new Shiruken(asec.getDouble("speed"), asec.getDouble("damage"), asec.getInt("ticks"));
                     break;
                 }
                 
