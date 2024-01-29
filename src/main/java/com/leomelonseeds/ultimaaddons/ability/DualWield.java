@@ -12,7 +12,9 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
@@ -44,6 +46,14 @@ public class DualWield extends Ability implements Listener {
         if (!isDualWield(player)) {
             return false;
         }
+        
+        // Switch blades before being used to give the illusion that both blades get used
+        PlayerInventory pinv = player.getInventory();
+        ItemStack main = pinv.getItemInMainHand();
+        ItemStack off = pinv.getItemInOffHand();
+        ItemMeta mainMeta = main.getItemMeta();
+        main.setItemMeta(off.getItemMeta());
+        off.setItemMeta(mainMeta);
         
         Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> target.setNoDamageTicks(DEFAULT_COOLDOWN / 2 - 1), 1);
         return true;

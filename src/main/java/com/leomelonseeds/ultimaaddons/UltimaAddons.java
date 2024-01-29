@@ -8,6 +8,7 @@ import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
 import org.kingdoms.constants.namespace.Namespace;
 
 import com.leomelonseeds.ultimaaddons.ability.ae.CaptureEffect;
+import com.leomelonseeds.ultimaaddons.ability.ae.RecuperateEffect;
 import com.leomelonseeds.ultimaaddons.command.UAChallenge;
 import com.leomelonseeds.ultimaaddons.command.UAGive;
 import com.leomelonseeds.ultimaaddons.command.UAReload;
@@ -57,6 +58,7 @@ public class UltimaAddons extends JavaPlugin {
         UAUnclaimProcessor.register();
         new UAPlaceholders().register();
         AEAPI.registerEffect(plugin, new CaptureEffect(plugin));
+        AEAPI.registerEffect(plugin, new RecuperateEffect(plugin));
         
         // Register listener
         PluginManager pm = getServer().getPluginManager();

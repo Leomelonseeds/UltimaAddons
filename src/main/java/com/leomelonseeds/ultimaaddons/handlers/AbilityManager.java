@@ -110,18 +110,20 @@ public class AbilityManager implements Listener {
                 ItemStack i = p.getInventory().getItemInMainHand();
                 String data = Utils.getItemID(i);
                 if (data == null || !abilities.containsKey(data)) {
-                    p.sendActionBar(Utils.toComponent(""));
+                    if (!lastData.isEmpty()) {
+                        p.sendActionBar(Utils.toComponent(""));
+                    }
                     lastData = "";
                     return;
                 }
-                
+
                 Ability a = abilities.get(data);
-                if (a.getCooldown() <= 0) {
-                    return;
-                }
-                
                 int cd = a.getCooldown(p);
-                if (cd > 0) {
+                if (a.getCooldown() <= 0) {
+                    if (!lastData.equals(data)) {
+                        p.sendActionBar(Utils.toComponent(""));
+                    }
+                } else if (cd > 0) {
                     p.sendActionBar(Utils.toComponent("&c[✕] " + a + ": Cooldown for " + cd + "s"));
                     lastAvailable = false;
                 } else if (data.equals(lastData) && lastAvailable) {
