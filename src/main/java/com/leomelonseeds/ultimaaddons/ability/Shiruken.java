@@ -1,6 +1,7 @@
 package com.leomelonseeds.ultimaaddons.ability;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -43,6 +44,8 @@ public class Shiruken extends Ability implements Listener {
         ballItem.setAmount(1);
         ball.setItem(ballItem);
         shiruken.setAmount(shiruken.getAmount() - 1);
+        
+        Utils.sendSound(Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1F, 2F, player.getLocation());
         return true;
     }
     

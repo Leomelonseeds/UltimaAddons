@@ -54,7 +54,7 @@ public abstract class Ability {
         }
         
         long diff = cd - time;
-        return (int) Math.ceil(diff / 1000);
+        return (int) Math.ceil(diff / 1000.0);
     }
     
     /**
