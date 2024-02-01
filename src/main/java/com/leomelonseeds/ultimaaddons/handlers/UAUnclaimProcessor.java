@@ -1,8 +1,6 @@
 package com.leomelonseeds.ultimaaddons.handlers;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.land.Land;
 import org.kingdoms.constants.land.location.SimpleChunkLocation;
@@ -14,16 +12,17 @@ import org.kingdoms.locale.messenger.Messenger;
 import org.kingdoms.managers.land.claiming.UnclaimProcessor;
 import org.kingdoms.utils.chunks.ChunkConnections;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import java.util.HashSet;
+import java.util.Set;
 
 public class UAUnclaimProcessor extends UnclaimProcessor {
 
-    public static void register() {
-        UnclaimProcessor.setBuilder(UAUnclaimProcessor::new);
-    }
-
     protected UAUnclaimProcessor(SimpleChunkLocation chunk, KingdomPlayer kp, Kingdom kingdom) {
         super(chunk, kp, kingdom);
+    }
+
+    public static void register() {
+        UnclaimProcessor.setBuilder(UAUnclaimProcessor::new);
     }
 
     @Override
@@ -48,16 +47,16 @@ public class UAUnclaimProcessor extends UnclaimProcessor {
                 }
                 return;
             }
-            
+
             if (outpostId == ((StandardKingdomMetadata) ldata).getLong()) {
                 toCheck.add(scl);
             }
         });
-        
+
         if (ChunkConnections.getConnectedClusters(1, toCheck).size() > 1) {
             return KingdomsLang.COMMAND_UNCLAIM_DISCONNECTION;
         }
-        
+
         return null;
     }
 }

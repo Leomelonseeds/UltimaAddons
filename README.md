@@ -62,3 +62,13 @@ The plugin also provides some custom items and recipes that add some fresh gamep
 
 ### Others
 - Diamond Chip: Like iron or gold nuggets, but for diamonds. Used for better economy integration, since Ultima uses a item-based economy with diamonds as its currency.
+
+## Shopkeepers
+The plugin also hooks onto Shopkeepers and creates two new types of shopkeepers (combinable), namely:
+- Rotating Shopkeeper: Trades that rotate on a timely basis
+- Auction Shopkeeper: Trades that require bidding
+
+In addition, these shopkeepers have new parameters to further enhance supply/demand trading:
+### Parameters
+- Weights: Adds weights which affects an item's ability to appear in rotations
+- Limits: Adds a buy & sell limit to a certain item

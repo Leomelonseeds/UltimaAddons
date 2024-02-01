@@ -9,11 +9,14 @@ depend:
 - DiscordSRV
 - PlaceholderAPI
 - AdvancedEnchantments
+- Shopkeepers
 commands: 
   uchallenge: {}
   ugive:
     default: op
   ureload:
+    default: op
+  usk:
     default: op
 permissions:
   ua.admin: {}
