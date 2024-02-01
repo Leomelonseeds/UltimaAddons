@@ -23,6 +23,15 @@ challengegui:
 #    name: "&2In 1 min (TEST)"
 #    slot: 6
 #    days: 0.0008
+capture-exclude:
+  - ENDER_DRAGON
+  - WITHER
+  - ELDER_GUARDIAN
+  - WARDEN
+skaddon:
+  limit_warn_start: 5
+  # Time to count down to for restock | Must be "HH:mm:ss" format
+  restock_time: "00:00:00"
 items:
   dchip:
     material: PRISMARINE_CRYSTALS
@@ -38,7 +47,7 @@ items:
       FIRE_ASPECT: 3
       UNBREAKING: 10
     custom-model-data: 48721
-    lore:   
+    lore:
       - ""
       - "&cRight-click while holding this flaming"
       - "&cweapon to shoot 3 fireballs in quick"
@@ -54,7 +63,7 @@ items:
     material: STONE_SWORD
     name: "&aTantō"
     custom-model-data: 48722
-    lore:   
+    lore:
       - ""
       - "&eA short sword that can be"
       - "&eswung extremely fast."
@@ -112,7 +121,7 @@ items:
     material: IRON_SWORD
     name: "&6Oxtail Saber"
     custom-model-data: 48725
-    lore:   
+    lore:
       - ""
       - "&eDual wield this weapon to attack"
       - "&eenemies twice as fast, halving"
@@ -149,8 +158,3 @@ items:
       speed: 3
       damage: 1
       ticks: 10
-capture-exclude:
-  - ENDER_DRAGON
-  - WITHER
-  - ELDER_GUARDIAN
-  - WARDEN
