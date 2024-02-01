@@ -1,10 +1,13 @@
 package com.leomelonseeds.ultimaaddons.handlers;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.ability.*;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
-import net.advancedplugins.ae.api.AEAPI;
-import net.kyori.adventure.text.Component;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -14,10 +17,25 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.CraftingInventory;
+import org.bukkit.inventory.CraftingRecipe;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.*;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.ability.Ability;
+import com.leomelonseeds.ultimaaddons.ability.BlazeFireball;
+import com.leomelonseeds.ultimaaddons.ability.Blink;
+import com.leomelonseeds.ultimaaddons.ability.DualWield;
+import com.leomelonseeds.ultimaaddons.ability.Lifesteal;
+import com.leomelonseeds.ultimaaddons.ability.Shiruken;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
+
+import net.advancedplugins.ae.api.AEAPI;
+import net.kyori.adventure.text.Component;
 
 public class ItemManager implements Listener {
 
@@ -26,12 +44,14 @@ public class ItemManager implements Listener {
     private Map<String, ItemStack> items;
     private Map<NamespacedKey, CraftingRecipe> recipes;
     private AbilityManager abilityManager;
+    private ArmorSetManager armorManager;
 
     public ItemManager(UltimaAddons plugin) {
         this.plugin = plugin;
         items = new HashMap<>();
         recipes = new HashMap<>();
         abilityManager = new AbilityManager();
+        armorManager = new ArmorSetManager();
         loadItems();
     }
 
@@ -41,13 +61,20 @@ public class ItemManager implements Listener {
      * Recipes are currently hard-coded.
      */
     public void loadItems() {
-        // Add all config items
+        // Clear current stuff
         items.clear();
         abilityManager.clearAbilities();
+        armorManager.clearAttrs();
+
+        // Add all config items
         itemConfig = UltimaAddons.getPlugin().getConfig().getConfigurationSection("items");
         for (String key : itemConfig.getKeys(false)) {
             try {
                 ConfigurationSection sec = itemConfig.getConfigurationSection(key);
+                if (sec.contains("uattribute")) {
+                    continue;
+                }
+                
                 ItemStack i = Utils.createItem(sec);
                 items.put(key, i);
 
