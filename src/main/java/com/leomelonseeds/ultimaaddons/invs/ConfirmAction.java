@@ -1,5 +1,6 @@
 package com.leomelonseeds.ultimaaddons.invs;
 
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -8,20 +9,20 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.leomelonseeds.ultimaaddons.utils.Utils;
+import java.util.Objects;
 
 public class ConfirmAction implements UAInventory {
-    
+
     private Inventory inv;
     private ConfirmCallback callback;
     private UAInventory mwinv;
     private Player player;
-    
+
     public ConfirmAction(String action, Player player, UAInventory mwinv, ConfirmCallback callback) {
         this.player = player;
         this.callback = callback;
         this.mwinv = mwinv;
-        
+
         inv = Bukkit.createInventory(null, 27, Utils.toComponent("Confirm: " + action));
         manager.registerInventory(player, this);
     }
@@ -33,10 +34,10 @@ public class ConfirmAction implements UAInventory {
             int mod = i % 9;
             Material material;
             String name = "";
-            if (0 <= mod && mod <= 3) {
+            if (mod <= 3) {
                 material = Material.EMERALD_BLOCK;
                 name = "&aConfirm";
-            } else if (5 <= mod && mod <= 8) {
+            } else if (5 <= mod) {
                 material = Material.REDSTONE_BLOCK;
                 name = "&cCancel";
             } else {
@@ -52,18 +53,18 @@ public class ConfirmAction implements UAInventory {
 
     @Override
     public void registerClick(int slot, ClickType type) {
-        Material material = inv.getItem(slot).getType();
-        
+        Material material = Objects.requireNonNull(inv.getItem(slot)).getType();
+
         if (material == Material.IRON_BARS) {
             return;
         }
-        
+
         if (mwinv != null) {
             manager.registerInventory(player, mwinv);
         } else {
             player.closeInventory();
         }
-        
+
         if (material == Material.EMERALD_BLOCK) {
             callback.onConfirm(true);
         } else if (material == Material.REDSTONE_BLOCK) {

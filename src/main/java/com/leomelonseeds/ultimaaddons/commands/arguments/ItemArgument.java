@@ -5,10 +5,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class ItemArgument extends Argument
-{
-    public ItemArgument(String name, String description)
-    {
+public class ItemArgument extends Argument {
+    public ItemArgument(String name, String description) {
         super(name, description);
     }
 
@@ -16,8 +14,7 @@ public class ItemArgument extends Argument
      * @return if item exists
      */
     @Override
-    protected boolean canParse(@NotNull String context)
-    {
+    protected boolean canParse(@NotNull String context) {
         return this.plugin.getItems().getItemNames().stream().toList().contains(context);
     }
 
@@ -25,8 +22,7 @@ public class ItemArgument extends Argument
      * @return list of items
      */
     @Override
-    protected List<String> tabComplete()
-    {
+    protected List<String> tabComplete() {
         return this.plugin.getItems().getItemNames().stream().toList();
     }
 
@@ -34,8 +30,7 @@ public class ItemArgument extends Argument
      * @return error msg
      */
     @Override
-    protected String getError()
-    {
+    protected String getError() {
         return "Item does not exist";
     }
 }

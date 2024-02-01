@@ -45,9 +45,11 @@ public class ItemManager implements Listener {
         items.clear();
         abilityManager.clearAbilities();
         itemConfig = UltimaAddons.getPlugin().getConfig().getConfigurationSection("items");
+        assert itemConfig != null;
         for (String key : itemConfig.getKeys(false)) {
             try {
                 ConfigurationSection sec = itemConfig.getConfigurationSection(key);
+                assert sec != null;
                 ItemStack i = Utils.createItem(sec);
                 items.put(key, i);
 
@@ -57,28 +59,20 @@ public class ItemManager implements Listener {
                 }
 
                 ConfigurationSection asec = sec.getConfigurationSection("ability");
-                Ability a = null;
-                switch (key) {
-                    case "blazesword":
-                        a = new BlazeFireball(asec.getInt("yield"), asec.getInt("randomness"));
-                        break;
-                    case "orcus":
-                        a = new Lifesteal(asec.getInt("percent"));
-                        break;
-                    case "shadowblade":
-                        a = new Blink(asec.getInt("distance"));
-                        break;
-                    case "oxtailsaber":
-                        a = new DualWield(key);
-                        break;
-                    case "shiruken":
-                        a = new Shiruken(asec.getDouble("speed"), asec.getDouble("damage"), asec.getInt("ticks"));
-                        break;
-                }
+                assert asec != null;
 
-                if (a == null) {
+                Ability a = switch (key) {
+                    case "blazesword" -> new BlazeFireball(asec.getInt("yield"), asec.getInt("randomness"));
+                    case "orcus" -> new Lifesteal(asec.getInt("percent"));
+                    case "shadowblade" -> new Blink(asec.getInt("distance"));
+                    case "oxtailsaber" -> new DualWield(key);
+                    case "shiruken" ->
+                            new Shiruken(asec.getDouble("speed"), asec.getDouble("damage"), asec.getInt("ticks"));
+                    default -> null;
+                };
+
+                if (a == null)
                     continue;
-                }
 
                 a.setCooldown(asec.getInt("cooldown"));
                 a.setDisplayName(asec.getString("name"));
@@ -166,12 +160,11 @@ public class ItemManager implements Listener {
             return;
         }
 
-        if (!(r instanceof CraftingRecipe)) {
+        if (!(r instanceof CraftingRecipe cr)) {
             return;
         }
 
         // Return if this is a custom recipe
-        CraftingRecipe cr = (CraftingRecipe) r;
         if (recipes.containsKey(cr.getKey())) {
             return;
         }
@@ -179,7 +172,7 @@ public class ItemManager implements Listener {
         // Get all ingredients and results
         // Kill result if any item has no item ID
         CraftingInventory ci = e.getInventory();
-        if (Arrays.asList(ci.getContents()).stream().anyMatch(i -> Utils.getItemID(i) != null)) {
+        if (Arrays.stream(ci.getContents()).anyMatch(i -> Utils.getItemID(i) != null)) {
             e.getInventory().setResult(null);
         }
     }
@@ -230,21 +223,21 @@ public class ItemManager implements Listener {
                 cur.setItemMeta(actualMeta);
                 break;
             case 2:
-                curMeta.getAttributeModifiers().keySet().forEach(a -> curMeta.removeAttributeModifier(a));
-                actualMeta.getAttributeModifiers().entries().forEach(a -> curMeta.addAttributeModifier(a.getKey(), a.getValue()));
+                Objects.requireNonNull(curMeta.getAttributeModifiers()).keySet().forEach(curMeta::removeAttributeModifier);
+                Objects.requireNonNull(actualMeta.getAttributeModifiers()).entries().forEach(a -> curMeta.addAttributeModifier(a.getKey(), a.getValue()));
             case 3:
                 cur.setType(actual.getType());
 
                 // Update lore without removing enchantments
                 List<Component> updated = new ArrayList<>();
-                for (Component c : curMeta.lore()) {
+                for (Component c : Objects.requireNonNull(curMeta.lore())) {
                     if (!AEAPI.isEnchantLine(Utils.toPlain(c))) {
                         break;
                     }
                     updated.add(c);
                 }
 
-                updated.addAll(actualMeta.lore());
+                updated.addAll(Objects.requireNonNull(actualMeta.lore()));
                 curMeta.lore(updated);
             case 4:
                 if (itemConfig.contains(data + ".custom-model-data")) {

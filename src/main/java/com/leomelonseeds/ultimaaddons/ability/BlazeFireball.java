@@ -1,7 +1,7 @@
 package com.leomelonseeds.ultimaaddons.ability;
 
-import java.util.Random;
-
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -12,14 +12,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.util.Vector;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
+import java.util.Random;
 
 public class BlazeFireball extends Ability {
-    
+
     private int power;
     private double randomness;
-    
+
     public BlazeFireball(int power, double randomness) {
         this.power = power;
         this.randomness = randomness;
@@ -30,18 +29,18 @@ public class BlazeFireball extends Ability {
         if (!isRightClick(e)) {
             return false;
         }
-        
+
         shootFireball(player, randomness);
         Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> shootFireball(player, randomness * -1), 6);
         Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> shootFireball(player, 0), 12);
         return true;
     }
-    
+
     private void shootFireball(Player player, double r) {
         Location eye = player.getEyeLocation();
         Vector direction = eye.getDirection();
         Fireball fireball = (Fireball) player.getWorld().spawnEntity(eye.clone().add(direction), EntityType.FIREBALL);
-        
+
         if (r != 0) {
             Random random = new Random();
             double abs = Math.abs(r);
@@ -51,7 +50,7 @@ public class BlazeFireball extends Ability {
             Vector vector = new Vector(x, y, z);
             direction = direction.add(vector);
         }
-        
+
         fireball.setIsIncendiary(true);
         fireball.setYield(power);
         fireball.setDirection(direction);

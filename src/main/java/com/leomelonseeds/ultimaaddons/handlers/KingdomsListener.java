@@ -47,6 +47,7 @@ import org.kingdoms.utils.nbt.NBTWrappers;
 
 import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -61,14 +62,13 @@ public class KingdomsListener implements Listener {
     // Close GUIs to stop bad things from happening
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onShield(GroupShieldPurchaseEvent e) {
-        if (!(e.getGroup() instanceof Kingdom)) {
+        if (!(e.getGroup() instanceof Kingdom k)) {
             return;
         }
 
         // Register next latest time to buy shield
-        Kingdom k = (Kingdom) e.getGroup();
-        long shieldtime = System.currentTimeMillis() + e.getShieldDuration() * 2;
-        k.getMetadata().put(UltimaAddons.shield_time, new StandardKingdomMetadata(shieldtime));
+        long shieldTime = System.currentTimeMillis() + e.getShieldDuration() * 2;
+        k.getMetadata().put(UltimaAddons.shield_time, new StandardKingdomMetadata(shieldTime));
         Utils.discord(":shield: **" + k.getName() + "** has activated a shield for " + Utils.formatDate(e.getShieldDuration()));
 
         // Close other shield buyers to stop abuse
@@ -109,12 +109,11 @@ public class KingdomsListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInvasionSuccess(KingdomInvadeEndEvent e) {
-        if (!(e.getInvasion() instanceof Plunder)) {
+        if (!(e.getInvasion() instanceof Plunder invasion)) {
             return;
         }
 
         // Only process successful invasion
-        Plunder invasion = (Plunder) e.getInvasion();
         if (!invasion.getResult().isSuccessful()) {
             return;
         }
@@ -138,9 +137,9 @@ public class KingdomsListener implements Listener {
             // Send messages
             long loss = defender.getResourcePoints();
             if (nexus != null && affected.stream().anyMatch(land -> nexus.toSimpleChunkLocation().equals(land))) {
-                Bukkit.getOnlinePlayers().forEach(p -> {
-                    message(p, "&e" + defender.getName() + " &cwas disbanded due to an invasion from &e" + attacker.getName() + "&c!");
-                });
+                Bukkit.getOnlinePlayers().forEach(p ->
+                        message(p, "&e" + defender.getName() + " &cwas disbanded due to an invasion from &e" + attacker.getName() + "&c!")
+                );
             } else {
                 int extra = 1;
                 if (outpost != null) {
@@ -227,18 +226,18 @@ public class KingdomsListener implements Listener {
 
         // For some reason without the 1 tick delay it skips the confirmation screen
         p.closeInventory();
-        Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
-            new ConfirmAction("Unclaim Outpost Lands", p, null, result -> {
-                if (result == null || !result) {
-                    return;
-                }
+        Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () ->
+                        new ConfirmAction("Unclaim Outpost Lands", p, null, result -> {
+                            if (result == null || !result) {
+                                return;
+                            }
 
-                justRemoved.add(structure);
-                structure.remove();
-                int amt = Utils.unclaimOutpost(kp, kp.getKingdom(), structure);
-                message(p, "&2You unclaimed &6" + amt + " &2land(s).");
-            });
-        }, 1);
+                            justRemoved.add(structure);
+                            structure.remove();
+                            int amt = Utils.unclaimOutpost(kp, kp.getKingdom(), structure);
+                            message(p, "&2You unclaimed &6" + amt + " &2land(s).");
+                        })
+                , 1);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -278,6 +277,7 @@ public class KingdomsListener implements Listener {
         // so when you set the type it doesn't affect the player(?)
         e.setCancelled(true);
         Player p = e.getPlayer();
+        assert item != null;
         Material type = item.getType();
         item.setType(Material.AIR);
 
@@ -295,7 +295,7 @@ public class KingdomsListener implements Listener {
         }
 
         if (land.isClaimed()) {
-            message(e.getPlayer().getPlayer(), "&cYou can only place outposts in unclaimed land!");
+            message(Objects.requireNonNull(e.getPlayer().getPlayer()), "&cYou can only place outposts in unclaimed land!");
             return;
         }
 
@@ -346,7 +346,7 @@ public class KingdomsListener implements Listener {
         k.claim(scl, kp, ClaimLandEvent.Reason.ADMIN);
         StructureStyle outpostStyle = StructureRegistry.getStyle("outpost");
         Structure outpost = outpostStyle.getType().build(
-                new KingdomItemBuilder<Structure, StructureStyle, StructureType>(outpostStyle, SimpleLocation.of(pb), kp));
+                new KingdomItemBuilder<>(outpostStyle, SimpleLocation.of(pb), kp));
         land.getStructures().put(sl, outpost);
         outpost.spawnHolograms(k);
         outpost.playSound("place");
@@ -360,7 +360,7 @@ public class KingdomsListener implements Listener {
         outpost.getMetadata().put(UltimaAddons.outpost_id, skm);
 
         // Remove item amount
-        ItemStack hand = p.getInventory().getItem(e.getHand());
+        ItemStack hand = p.getInventory().getItem(Objects.requireNonNull(e.getHand()));
         hand.setAmount(hand.getAmount() - 1);
 
         // Visualize lands
@@ -372,7 +372,7 @@ public class KingdomsListener implements Listener {
     public void onLandClaim(ClaimLandEvent e) {
         // Allow claiming if currently kingdom has 0 lands
         Kingdom k = e.getKingdom();
-        if (k.getLandLocations().size() == 0) {
+        if (k.getLandLocations().isEmpty()) {
             return;
         }
 
@@ -391,7 +391,7 @@ public class KingdomsListener implements Listener {
 
         // Disable claiming if there are no other claims in the same world
         Set<SimpleChunkLocation> chunks = e.getLandLocations();
-        if (!k.getLandLocations().stream().anyMatch(scl -> scl.getWorld().equals(p.getWorld().getName()))) {
+        if (k.getLandLocations().stream().noneMatch(scl -> scl.getWorld().equals(p.getWorld().getName()))) {
             e.setCancelled(true);
             message(p, "&cYour land must be connected to your other kingdom lands.");
             return;
@@ -404,32 +404,32 @@ public class KingdomsListener implements Listener {
             Set<SimpleChunkLocation> checked = new HashSet<>();
             long outpost_id = 0;
             for (SimpleChunkLocation scl : chunks) {
-                for (SimpleChunkLocation sclnear : scl.getChunksAround(1)) {
+                for (SimpleChunkLocation sclNear : scl.getChunksAround(1)) {
                     // Continue if this was one of the recently claimed lands
-                    if (chunks.contains(sclnear)) {
+                    if (chunks.contains(sclNear)) {
                         continue;
                     }
 
                     // Continue if we already checked this land before
-                    if (checked.contains(sclnear)) {
+                    if (checked.contains(sclNear)) {
                         continue;
                     }
 
                     // Continue if the land is unclaimed, or not claimed by same kingdom
-                    Land scll = sclnear.getLand();
-                    if (scll == null) {
-                        checked.add(sclnear);
+                    Land sclL = sclNear.getLand();
+                    if (sclL == null) {
+                        checked.add(sclNear);
                         continue;
                     }
 
-                    UUID nearclaim = scll.getKingdomId();
-                    if (nearclaim == null || !nearclaim.equals(kid)) {
-                        checked.add(sclnear);
+                    UUID nearClaim = sclL.getKingdomId();
+                    if (nearClaim == null || !nearClaim.equals(kid)) {
+                        checked.add(sclNear);
                         continue;
                     }
 
                     // If any surrounding land doesn't have metadata, it means its a nexus land
-                    KingdomMetadata data = scll.getMetadata().get(UltimaAddons.outpost_id);
+                    KingdomMetadata data = sclL.getMetadata().get(UltimaAddons.outpost_id);
                     if (data == null) {
                         return;
                     }
@@ -443,8 +443,8 @@ public class KingdomsListener implements Listener {
                 // Assign a negative outpost ID so that this land still works with custom disconnectLands
                 // function, and also to allow nexus to be moved to an invasion spot.
                 if (e.getReason() == ClaimLandEvent.Reason.INVASION && checked.size() == 8) {
-                    long ctime = System.currentTimeMillis();
-                    scl.getLand().getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(-1 * ctime));
+                    long c_time = System.currentTimeMillis();
+                    scl.getLand().getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(-1 * c_time));
                     return;
                 }
             }
@@ -454,8 +454,8 @@ public class KingdomsListener implements Listener {
             }
 
             // If we got to this point, an outpost land must've been found. Then add the metadata to all claimed chunks
-            long finalid = outpost_id;
-            chunks.forEach(c -> c.getLand().getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(finalid)));
+            long finalID = outpost_id;
+            chunks.forEach(c -> c.getLand().getMetadata().put(UltimaAddons.outpost_id, new StandardKingdomMetadata(finalID)));
         }, 1);
     }
 
@@ -468,9 +468,9 @@ public class KingdomsListener implements Listener {
         }
 
         // Remove metadata
-        e.getLandLocations().forEach(scl -> {
-            scl.getLand().getMetadata().remove(UltimaAddons.outpost_id);
-        });
+        e.getLandLocations().forEach(scl ->
+                scl.getLand().getMetadata().remove(UltimaAddons.outpost_id)
+        );
     }
 
     // Checks if a land can be unclaimed
@@ -536,19 +536,19 @@ public class KingdomsListener implements Listener {
 
             long wartime = Utils.getWarTime();
             Kingdom k = kp.getKingdom();
-            long ctime = System.currentTimeMillis();
+            long c_time = System.currentTimeMillis();
             for (Entry<UUID, Long> challenge : k.getChallenges().entrySet()) {
                 Kingdom attacker = Kingdom.getKingdom(challenge.getKey());
                 if (attacker == null) {
                     continue;
                 }
 
-                if (ctime > challenge.getValue() + wartime) {
+                if (c_time > challenge.getValue() + wartime) {
                     continue;
                 }
 
-                if (ctime < challenge.getValue()) {
-                    message(p, "&cYour kingdom has &e" + Utils.formatDate(challenge.getValue() - ctime) +
+                if (c_time < challenge.getValue()) {
+                    message(p, "&cYour kingdom has &e" + Utils.formatDate(challenge.getValue() - c_time) +
                             " &cto prepare for war with &e" + attacker.getName());
                 } else {
                     message(p, "&4&l[!] &c&lYour kingdom is currently at war with &e&l" + attacker.getName() + "&c&l!");
@@ -559,26 +559,26 @@ public class KingdomsListener implements Listener {
             String lastChallenge = Utils.getLastChallenge(k);
             if (lastChallenge != null) {
                 String[] slck = lastChallenge.split("@");
-                long lcd = Long.valueOf(slck[1]);
+                long lcd = Long.parseLong(slck[1]);
                 Kingdom target = Kingdom.getKingdom(UUID.fromString(slck[0]));
                 if (target == null) {
                     return;
                 }
 
-                if (ctime > lcd + wartime) {
+                if (c_time > lcd + wartime) {
                     return;
                 }
 
-                long timeleft = lcd - ctime;
+                long timeLeft = lcd - c_time;
 
-                if (timeleft > 0) {
-                    message(p, "&cYour kingdom has &e" + Utils.formatDate(timeleft) +
+                if (timeLeft > 0) {
+                    message(p, "&cYour kingdom has &e" + Utils.formatDate(timeLeft) +
                             " &cto prepare for war with &c" + target.getName());
                 } else {
                     message(p, "&4&l[!] &c&lYour kingdom is currently at war with &e&l" + target.getName() + "&c&l!");
                 }
 
-                Utils.setupReminders(k, target, timeleft);
+                Utils.setupReminders(k, target, timeLeft);
             }
         }, 5);
     }

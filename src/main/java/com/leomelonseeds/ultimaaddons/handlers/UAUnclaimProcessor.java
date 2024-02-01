@@ -32,8 +32,8 @@ public class UAUnclaimProcessor extends UnclaimProcessor {
         Set<SimpleChunkLocation> toCheck = new HashSet<>();
         Land cur = set.getLand();
         String curWorld = set.getWorld();
-        KingdomMetadata outpostdata = cur.getMetadata().get(UltimaAddons.outpost_id);
-        long outpostId = outpostdata == null ? 0 : ((StandardKingdomMetadata) outpostdata).getLong();
+        KingdomMetadata outpostData = cur.getMetadata().get(UltimaAddons.outpost_id);
+        long outpostId = outpostData == null ? 0 : ((StandardKingdomMetadata) outpostData).getLong();
         kingdom.getLands().forEach(l -> {
             SimpleChunkLocation scl = l.getLocation();
             if (!scl.getWorld().equals(curWorld) || scl.equals(set)) {

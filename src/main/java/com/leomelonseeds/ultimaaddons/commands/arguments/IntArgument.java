@@ -6,11 +6,9 @@ import org.apache.commons.lang3.math.NumberUtils;
 import java.util.Collections;
 import java.util.List;
 
-public class IntArgument extends Argument
-{
+public class IntArgument extends Argument {
 
-    public IntArgument(String name, String description)
-    {
+    public IntArgument(String name, String description) {
         super(name, description);
     }
 
@@ -19,8 +17,7 @@ public class IntArgument extends Argument
      * @return boolean
      */
     @Override
-    protected boolean canParse(String context)
-    {
+    protected boolean canParse(String context) {
         int converted = NumberUtils.toInt(context, -1);
         return converted > 0;
     }
@@ -29,8 +26,7 @@ public class IntArgument extends Argument
      * @return empty list
      */
     @Override
-    protected List<String> tabComplete()
-    {
+    protected List<String> tabComplete() {
         // Can't really predict what integer they need
         return Collections.emptyList();
     }
@@ -39,8 +35,7 @@ public class IntArgument extends Argument
      * @return error msg
      */
     @Override
-    protected String getError()
-    {
+    protected String getError() {
         return "That is not a valid integer";
     }
 }
