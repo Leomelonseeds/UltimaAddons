@@ -1,6 +1,5 @@
 package com.leomelonseeds.ultimaaddons.commands.ua;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.commands.Argument;
 import com.leomelonseeds.ultimaaddons.commands.Command;
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;

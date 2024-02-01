@@ -57,10 +57,10 @@ public class RotateCommand extends Command {
 
     private boolean rotateTrades(RotatingShopkeeper rsk) {
         // Rotate Trades
-        if (!(rsk.getShopkeeper() instanceof RegularAdminShopkeeper))
+        if (!(rsk.getShopkeeper() instanceof RegularAdminShopkeeper ask))
             return false;
-        RegularAdminShopkeeper ask = (RegularAdminShopkeeper) rsk.getShopkeeper();
-        RegularAdminShopkeeper parentAsk = (RegularAdminShopkeeper) rsk.getParentShopkeeper();
+        if (!(rsk.getParentShopkeeper() instanceof RegularAdminShopkeeper parentAsk))
+            return false;
 
         // Check if broken before rotating
         if (rsk.isBroken()) {

@@ -31,13 +31,12 @@ public class UAChallenge extends Command {
             return true;
         }
 
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             CommandUtils.sendErrorMsg(sender, "Bruh stop tryna use player commands in the console smhsmh");
             return true;
         }
 
         // Challenger must have a kingdom
-        Player player = (Player) sender;
         KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(player);
         Kingdom attacker = kp.getKingdom();
         if (attacker == null) {
@@ -128,7 +127,7 @@ public class UAChallenge extends Command {
         String lastChallenge = Utils.getLastChallenge(attacker);
         if (lastChallenge != null) {
             String[] slck = lastChallenge.split("@");
-            long lcd = Long.valueOf(slck[1]);
+            long lcd = Long.parseLong(slck[1]);
             Kingdom cur = Kingdom.getKingdom(UUID.fromString(slck[0]));
             long cooldown = lcd + UltimaAddons.CHALLENGE_COOLDOWN_TIME;
 

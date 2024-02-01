@@ -9,7 +9,7 @@ import java.time.LocalTime;
 public class ConfigFile {
     public int limit_warn_start = 3;
     public LocalTime restock_time = TimeParser.parse("00:00:00");
-    private UltimaAddons plugin = UltimaAddons.getPlugin();
+    private final UltimaAddons plugin = UltimaAddons.getPlugin();
 
     public ConfigFile() {
         this.reload();
