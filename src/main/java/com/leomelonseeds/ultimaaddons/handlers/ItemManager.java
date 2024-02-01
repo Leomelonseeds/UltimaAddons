@@ -184,6 +184,10 @@ public class ItemManager implements Listener {
     public AbilityManager getAbilities() {
         return abilityManager;
     }
+    
+    public ArmorSetManager getArmor() {
+        return armorManager;
+    }
 
     // Stop custom items being used for non-custom recipes
     @EventHandler

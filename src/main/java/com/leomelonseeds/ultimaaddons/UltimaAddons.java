@@ -1,5 +1,12 @@
 package com.leomelonseeds.ultimaaddons;
 
+import org.bukkit.NamespacedKey;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.kingdoms.constants.metadata.KingdomMetadataHandler;
+import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
+import org.kingdoms.constants.namespace.Namespace;
+
 import com.leomelonseeds.ultimaaddons.ability.ae.CaptureEffect;
 import com.leomelonseeds.ultimaaddons.ability.ae.RecuperateEffect;
 import com.leomelonseeds.ultimaaddons.commands.BaseCommand;
@@ -7,16 +14,15 @@ import com.leomelonseeds.ultimaaddons.data.Load;
 import com.leomelonseeds.ultimaaddons.data.Save;
 import com.leomelonseeds.ultimaaddons.data.file.ConfigFile;
 import com.leomelonseeds.ultimaaddons.data.file.Data;
-import com.leomelonseeds.ultimaaddons.handlers.*;
+import com.leomelonseeds.ultimaaddons.handlers.ItemManager;
+import com.leomelonseeds.ultimaaddons.handlers.KingdomsListener;
+import com.leomelonseeds.ultimaaddons.handlers.LinkManager;
+import com.leomelonseeds.ultimaaddons.handlers.ShopkeeperTrade;
+import com.leomelonseeds.ultimaaddons.handlers.UAUnclaimProcessor;
 import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 import com.leomelonseeds.ultimaaddons.utils.UAPlaceholders;
+
 import net.advancedplugins.ae.api.AEAPI;
-import org.bukkit.NamespacedKey;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.kingdoms.constants.metadata.KingdomMetadataHandler;
-import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
-import org.kingdoms.constants.namespace.Namespace;
 
 
 public class UltimaAddons extends JavaPlugin {
@@ -70,6 +76,7 @@ public class UltimaAddons extends JavaPlugin {
         pm.registerEvents(invManager, this);
         pm.registerEvents(itemManager, this);
         pm.registerEvents(itemManager.getAbilities(), this);
+        pm.registerEvents(itemManager.getArmor(), this);
         pm.registerEvents(new ShopkeeperTrade(), this);
 
         // Register and Load Data File
