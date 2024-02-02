@@ -34,21 +34,12 @@ public class ArmorSetManager implements Listener {
      */
     private static Map<String, Pair<EquipmentSlot, Integer>> slots;
     
-    /**
-     * Stores the corresponding attribute for each armor set. Since
-     * attribute modifier is determined dynamically when armor is
-     * worn, it isn't stored here.
-     */
-    private Map<String, Attribute> attrs;
-    
     public ArmorSetManager() {
         slots = new HashMap<>();
         slots.put("helmet", ImmutablePair.of(EquipmentSlot.HEAD, 3));
         slots.put("chestplate", ImmutablePair.of(EquipmentSlot.CHEST, 8));
         slots.put("leggings", ImmutablePair.of(EquipmentSlot.LEGS, 6));
         slots.put("boots", ImmutablePair.of(EquipmentSlot.FEET, 3));
-        
-        this.attrs = new HashMap<>();
     }
     
     /**
@@ -92,15 +83,7 @@ public class ArmorSetManager implements Listener {
             res.put(key, cur);
         }
         
-        // Store corresponding scaled attribute in a map
-        ConfigurationSection asec = sec.getConfigurationSection(ARMOR_INDICATOR);
-        attrs.put(sec.getName(), Attribute.valueOf(asec.getString("type")));
-        
         return res;
-    }
-    
-    public void clearAttrs() {
-        attrs.clear();
     }
     
     @EventHandler
