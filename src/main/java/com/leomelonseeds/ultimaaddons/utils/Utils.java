@@ -331,16 +331,28 @@ public class Utils {
     }
     
     /**
-     * Create an item from the config section, adding
-     * persistent data for the string
+     * Create a non-armorset item
      * 
-     * @param config
+     * @param sec
      * @return
      */
     public static ItemStack createItem(ConfigurationSection sec) {
+        return createItem(sec, sec.getName());
+    }
+    
+    /**
+     * Create an item from the config section, adding
+     * persistent data for the string and a path to 
+     * account for armor sets.
+     * 
+     * @param config
+     * @param path the path String to add to the item
+     * @return
+     */
+    public static ItemStack createItem(ConfigurationSection sec, String path) {
         ItemStack i = XItemStack.deserialize(sec, s -> ChatColor.translateAlternateColorCodes('&', s));
         ItemMeta meta = i.getItemMeta();
-        meta.getPersistentDataContainer().set(UltimaAddons.itemKey, PersistentDataType.STRING, sec.getName());
+        meta.getPersistentDataContainer().set(UltimaAddons.itemKey, PersistentDataType.STRING, path);
         i.setItemMeta(meta);
         return i;
     }

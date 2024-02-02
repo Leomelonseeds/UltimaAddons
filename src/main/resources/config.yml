@@ -157,4 +157,44 @@ items:
       cooldown: 0
       speed: 3
       damage: 1
-      ticks: 10
+      ticks: 20
+  mithril:
+    lore:
+      - ""
+      - "&eA durable, yet very lightweight"
+      - "&eset of armor. Each piece, when"
+      - "&eworn, gives &6+1% &emovement speed"
+      - "&eper level of &9Wisdom &eabove 25."
+    scaled-attribute:
+      type: GENERIC_MOVEMENT_SPEED
+      name: "Speed"
+      operation: MULTIPLY_SCALAR_1
+      amount: 0.01
+    helmet:
+      material: CHAINMAIL_HELMET
+      name: "&6Mithril Helmet"
+      custom-model-data: 48727
+      enchants:
+        UNBREAKING: 9
+      update: 3
+    chestplate:
+      material: CHAINMAIL_CHESTPLATE
+      name: "&6Mithril Chestplate"
+      custom-model-data: 48728
+      enchants:
+        UNBREAKING: 9
+      update: 3
+    leggings:
+      material: CHAINMAIL_LEGGINGS
+      name: "&6Mithril Leggings"
+      custom-model-data: 48729
+      enchants:
+        UNBREAKING: 9
+      update: 3
+    boots:
+      material: CHAINMAIL_BOOTS
+      name: "&6Mithril Boots"
+      custom-model-data: 48730
+      enchants:
+        UNBREAKING: 9
+      update: 3

@@ -70,8 +70,10 @@ public class ItemManager implements Listener {
         itemConfig = UltimaAddons.getPlugin().getConfig().getConfigurationSection("items");
         for (String key : itemConfig.getKeys(false)) {
             try {
+                // Use armor set manager if section contains scaled attribute
                 ConfigurationSection sec = itemConfig.getConfigurationSection(key);
-                if (sec.contains("uattribute")) {
+                if (sec.contains(ArmorSetManager.ARMOR_INDICATOR)) {
+                    items.putAll(armorManager.createArmorSet(sec));
                     continue;
                 }
                 
