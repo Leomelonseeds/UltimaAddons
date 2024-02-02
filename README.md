@@ -50,25 +50,32 @@ In addition to tracking player joining and leaving kingdoms as well as invasions
 The plugin also hooks into AdvancedEnchantments' API to provide the following custom effects:
  
 - CAPTURE: Drops a mob's spawn egg. Excludes boss mobs and those defined in the config.
+- RECUPERATE: Reduces cooldown time for shields when they are disabled by an axe.
 
 ## Custom Items
-The plugin also provides some custom items and recipes that add some fresh gameplay elements to the survival experience. All recipes can be found by using the `/recipes` command in-game.
+The plugin also provides some custom items and recipes that add some fresh gameplay elements to the survival experience. All recipes can be found by using the `/recipes` command in-game, and most weapons with abilities have cooldowns that are not listed here, since they are subject to change.
 
 ### Weapons
 - Blaze Sword: Right-click to shoot 3 fireballs in quick succession.
+- Tanto: A short sword that can be swung extremely fast.
+- Orcus: Land a critical hit to remove 20% of their remaining health, regardless of armor or effects, in addition to blinding and withering them temporarily.
+- Shadowblade: Right-click to teleport 10 blocks in the direction you are facing. If you teleport through a player, you will face that player after the teleport.
+- Oxtail Saber: Dual-wield the weapon to attack enemies twice as fast, halving their damage tick cooldown. Visually, other players will see you alternating between attacking with main hand and off hand sword.
+- Shiruken: A throwable weapon that damages enemies in rapid bursts.
 
 ### Armor
-- Coming soon
+Each armorset has the protection and armor toughness equivalent of Netherite, unless stated otherwise.
+- Mithril: Each piece, when worn, gives +1% movement speed per level of Wisdom (from Aurelium) above 25.
 
 ### Others
 - Diamond Chip: Like iron or gold nuggets, but for diamonds. Used for better economy integration, since Ultima uses a item-based economy with diamonds as its currency.
 
 ## Shopkeepers
 The plugin also hooks onto Shopkeepers and creates two new types of shopkeepers (combinable), namely:
-- Rotating Shopkeeper: Trades that rotate on a timely basis
-- Auction Shopkeeper: Trades that require bidding
+- Rotating Shopkeeper: Trades that rotate on a timely basis.
+- Auction Shopkeeper: Trades that require bidding.
 
 In addition, these shopkeepers have new parameters to further enhance supply/demand trading:
 ### Parameters
-- Weights: Adds weights which affects an item's ability to appear in rotations
-- Limits: Adds a buy & sell limit to a certain item
+- Weights: Adds weights which affects an item's ability to appear in rotations.
+- Limits: Adds a buy & sell limit to a certain item.

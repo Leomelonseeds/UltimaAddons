@@ -1,10 +1,13 @@
 package com.leomelonseeds.ultimaaddons.handlers;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.ability.*;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
-import net.advancedplugins.ae.api.AEAPI;
-import net.kyori.adventure.text.Component;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -14,10 +17,25 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.CraftingInventory;
+import org.bukkit.inventory.CraftingRecipe;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.*;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.ability.Ability;
+import com.leomelonseeds.ultimaaddons.ability.BlazeFireball;
+import com.leomelonseeds.ultimaaddons.ability.Blink;
+import com.leomelonseeds.ultimaaddons.ability.DualWield;
+import com.leomelonseeds.ultimaaddons.ability.Lifesteal;
+import com.leomelonseeds.ultimaaddons.ability.Shiruken;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
+
+import net.advancedplugins.ae.api.AEAPI;
+import net.kyori.adventure.text.Component;
 
 public class ItemManager implements Listener {
 
@@ -26,12 +44,14 @@ public class ItemManager implements Listener {
     private Map<String, ItemStack> items;
     private Map<NamespacedKey, CraftingRecipe> recipes;
     private AbilityManager abilityManager;
+    private ArmorSetManager armorManager;
 
     public ItemManager(UltimaAddons plugin) {
         this.plugin = plugin;
         items = new HashMap<>();
         recipes = new HashMap<>();
         abilityManager = new AbilityManager();
+        armorManager = new ArmorSetManager();
         loadItems();
     }
 
@@ -41,15 +61,21 @@ public class ItemManager implements Listener {
      * Recipes are currently hard-coded.
      */
     public void loadItems() {
-        // Add all config items
+        // Clear current stuff
         items.clear();
         abilityManager.clearAbilities();
+
+        // Add all config items
         itemConfig = UltimaAddons.getPlugin().getConfig().getConfigurationSection("items");
-        assert itemConfig != null;
         for (String key : itemConfig.getKeys(false)) {
             try {
+                // Use armor set manager if section contains scaled attribute
                 ConfigurationSection sec = itemConfig.getConfigurationSection(key);
-                assert sec != null;
+                if (sec.contains(ArmorSetManager.ARMOR_INDICATOR)) {
+                    items.putAll(armorManager.createArmorSet(sec));
+                    continue;
+                }
+                
                 ItemStack i = Utils.createItem(sec);
                 items.put(key, i);
 
@@ -59,20 +85,28 @@ public class ItemManager implements Listener {
                 }
 
                 ConfigurationSection asec = sec.getConfigurationSection("ability");
-                assert asec != null;
+                Ability a = null;
+                switch (key) {
+                    case "blazesword":
+                        a = new BlazeFireball(asec.getInt("yield"), asec.getInt("randomness"));
+                        break;
+                    case "orcus":
+                        a = new Lifesteal(asec.getInt("percent"));
+                        break;
+                    case "shadowblade":
+                        a = new Blink(asec.getInt("distance"));
+                        break;
+                    case "oxtailsaber":
+                        a = new DualWield(key);
+                        break;
+                    case "shiruken":
+                        a = new Shiruken(asec.getDouble("speed"), asec.getDouble("damage"), asec.getInt("ticks"));
+                        break;
+                }
 
-                Ability a = switch (key) {
-                    case "blazesword" -> new BlazeFireball(asec.getInt("yield"), asec.getInt("randomness"));
-                    case "orcus" -> new Lifesteal(asec.getInt("percent"));
-                    case "shadowblade" -> new Blink(asec.getInt("distance"));
-                    case "oxtailsaber" -> new DualWield(key);
-                    case "shiruken" ->
-                            new Shiruken(asec.getDouble("speed"), asec.getDouble("damage"), asec.getInt("ticks"));
-                    default -> null;
-                };
-
-                if (a == null)
+                if (a == null) {
                     continue;
+                }
 
                 a.setCooldown(asec.getInt("cooldown"));
                 a.setDisplayName(asec.getString("name"));
@@ -151,6 +185,10 @@ public class ItemManager implements Listener {
     public AbilityManager getAbilities() {
         return abilityManager;
     }
+    
+    public ArmorSetManager getArmor() {
+        return armorManager;
+    }
 
     // Stop custom items being used for non-custom recipes
     @EventHandler
@@ -160,11 +198,12 @@ public class ItemManager implements Listener {
             return;
         }
 
-        if (!(r instanceof CraftingRecipe cr)) {
+        if (!(r instanceof CraftingRecipe)) {
             return;
         }
 
         // Return if this is a custom recipe
+        CraftingRecipe cr = (CraftingRecipe) r;
         if (recipes.containsKey(cr.getKey())) {
             return;
         }
@@ -172,7 +211,7 @@ public class ItemManager implements Listener {
         // Get all ingredients and results
         // Kill result if any item has no item ID
         CraftingInventory ci = e.getInventory();
-        if (Arrays.stream(ci.getContents()).anyMatch(i -> Utils.getItemID(i) != null)) {
+        if (Arrays.asList(ci.getContents()).stream().anyMatch(i -> Utils.getItemID(i) != null)) {
             e.getInventory().setResult(null);
         }
     }
@@ -223,21 +262,21 @@ public class ItemManager implements Listener {
                 cur.setItemMeta(actualMeta);
                 break;
             case 2:
-                Objects.requireNonNull(curMeta.getAttributeModifiers()).keySet().forEach(curMeta::removeAttributeModifier);
-                Objects.requireNonNull(actualMeta.getAttributeModifiers()).entries().forEach(a -> curMeta.addAttributeModifier(a.getKey(), a.getValue()));
+                curMeta.getAttributeModifiers().keySet().forEach(a -> curMeta.removeAttributeModifier(a));
+                actualMeta.getAttributeModifiers().entries().forEach(a -> curMeta.addAttributeModifier(a.getKey(), a.getValue()));
             case 3:
                 cur.setType(actual.getType());
 
                 // Update lore without removing enchantments
                 List<Component> updated = new ArrayList<>();
-                for (Component c : Objects.requireNonNull(curMeta.lore())) {
+                for (Component c : curMeta.lore()) {
                     if (!AEAPI.isEnchantLine(Utils.toPlain(c))) {
                         break;
                     }
                     updated.add(c);
                 }
 
-                updated.addAll(Objects.requireNonNull(actualMeta.lore()));
+                updated.addAll(actualMeta.lore());
                 curMeta.lore(updated);
             case 4:
                 if (itemConfig.contains(data + ".custom-model-data")) {
