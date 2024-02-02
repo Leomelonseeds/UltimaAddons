@@ -148,13 +148,13 @@ items:
     lore:
       - ""
       - "&eA throwable weapon that damages"
-      - "&eenemies extremely rapidly. Drops"
+      - "&eenemies in rapid bursts. Drops"
       - "&eas an item after hitting a block"
       - "&eor enemy."
     update: 3
     ability:
       name: "Shiruken"
-      cooldown: 0
+      cooldown: 2
       speed: 3
       damage: 1
       ticks: 20
