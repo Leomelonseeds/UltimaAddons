@@ -14,6 +14,10 @@ public class CommandUtils {
         target.sendMessage(Utils.toComponent("&7" + msg));
     }
 
+    public static void sendActionbarMsg(CommandSender target, String msg) {
+        target.sendActionBar(Utils.toComponent("&7" + msg));
+    }
+
     public static void sendConsoleMsg(String msg) {
         Bukkit.getConsoleSender().sendMessage(Utils.toComponent("&7" + msg));
     }

@@ -22,6 +22,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,7 +57,7 @@ public class ShopkeeperListener implements Listener {
 
         e.setCancelled(true);
         String countdown = TimeParser.timeUntil(this.plugin.getConfigFile().restock_time);
-        CommandUtils.sendMsg(e.getPlayer(), "&cOut of stock! &7Restock in: &b(" + countdown + ")");
+        CommandUtils.sendActionbarMsg(e.getPlayer(), "&cUnavailable. &7Restock in: &b(" + countdown + ")");
     }
 
     @EventHandler
@@ -71,22 +72,20 @@ public class ShopkeeperListener implements Listener {
         List<Integer> uses = rsk.getUses(e.getCompletedTrade().getPlayer());
 
         // First time trade
-        if (uses.isEmpty())
+        if (uses.isEmpty()) {
             uses = new ArrayList<>(Collections.nCopies(e.getShopkeeper().getTradingRecipes(null).size(), 0));
+            rsk.setUses(e.getCompletedTrade().getPlayer(), uses);
+        }
 
         int usage = uses.get(index) + 1;
         uses.set(index, usage);
-        rsk.setUses(e.getCompletedTrade().getPlayer(), uses);
 
         int limit = rsk.getLimits().get(index);
         if (limit - usage <= plugin.getConfigFile().limit_warn_start)
-            CommandUtils.sendMsg(e.getCompletedTrade().getPlayer(),
+            CommandUtils.sendActionbarMsg(e.getCompletedTrade().getPlayer(),
                     "&7Remaining Stock&7: &b" + (limit - usage));
-        if (limit - usage == 0) {
-            String countdown = TimeParser.timeUntil(this.plugin.getConfigFile().restock_time);
-            CommandUtils.sendMsg(e.getCompletedTrade().getPlayer(),
-                    "&7Restock in: &b(" + countdown + ")");
-        }
+
+        updateTrades(e.getCompletedTrade().getPlayer(), rsk);
         plugin.writeTradesFile();
     }
 
@@ -135,7 +134,10 @@ public class ShopkeeperListener implements Listener {
         );
     }
 
-    private void sendOffers(Player player) {
+    /**
+     * @see <a href="https://github.com/Shopkeepers/Shopkeepers/blob/06be9152718f4454e8a154af2ccbf21ccda9a8b7/modules/v1_20_R4/src/main/java/com/nisovin/shopkeepers/compat/v1_20_R4/NMSHandler.java#L197">...</a>
+     */
+    private void sendOffers(@NotNull Player player) {
         Inventory openInventory = player.getOpenInventory().getTopInventory();
         if (!(openInventory instanceof MerchantInventory merchantInventory))
             return;
