@@ -11,9 +11,9 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockDispenseArmorEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -26,7 +26,8 @@ import net.kyori.adventure.text.Component;
 
 public class ArmorSetManager implements Listener {
     
-    public static String ARMOR_INDICATOR = "scaled-attribute";
+    public static final String ARMOR_INDICATOR = "scaled-attribute";
+    public static final int DEFAULT_TOUGHNESS = 3;
     
     /**
      * Key: Armor piece type. Value: Pair of EquipmentSlot and Integer representing generic armor value
@@ -34,12 +35,26 @@ public class ArmorSetManager implements Listener {
      */
     private static Map<String, Pair<EquipmentSlot, Integer>> slots;
     
+    /**
+     * Stores the corresponding attribute for each armor set. Since
+     * attribute modifier is determined dynamically when armor is
+     * worn, it isn't stored here.
+     */
+    private Map<String, ScaledAttribute> attrs;
+    
+    
     public ArmorSetManager() {
         slots = new HashMap<>();
         slots.put("helmet", ImmutablePair.of(EquipmentSlot.HEAD, 3));
         slots.put("chestplate", ImmutablePair.of(EquipmentSlot.CHEST, 8));
         slots.put("leggings", ImmutablePair.of(EquipmentSlot.LEGS, 6));
         slots.put("boots", ImmutablePair.of(EquipmentSlot.FEET, 3));
+
+        this.attrs = new HashMap<>();
+    }
+    
+    public void clearAttrs() {
+        attrs.clear();
     }
     
     /**
@@ -66,16 +81,11 @@ public class ArmorSetManager implements Listener {
             
             // Adds common armor attributes
             EquipmentSlot equipSlot = slots.get(slot).getLeft();
+            addDefaultToughness(curMeta, equipSlot);
             curMeta.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier(
                     UUID.randomUUID(), 
                     "Armor", 
                     slots.get(slot).getRight(), 
-                    Operation.ADD_NUMBER, 
-                    equipSlot));
-
-            curMeta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, new AttributeModifier(
-                    UUID.randomUUID(), 
-                    "Armor Toughness", 3, 
                     Operation.ADD_NUMBER, 
                     equipSlot));
             
@@ -83,21 +93,102 @@ public class ArmorSetManager implements Listener {
             res.put(key, cur);
         }
         
+        // Store corresponding scaled attribute in a map
+        ConfigurationSection asec = sec.getConfigurationSection(ARMOR_INDICATOR);
+        attrs.put(sec.getName(), new ScaledAttribute(asec));
+        
         return res;
     }
     
     @EventHandler
     public void onPlayerEquip(PlayerArmorChangeEvent e) {
-        
-    }
-
-    @EventHandler
-    public void onDispenserEquip(BlockDispenseArmorEvent e) {
-        
+        addScaledAttribute(e.getNewItem(), e.getPlayer());
+        removeScaledAttribute(e.getOldItem(), e.getPlayer());
     }
 
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
+        e.getDrops().stream().forEach(i -> removeScaledAttribute(i, e.getPlayer()));
+    }
+    
+    // Helper method to add default armor toughness after removal/upon creation
+    private void addDefaultToughness(ItemMeta meta, EquipmentSlot slot) {
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, new AttributeModifier(
+                UUID.randomUUID(), 
+                "Armor Toughness",
+                DEFAULT_TOUGHNESS,
+                Operation.ADD_NUMBER, 
+                slot));
+    }
+    
+    // Adds a scaled attribute to an item if applicable
+    private void addScaledAttribute(ItemStack item, Player player) {
+        String id = Utils.getItemID(item);
+        if (id == null) {
+            return;
+        }
         
+        String[] args = id.split("\\.");
+        if (args.length < 2) {
+            return;
+        }
+        
+        if (!attrs.containsKey(args[0])) {
+            return;
+        }
+        
+        // At this point, this item must be a custom armor
+        // args[0] = base name, args[1] = slot type
+        ItemMeta meta = item.getItemMeta();
+        ScaledAttribute sca = attrs.get(args[0]);
+        EquipmentSlot slot = slots.get(args[1]).getLeft();
+        
+        // Get attribute and modifier
+        AttributeModifier modifier = sca.getModifier(player, slot);
+        if (modifier == null) {
+            return;
+        }
+
+        // Remove armor toughness if its the scaled attribute, since
+        // ScaledAttribute adds the default 3 back
+        Attribute attr = sca.getAttribute();
+        if (attr == Attribute.GENERIC_ARMOR_TOUGHNESS) {
+            meta.removeAttributeModifier(attr);
+        }
+        
+        meta.addAttributeModifier(attr, modifier);
+        item.setItemMeta(meta);
+    }
+
+    // Removes a scaled attribute to an item if applicable
+    private void removeScaledAttribute(ItemStack item, Player player) {
+        String id = Utils.getItemID(item);
+        if (id == null) {
+            return;
+        }
+        
+        String[] args = id.split("\\.");
+        if (args.length < 2) {
+            return;
+        }
+        
+        if (!attrs.containsKey(args[0])) {
+            return;
+        }
+        
+        // At this point, this item must be a custom armor
+        // args[0] = base name, args[1] = slot type
+        ItemMeta meta = item.getItemMeta();
+        ScaledAttribute sca = attrs.get(args[0]);
+        Attribute attr = sca.getAttribute();
+        meta.removeAttributeModifier(attr);
+        
+        // Add the default armor toughness back
+        if (attr == Attribute.GENERIC_ARMOR_TOUGHNESS) {
+            EquipmentSlot slot = slots.get(args[1]).getLeft();
+            addDefaultToughness(meta, slot);
+        }
+        
+        item.setItemMeta(meta);
     }
 }

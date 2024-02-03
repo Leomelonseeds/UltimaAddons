@@ -64,6 +64,7 @@ public class ItemManager implements Listener {
         // Clear current stuff
         items.clear();
         abilityManager.clearAbilities();
+        armorManager.clearAttrs();
 
         // Add all config items
         itemConfig = UltimaAddons.getPlugin().getConfig().getConfigurationSection("items");
