@@ -166,6 +166,7 @@ items:
       - "&eworn, gives &6+1% &emovement speed"
       - "&eper level of &9Wisdom &eabove 25."
     scaled-attribute:
+      skill: AGILITY
       type: GENERIC_MOVEMENT_SPEED
       name: "Speed"
       operation: MULTIPLY_SCALAR_1

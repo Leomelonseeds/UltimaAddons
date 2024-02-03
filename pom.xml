@@ -92,6 +92,10 @@
             <id>shopkeepers-repo</id>
             <url>https://nexus.lichtspiele.org/repository/releases/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -134,6 +138,12 @@
             <groupId>com.nisovin.shopkeepers</groupId>
             <artifactId>ShopkeepersAPI</artifactId>
             <version>2.19.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Archy-X</groupId>
+            <artifactId>AureliumSkills</artifactId>
+            <version>Beta1.3.24</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
