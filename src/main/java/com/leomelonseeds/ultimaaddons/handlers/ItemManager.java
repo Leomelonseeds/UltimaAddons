@@ -1,5 +1,6 @@
 package com.leomelonseeds.ultimaaddons.handlers;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -307,8 +308,8 @@ public class ItemManager implements Listener {
                             dmg += 0.5 * curMeta.getEnchantLevel(Enchantment.DAMAGE_ALL) + 0.5;
                         }
                         
-                        String dmgtext = String.format("{0:0.#}", dmg);
-                        actualLore.set(i, Utils.toComponent("&2 " + dmgtext + " Attack Damage"));
+                        DecimalFormat df = new DecimalFormat("0.#");
+                        actualLore.set(i, Utils.toComponent("&2 " + df.format(dmg) + " Attack Damage"));
                     }
                 }
 
