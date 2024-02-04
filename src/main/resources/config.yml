@@ -227,3 +227,59 @@ items:
       enchants:
         UNBREAKING: 9
       update: 3
+  obsidian:
+    lore:
+      - ""
+      - "&eForged from the the most fortified"
+      - "&eobsidian from the depths, each piece"
+      - "&eof this near-imperishable armor set,"
+      - "&ewhen worn, gives &6+0.2 &earmor"
+      - "&etoughness per level of &bEndurance"
+      - "&eabove 25, increasing its resistance"
+      - "&eagainst high damage sources."
+    scaled-attribute:
+      skill: ENDURANCE
+      type: GENERIC_ARMOR_TOUGHNESS
+      name: "Armor Toughness"
+      operation: ADD_NUMBER
+      amount: 0.2
+    helmet:
+      material: LEATHER_HELMET
+      name: "&5Obsidian Helmet"
+      custom-model-data: 48732
+      color: "61,40,86"
+      flags:
+        - HIDE_DYE
+      enchants:
+        UNBREAKING: 10
+      update: 3
+    chestplate:
+      material: LEATHER_CHESTPLATE
+      name: "&5Obsidian Chestplate"
+      custom-model-data: 48733
+      color: "40,31,63"
+      flags:
+        - HIDE_DYE
+      enchants:
+        UNBREAKING: 10
+      update: 3
+    leggings:
+      material: LEATHER_LEGGINGS
+      name: "&5Obsidian Leggings"
+      custom-model-data: 48734
+      color: "17,13,29"
+      flags:
+        - HIDE_DYE
+      enchants:
+        UNBREAKING: 10
+      update: 3
+    boots:
+      material: LEATHER_BOOTS
+      name: "&5Obsidian Boots"
+      custom-model-data: 48735
+      color: "6,3,12"
+      flags:
+        - HIDE_DYE
+      enchants:
+        UNBREAKING: 10
+      update: 3

@@ -22,6 +22,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
+import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.ItemFlag;
@@ -30,6 +32,7 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.ability.Ability;
@@ -260,7 +263,7 @@ public class ItemManager implements Listener {
         // 1: Update everything (only use for items that shouldn't be edited)
         // 2: Update attributes, flags, and all below
         // 3: Update type, lore, and all below
-        // 4: Update custom model data only
+        // 4: Update custom model data + color only
         ItemMeta curMeta = cur.getItemMeta();
         ItemMeta actualMeta = actual.getItemMeta();
         switch (itemConfig.getInt(path)) {
@@ -316,11 +319,27 @@ public class ItemManager implements Listener {
                 updated.addAll(actualLore);
                 curMeta.lore(updated);
             case 4:
+                if (curMeta instanceof LeatherArmorMeta) {
+                    LeatherArmorMeta colorMeta = (LeatherArmorMeta) curMeta;
+                    colorMeta.setColor(((LeatherArmorMeta) actualMeta).getColor());
+                }
+                
                 if (itemConfig.contains(data + ".custom-model-data")) {
                     curMeta.setCustomModelData(itemConfig.getInt(data + ".custom-model-data"));
                 }
+                
                 cur.setItemMeta(curMeta);
         }
+    }
+    
+    @EventHandler
+    public void onDamage(PlayerItemDamageEvent e) {
+        // TODO
+    }
+    
+    @EventHandler
+    public void onMend(PlayerItemMendEvent e) {
+        // TODO
     }
 
 }
