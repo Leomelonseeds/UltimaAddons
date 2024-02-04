@@ -43,9 +43,10 @@ items:
     material: GOLDEN_SWORD
     name: "&6Blaze Sword"
     enchants:
-      SHARPNESS: 8
       FIRE_ASPECT: 3
       UNBREAKING: 10
+    flags:
+      - HIDE_ATTRIBUTES
     custom-model-data: 48721
     lore:
       - ""
@@ -53,7 +54,22 @@ items:
       - "&cweapon to shoot 3 fireballs in quick"
       - "&csuccession at your enemies. This ability"
       - "&chas a &610s &ccooldown."
-    update: 3
+      - ""
+      - "&7When in Main Hand:"
+      - "&2 7 Attack Damage"
+      - "&2 1.6 Attack Speed"
+    update: 2
+    attributes:
+      GENERIC_ATTACK_DAMAGE:
+        name: "Attack Damage"
+        operation: ADD_NUMBER
+        amount: 6
+        slot: HAND
+      GENERIC_ATTACK_SPEED:
+        name: "Attack Speed"
+        operation: ADD_NUMBER
+        amount: -2.33
+        slot: HAND
     ability:
       name: "Fireball Trio"
       cooldown: 10
@@ -67,7 +83,13 @@ items:
       - ""
       - "&eA short sword that can be"
       - "&eswung extremely fast."
+      - ""
+      - "&7When in Main Hand:"
+      - "&2 5 Attack Damage"
+      - "&2 20 Attack Speed"
     update: 2
+    flags:
+      - HIDE_ATTRIBUTES
     attributes:
       GENERIC_ATTACK_DAMAGE:
         name: "Attack Damage"
@@ -126,7 +148,13 @@ items:
       - "&eDual wield this weapon to attack"
       - "&eenemies twice as fast, halving"
       - "&etheir damage tick cooldown."
+      - ""
+      - "&7When in Main Hand:"
+      - "&2 6 Attack Damage"
+      - "&2 3.3 Attack Speed"
     update: 2
+    flags:
+      - HIDE_ATTRIBUTES
     attributes:
       GENERIC_ATTACK_DAMAGE:
         name: "Attack Damage"
@@ -136,7 +164,7 @@ items:
       GENERIC_ATTACK_SPEED:
         name: "Attack Speed"
         operation: ADD_NUMBER
-        amount: -0.7
+        amount: -0.66
         slot: HAND
     ability:
       name: "Dual"
@@ -164,7 +192,7 @@ items:
       - "&eA durable, yet very lightweight"
       - "&eset of armor. Each piece, when"
       - "&eworn, gives &6+1% &emovement speed"
-      - "&eper level of &9Wisdom &eabove 25."
+      - "&eper level of &bAgility &eabove 25."
     scaled-attribute:
       skill: AGILITY
       type: GENERIC_MOVEMENT_SPEED

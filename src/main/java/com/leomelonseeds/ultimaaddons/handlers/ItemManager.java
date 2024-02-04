@@ -5,13 +5,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,6 +23,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.CraftingRecipe;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
@@ -252,7 +257,7 @@ public class ItemManager implements Listener {
         // UPDATE MODES:
         // 0 (default): No updating
         // 1: Update everything (only use for items that shouldn't be edited)
-        // 2: Update attributes, and all below
+        // 2: Update attributes, flags, and all below
         // 3: Update type, lore, and all below
         // 4: Update custom model data only
         ItemMeta curMeta = cur.getItemMeta();
@@ -265,6 +270,14 @@ public class ItemManager implements Listener {
             case 2:
                 curMeta.getAttributeModifiers().keySet().forEach(a -> curMeta.removeAttributeModifier(a));
                 actualMeta.getAttributeModifiers().entries().forEach(a -> curMeta.addAttributeModifier(a.getKey(), a.getValue()));
+                
+                for (ItemFlag flag : new HashSet<>(curMeta.getItemFlags())) {
+                    curMeta.removeItemFlags(flag);
+                }
+                
+                for (ItemFlag flag : actualMeta.getItemFlags()) {
+                    curMeta.addItemFlags(flag);
+                }
             case 3:
                 cur.setType(actual.getType());
 
@@ -276,8 +289,30 @@ public class ItemManager implements Listener {
                     }
                     updated.add(c);
                 }
+                
+                // Update lore for custom attribute text for attack damage
+                List<Component> actualLore = actualMeta.lore();
+                if (curMeta.getAttributeModifiers().containsKey(Attribute.GENERIC_ATTACK_DAMAGE)) {
+                    for (int i = 0; i < actualLore.size(); i++) {
+                        if (!Utils.toPlain(actualLore.get(i)).contains("Attack Damage")) {
+                            continue;
+                        }
+                        
+                        double dmg = 1;
+                        for (AttributeModifier am : curMeta.getAttributeModifiers(Attribute.GENERIC_ATTACK_DAMAGE)) {
+                            dmg += am.getAmount();
+                        }
+                        
+                        if (curMeta.hasEnchant(Enchantment.DAMAGE_ALL)) {
+                            dmg += 0.5 * curMeta.getEnchantLevel(Enchantment.DAMAGE_ALL) + 0.5;
+                        }
+                        
+                        String dmgtext = String.format("{0:0.#}", dmg);
+                        actualLore.set(i, Utils.toComponent("&2 " + dmgtext + " Attack Damage"));
+                    }
+                }
 
-                updated.addAll(actualMeta.lore());
+                updated.addAll(actualLore);
                 curMeta.lore(updated);
             case 4:
                 if (itemConfig.contains(data + ".custom-model-data")) {

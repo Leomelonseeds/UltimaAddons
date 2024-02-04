@@ -17,8 +17,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.archyx.aureliumskills.api.event.SkillLevelUpEvent;
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
@@ -101,14 +103,47 @@ public class ArmorSetManager implements Listener {
     }
     
     @EventHandler
+    public void onLevelUp(SkillLevelUpEvent e) {
+        for (ItemStack a : e.getPlayer().getInventory().getArmorContents()) {
+            addScaledAttribute(a, e.getPlayer());
+        }
+    }
+    
+    @EventHandler
     public void onPlayerEquip(PlayerArmorChangeEvent e) {
-        addScaledAttribute(e.getNewItem(), e.getPlayer());
-        removeScaledAttribute(e.getOldItem(), e.getPlayer());
+        // Since the new item and old item from this event are not references,
+        // we have to fetch the original items from the player's inventory slots.
+        // Here we get the new item and add an attribute
+        Player p = e.getPlayer();
+        PlayerInventory pinv = p.getInventory();
+        EquipmentSlot slot = EquipmentSlot.valueOf(e.getSlotType().toString());
+        addScaledAttribute(pinv.getItem(slot), p);
+
+        // Get old item and remove any attributes
+        ItemStack iold = e.getOldItem();
+        ItemStack cursor = p.getItemOnCursor();
+        if (cursor.isSimilar(iold)) {
+            removeScaledAttribute(cursor);
+            return;
+        }
+        
+        for (ItemStack c : pinv.getStorageContents()) {
+            if (c == null) {
+                continue;
+            }
+            
+            if (!c.isSimilar(iold)) {
+                continue;
+            }
+            
+            removeScaledAttribute(c);
+            return;
+        }
     }
 
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
-        e.getDrops().stream().forEach(i -> removeScaledAttribute(i, e.getPlayer()));
+        e.getDrops().stream().forEach(i -> removeScaledAttribute(i));
     }
     
     // Helper method to add default armor toughness after removal/upon creation
@@ -149,19 +184,16 @@ public class ArmorSetManager implements Listener {
             return;
         }
 
-        // Remove armor toughness if its the scaled attribute, since
-        // ScaledAttribute adds the default 3 back
+        // Remove any existing attribute if exists
+        // before adding in new one
         Attribute attr = sca.getAttribute();
-        if (attr == Attribute.GENERIC_ARMOR_TOUGHNESS) {
-            meta.removeAttributeModifier(attr);
-        }
-        
+        meta.removeAttributeModifier(attr);
         meta.addAttributeModifier(attr, modifier);
         item.setItemMeta(meta);
     }
 
     // Removes a scaled attribute to an item if applicable
-    private void removeScaledAttribute(ItemStack item, Player player) {
+    private void removeScaledAttribute(ItemStack item) {
         String id = Utils.getItemID(item);
         if (id == null) {
             return;
