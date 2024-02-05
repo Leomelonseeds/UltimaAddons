@@ -44,11 +44,11 @@ public class UAddDurabilityCurrentItem extends AdvancedEffect {
      * @param amt
      */
     public static void damageItem(Player player, ItemStack item, int amt) {
-        if (item == null || item.getItemMeta() == null) {
+        if (amt == 0 || item == null || item.getItemMeta() == null) {
             return;
         }
         
-        if (amt == 0 || !(item.getItemMeta() instanceof Damageable)) {
+        if (!(item.getItemMeta() instanceof Damageable)) {
             return;
         }
         
