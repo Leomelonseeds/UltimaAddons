@@ -7,6 +7,8 @@ import org.kingdoms.constants.metadata.KingdomMetadataHandler;
 import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
 import org.kingdoms.constants.namespace.Namespace;
 
+import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityArmor;
+import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityCurrentItem;
 import com.leomelonseeds.ultimaaddons.ability.ae.CaptureEffect;
 import com.leomelonseeds.ultimaaddons.ability.ae.RecuperateEffect;
 import com.leomelonseeds.ultimaaddons.commands.BaseCommand;
@@ -28,11 +30,16 @@ import net.advancedplugins.ae.api.AEAPI;
 public class UltimaAddons extends JavaPlugin {
 
     public static final long CHALLENGE_COOLDOWN_TIME = 1 * 24 * 3600 * 1000; // 1 day
+    
     public static KingdomMetadataHandler lckh;
     public static KingdomMetadataHandler shield_time;
     public static KingdomMetadataHandler outpost_id;
+    
     public static NamespacedKey itemKey;
+    public static NamespacedKey duraKey;
+    
     private static UltimaAddons plugin;
+    
     private LinkManager linkManager;
     private InventoryManager invManager;
     private ItemManager itemManager;
@@ -60,6 +67,7 @@ public class UltimaAddons extends JavaPlugin {
         shield_time = new StandardKingdomMetadataHandler(new Namespace("UltimaAddons", "SHIELD_TIME"));  // (long) Next available time a kingdom can buy a shield
         outpost_id = new StandardKingdomMetadataHandler(new Namespace("UltimaAddons", "OUTPOST_ID"));  // (long) id of outpost/outpost land
         itemKey = new NamespacedKey(plugin, "uaitem");
+        duraKey = new NamespacedKey(plugin, "uadura");
 
         // Register managers and stuff
         linkManager = new LinkManager();
@@ -69,6 +77,8 @@ public class UltimaAddons extends JavaPlugin {
         new UAPlaceholders().register();
         AEAPI.registerEffect(plugin, new CaptureEffect(plugin));
         AEAPI.registerEffect(plugin, new RecuperateEffect(plugin));
+        AEAPI.registerEffect(plugin, new UAddDurabilityCurrentItem(plugin));
+        AEAPI.registerEffect(plugin, new UAddDurabilityArmor(plugin));
 
         // Register listener
         PluginManager pm = getServer().getPluginManager();
@@ -120,7 +130,7 @@ public class UltimaAddons extends JavaPlugin {
     public void reload() {
         reloadConfig();
         getConfigFile().reload();
-        getItems().loadItems();
+        getItems().reload();
         getTradesFile().reload();
         getSKLinker().clear();
         new Load();

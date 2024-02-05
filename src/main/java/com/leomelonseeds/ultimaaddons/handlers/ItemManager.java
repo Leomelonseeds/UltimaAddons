@@ -31,8 +31,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.ability.Ability;
@@ -48,7 +50,7 @@ import net.kyori.adventure.text.Component;
 
 public class ItemManager implements Listener {
 
-    ConfigurationSection itemConfig;
+    private ConfigurationSection itemConfig;
     private UltimaAddons plugin;
     private Map<String, ItemStack> items;
     private Map<NamespacedKey, CraftingRecipe> recipes;
@@ -62,20 +64,31 @@ public class ItemManager implements Listener {
         abilityManager = new AbilityManager();
         armorManager = new ArmorSetManager();
         loadItems();
+        loadRecipes();
     }
-
+    
     /**
-     * Load all items and recipes from config,
-     * adding abilities as necessary.
-     * Recipes are currently hard-coded.
+     * Reload all items and recipes
      */
-    public void loadItems() {
-        // Clear current stuff
+    public void reload() {
+        // Clear current item-related stuff
         items.clear();
         abilityManager.clearAbilities();
         armorManager.clearAttrs();
+        
+        // Remove currently loaded recipes
+        for (NamespacedKey key : recipes.keySet()) {
+            Bukkit.removeRecipe(key);
+        }
+        recipes.clear();
+        
+        // Load everything again
+        loadItems();
+        loadRecipes();
+    }
 
-        // Add all config items
+    /** Load all items from config, adding abilities as necessary. */
+    private void loadItems() {
         itemConfig = UltimaAddons.getPlugin().getConfig().getConfigurationSection("items");
         for (String key : itemConfig.getKeys(false)) {
             try {
@@ -126,13 +139,10 @@ public class ItemManager implements Listener {
                 e.printStackTrace();
             }
         }
-
-        // Remove currently loaded recipes
-        for (NamespacedKey key : recipes.keySet()) {
-            Bukkit.removeRecipe(key);
-        }
-
-        // Add new, hardcoded recipes
+    }
+    
+    /** Reload all recipes, which are currently hardcoded */
+    private void loadRecipes() {
         // All namespacedkeys follow the format:
         // [lowercase item result (enum if mc material, key if ua item)]_index
         // index starts at 0, add more if more crafting recipes for a single item added
@@ -149,6 +159,43 @@ public class ItemManager implements Listener {
         chipToDiamond.shape("CCC", "CCC", "CCC");
         chipToDiamond.setIngredient('C', getItem("dchip"));
         addRecipe(chipToDiamond);
+    }
+
+    /**
+     * @param item
+     * @param dmg set to negative if item is being repaired
+     * 
+     * @return true if durability was changed (whether to cancel event)
+     */
+    public boolean damageItem(ItemStack item, int dmg) {
+        if (dmg == 0) {
+            return false;
+        }
+        
+        String dura = Utils.getItemInfo(item, UltimaAddons.duraKey);
+        if (dura == null) {
+            return false;
+        }
+        
+        String[] dargs = dura.split("/");
+        int cur = Integer.parseInt(dargs[0]);
+        int max = Integer.parseInt(dargs[1]);
+        
+        // If damage is larger than current durability amount,
+        // the item naturally should break.
+        if (dmg >= cur) {
+            return false;
+        }
+        
+        Damageable dmeta = (Damageable) item.getItemMeta();
+        int itemmax = item.getType().getMaxDurability();
+        int fdura = Math.min(max, cur - dmg);
+        int remaining = (int) Math.floor(((double) fdura / max) * itemmax);
+        dmeta.setDamage(itemmax - remaining);
+        dmeta.getPersistentDataContainer().set(UltimaAddons.duraKey, PersistentDataType.STRING, fdura + "/" + max);
+        item.setItemMeta(dmeta);
+        
+        return true;
     }
 
     /**
@@ -199,6 +246,21 @@ public class ItemManager implements Listener {
     public ArmorSetManager getArmor() {
         return armorManager;
     }
+    
+    // Handle durability changes for custom durability items
+    @EventHandler
+    public void onDamage(PlayerItemDamageEvent e) {
+        if (damageItem(e.getItem(), e.getDamage())) {
+            e.setCancelled(true);
+        }
+    }
+    
+    @EventHandler
+    public void onMend(PlayerItemMendEvent e) {
+        if (damageItem(e.getItem(), e.getRepairAmount() * -1)) {
+            e.setCancelled(true);
+        }
+    }
 
     // Stop custom items being used for non-custom recipes
     @EventHandler
@@ -244,6 +306,27 @@ public class ItemManager implements Listener {
             p.sendMessage(Utils.toComponent("&cThe custom item '" + data + "' no longer exists, and may be automatically removed in the future. "
                     + "Please contact an admin if you have any further questions."));
             return;
+        }
+        
+        // If item durability and actual durability are unmatched,
+        // try to match the durabilities. This is used in cases such as
+        // anvil repairs, crafting combination, and grindstone combination.
+        String dura = Utils.getItemInfo(cur, UltimaAddons.duraKey);
+        if (dura != null) {
+            Damageable dmeta = (Damageable) cur.getItemMeta();
+            int amax = cur.getType().getMaxDurability();
+            int acur = amax - dmeta.getDamage();
+
+            String[] dargs = dura.split("/");
+            int ucur = Integer.parseInt(dargs[0]);
+            int umax = Integer.parseInt(dargs[1]);
+            
+            // Here, the actual durability ratio of the item takes priority
+            if (Math.ceil((double) ucur / umax) != acur) {
+                ucur = (int) Math.ceil(((double) acur / amax) * umax);
+                dmeta.getPersistentDataContainer().set(UltimaAddons.duraKey, PersistentDataType.STRING, ucur + "/" + umax);
+                cur.setItemMeta(dmeta);
+            }
         }
 
         // Make sure item has the update key
@@ -331,15 +414,4 @@ public class ItemManager implements Listener {
                 cur.setItemMeta(curMeta);
         }
     }
-    
-    @EventHandler
-    public void onDamage(PlayerItemDamageEvent e) {
-        // TODO
-    }
-    
-    @EventHandler
-    public void onMend(PlayerItemMendEvent e) {
-        // TODO
-    }
-
 }

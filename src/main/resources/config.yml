@@ -44,7 +44,6 @@ items:
     name: "&6Blaze Sword"
     enchants:
       FIRE_ASPECT: 3
-      UNBREAKING: 10
     flags:
       - HIDE_ATTRIBUTES
     custom-model-data: 48721
@@ -59,6 +58,7 @@ items:
       - "&2 7 Attack Damage"
       - "&2 1.6 Attack Speed"
     update: 2
+    durability: 500
     attributes:
       GENERIC_ATTACK_DAMAGE:
         name: "Attack Damage"
@@ -189,7 +189,7 @@ items:
   mithril:
     lore:
       - ""
-      - "&eA durable, yet very lightweight"
+      - "&eA light, flexible, yet durable"
       - "&eset of armor. Each piece, when"
       - "&eworn, gives &6+1% &emovement speed"
       - "&eper level of &bAgility &eabove 25."
@@ -203,29 +203,25 @@ items:
       material: CHAINMAIL_HELMET
       name: "&6Mithril Helmet"
       custom-model-data: 48727
-      enchants:
-        UNBREAKING: 9
+      durability: 400
       update: 3
     chestplate:
       material: CHAINMAIL_CHESTPLATE
       name: "&6Mithril Chestplate"
       custom-model-data: 48728
-      enchants:
-        UNBREAKING: 9
+      durability: 600
       update: 3
     leggings:
       material: CHAINMAIL_LEGGINGS
       name: "&6Mithril Leggings"
       custom-model-data: 48729
-      enchants:
-        UNBREAKING: 9
+      durability: 550
       update: 3
     boots:
       material: CHAINMAIL_BOOTS
       name: "&6Mithril Boots"
       custom-model-data: 48730
-      enchants:
-        UNBREAKING: 9
+      durability: 500
       update: 3
   obsidian:
     lore:
@@ -250,8 +246,7 @@ items:
       color: "61,40,86"
       flags:
         - HIDE_DYE
-      enchants:
-        UNBREAKING: 10
+      durability: 800
       update: 3
     chestplate:
       material: LEATHER_CHESTPLATE
@@ -260,8 +255,7 @@ items:
       color: "40,31,63"
       flags:
         - HIDE_DYE
-      enchants:
-        UNBREAKING: 10
+      durability: 1200
       update: 3
     leggings:
       material: LEATHER_LEGGINGS
@@ -270,8 +264,7 @@ items:
       color: "17,13,29"
       flags:
         - HIDE_DYE
-      enchants:
-        UNBREAKING: 10
+      durability: 1100
       update: 3
     boots:
       material: LEATHER_BOOTS
@@ -280,6 +273,5 @@ items:
       color: "6,3,12"
       flags:
         - HIDE_DYE
-      enchants:
-        UNBREAKING: 10
+      durability: 1000
       update: 3

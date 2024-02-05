@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.configuration.ConfigurationSection;
@@ -343,7 +344,8 @@ public class Utils {
     /**
      * Create an item from the config section, adding
      * persistent data for the string and a path to 
-     * account for armor sets.
+     * account for armor sets. If a key "durability"
+     * is set, adds a persistent data for that too.
      * 
      * @param config
      * @param path the path String to add to the item
@@ -353,6 +355,10 @@ public class Utils {
         ItemStack i = XItemStack.deserialize(sec, s -> ChatColor.translateAlternateColorCodes('&', s));
         ItemMeta meta = i.getItemMeta();
         meta.getPersistentDataContainer().set(UltimaAddons.itemKey, PersistentDataType.STRING, path);
+        if (sec.contains("durability")) {
+            int dura = sec.getInt("durability");
+            meta.getPersistentDataContainer().set(UltimaAddons.duraKey, PersistentDataType.STRING, dura + "/" + dura);
+        }
         i.setItemMeta(meta);
         return i;
     }
@@ -365,15 +371,20 @@ public class Utils {
      * @return
      */
     public static String getItemID(ItemStack i) {
+        return getItemInfo(i, UltimaAddons.itemKey);
+    }
+
+    public static String getItemInfo(ItemStack i, NamespacedKey key) {
         if (i == null || i.getItemMeta() == null) {
             return null;
         }
         
         ItemMeta meta = i.getItemMeta();
-        if (!meta.getPersistentDataContainer().has(UltimaAddons.itemKey, PersistentDataType.STRING)) {
+        if (!meta.getPersistentDataContainer().has(key, PersistentDataType.STRING)) {
             return null;
         }
         
-        return meta.getPersistentDataContainer().get(UltimaAddons.itemKey, PersistentDataType.STRING);
+        return meta.getPersistentDataContainer().get(key, PersistentDataType.STRING);
     }
+    
 }
