@@ -1,5 +1,15 @@
 package com.leomelonseeds.ultimaaddons.commands.ua.uask.sub;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+
+import org.apache.commons.lang3.math.NumberUtils;
+import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
+
 import com.leomelonseeds.ultimaaddons.commands.Argument;
 import com.leomelonseeds.ultimaaddons.commands.Command;
 import com.leomelonseeds.ultimaaddons.data.Save;
@@ -7,17 +17,13 @@ import com.leomelonseeds.ultimaaddons.skaddon.RotatingShopkeeper;
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 import com.nisovin.shopkeepers.api.ShopkeepersPlugin;
 import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.*;
 
 public class SyncCommand extends Command {
     public SyncCommand(String name, List<String> aliases, String permission, String description, List<? extends Argument> arguments) {
         super(name, aliases, permission, description, arguments);
     }
 
+    @Override
     public boolean hasInvalidArgs(@NotNull CommandSender sender, @NotNull String[] args) {
         // Check for valid number of arguments
         if (args.length < 2) {
@@ -49,9 +55,6 @@ public class SyncCommand extends Command {
 
     @Override
     public void execute(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command cmd, @NotNull String name, @NotNull String[] args) {
-        if (hasInvalidArgs(sender, args))
-            return;
-
         // Safe to parse since we already checked for valid integers
         int child = NumberUtils.toInt(args[0]), parent = NumberUtils.toInt(args[1]);
 

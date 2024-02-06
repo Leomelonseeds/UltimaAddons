@@ -1,17 +1,25 @@
 package com.leomelonseeds.ultimaaddons.commands.ua.uask;
 
-import com.leomelonseeds.ultimaaddons.commands.Argument;
-import com.leomelonseeds.ultimaaddons.commands.BaseCommand;
-import com.leomelonseeds.ultimaaddons.commands.Command;
-import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.*;
-import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
-import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
+
+import com.leomelonseeds.ultimaaddons.commands.Argument;
+import com.leomelonseeds.ultimaaddons.commands.BaseCommand;
+import com.leomelonseeds.ultimaaddons.commands.Command;
+import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.DebugCommand;
+import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.DiscountCommand;
+import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.HelpCommand;
+import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.InfoCommand;
+import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.LimitCommand;
+import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.RotateCommand;
+import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.SyncCommand;
+import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.UnsyncCommand;
+import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 
 public class UASk extends Command {
     private static final Map<String, Argument> argumentTypes = BaseCommand.argumentTypes;
@@ -77,9 +85,6 @@ public class UASk extends Command {
 
     @Override
     public void execute(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command cmd, @NotNull String name, @NotNull String[] args) {
-        if (hasInvalidArgs(sender, args))
-            return;
-
         Command subCmd = args.length < 1
                 ? subcommands.get("help")
                 : subcommands.get(args[0]);

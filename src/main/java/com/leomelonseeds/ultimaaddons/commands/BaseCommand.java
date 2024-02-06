@@ -76,7 +76,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
         Command runCommand = commands.get(name);
         if (!runCommand.hasPermission(sender))
             CommandUtils.sendErrorMsg(sender, "No permission");
-        else
+        else if (!runCommand.hasInvalidArgs(sender, args))
             commands.get(name).execute(sender, cmd, name, args);
 
         return true;

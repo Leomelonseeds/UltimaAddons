@@ -1,12 +1,9 @@
 package com.leomelonseeds.ultimaaddons.commands.ua;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.commands.Argument;
-import com.leomelonseeds.ultimaaddons.commands.Command;
-import com.leomelonseeds.ultimaaddons.invs.ChallengeInv;
-import com.leomelonseeds.ultimaaddons.utils.ChatConfirm;
-import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -15,9 +12,13 @@ import org.kingdoms.constants.group.model.relationships.StandardRelationAttribut
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.constants.player.StandardKingdomPermission;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.commands.Argument;
+import com.leomelonseeds.ultimaaddons.commands.Command;
+import com.leomelonseeds.ultimaaddons.invs.ChallengeInv;
+import com.leomelonseeds.ultimaaddons.utils.ChatConfirm;
+import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class UAChallenge extends Command {
     public UAChallenge(String name, List<String> aliases, String permission, String description, List<? extends Argument> arguments) {
@@ -164,9 +165,6 @@ public class UAChallenge extends Command {
 
     @Override
     public void execute(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command cmd, @NotNull String name, @NotNull String[] args) {
-        if (hasInvalidArgs(sender, args))
-            return;
-
         Player player = (Player) sender;
         KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(player);
         Kingdom attacker = kp.getKingdom();

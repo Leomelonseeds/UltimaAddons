@@ -16,9 +16,6 @@ public class UAReload extends Command {
 
     @Override
     public void execute(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command cmd, @NotNull String name, @NotNull String[] args) {
-        if (hasInvalidArgs(sender, args))
-            return;
-
         this.plugin.reload();
         CommandUtils.sendSuccessMsg(sender, "UltimaAddons reloaded");
     }
