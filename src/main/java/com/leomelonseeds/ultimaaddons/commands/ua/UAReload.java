@@ -1,16 +1,17 @@
 package com.leomelonseeds.ultimaaddons.commands.ua;
 
-import com.leomelonseeds.ultimaaddons.commands.Argument;
-import com.leomelonseeds.ultimaaddons.commands.Command;
-import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+import java.util.Collections;
+import java.util.List;
+
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import com.leomelonseeds.ultimaaddons.commands.Command;
+import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 
 public class UAReload extends Command {
-    public UAReload(String name, List<String> aliases, String permission, String description, List<? extends Argument> arguments) {
-        super(name, aliases, permission, description, arguments);
+    public UAReload(String name, List<String> aliases, String permission, String description) {
+        super(name, aliases, permission, description, Collections.emptyList());
     }
 
     @Override

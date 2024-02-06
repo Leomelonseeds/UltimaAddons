@@ -1,13 +1,11 @@
 package com.leomelonseeds.ultimaaddons.commands;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.commands.arguments.*;
-import com.leomelonseeds.ultimaaddons.commands.ua.UAChallenge;
-import com.leomelonseeds.ultimaaddons.commands.ua.UAGive;
-import com.leomelonseeds.ultimaaddons.commands.ua.UAReload;
-import com.leomelonseeds.ultimaaddons.commands.ua.uask.UASk;
-import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -17,7 +15,19 @@ import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.commands.arguments.IntArgument;
+import com.leomelonseeds.ultimaaddons.commands.arguments.ItemArgument;
+import com.leomelonseeds.ultimaaddons.commands.arguments.KingdomArgument;
+import com.leomelonseeds.ultimaaddons.commands.arguments.PlayerArgument;
+import com.leomelonseeds.ultimaaddons.commands.arguments.ShopkeeperArgument;
+import com.leomelonseeds.ultimaaddons.commands.ua.UAChallenge;
+import com.leomelonseeds.ultimaaddons.commands.ua.UAGive;
+import com.leomelonseeds.ultimaaddons.commands.ua.UARecipes;
+import com.leomelonseeds.ultimaaddons.commands.ua.UAReload;
+import com.leomelonseeds.ultimaaddons.commands.ua.uask.UASk;
+import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class BaseCommand implements CommandExecutor, TabCompleter {
     public static Map<String, Argument> argumentTypes;
@@ -33,7 +43,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
                 "shopkeeper", new ShopkeeperArgument("int", "")
         );
         commands = Map.of(
-                "uchallenge", new UAChallenge("uchallenge", Collections.emptyList(), "ua.challenge", "",
+                "uchallenge", new UAChallenge("uchallenge", Collections.emptyList(), "", "",
                         List.of(
                                 argumentTypes.get("kingdom")
                         )),
@@ -43,9 +53,9 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
                                 argumentTypes.get("item"),
                                 argumentTypes.get("int")
                         )),
-                "ureload", new UAReload("ureload", Collections.emptyList(), "ua.reload", "",
-                        Collections.emptyList()),
-                "usk", new UASk("uask", Collections.emptyList(), "ua.sk", "")
+                "ureload", new UAReload("ureload", Collections.emptyList(), "ua.reload", ""),
+                "usk", new UASk("uask", Collections.emptyList(), "ua.sk", ""),
+                "recipes", new UARecipes("recipes", Collections.emptyList(), "", "")
         );
         commands.forEach((key, value) ->
                 {

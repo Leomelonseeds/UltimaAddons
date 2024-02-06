@@ -159,6 +159,13 @@ public class ItemManager implements Listener {
         chipToDiamond.shape("CCC", "CCC", "CCC");
         chipToDiamond.setIngredient('C', getItem("dchip"));
         addRecipe(chipToDiamond);
+        
+        // Bundle
+        ShapedRecipe bundle = new ShapedRecipe(new NamespacedKey(plugin, "bundle_0"), new ItemStack(Material.BUNDLE));
+        bundle.shape("SRS", "RXR", "RRR");
+        bundle.setIngredient('S', new ItemStack(Material.STRING));
+        bundle.setIngredient('R', new ItemStack(Material.RABBIT_HIDE));
+        addRecipe(bundle);
     }
 
     /**
@@ -214,10 +221,10 @@ public class ItemManager implements Listener {
     }
 
     /**
-     * @return an unmodifiable collection of all custom recipes
+     * @return an unmodifiable map of all custom recipes
      */
-    public Collection<CraftingRecipe> getRecipes() {
-        return Collections.unmodifiableCollection(recipes.values());
+    public Map<NamespacedKey, CraftingRecipe> getRecipes() {
+        return Collections.unmodifiableMap(recipes);
     }
 
     /**

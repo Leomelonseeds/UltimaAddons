@@ -12,6 +12,7 @@ depend:
 - Shopkeepers
 commands: 
   uchallenge: {}
+  recipes: {}
   ugive:
     default: op
   ureload:
