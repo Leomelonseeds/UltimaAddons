@@ -51,9 +51,11 @@ The plugin also hooks into AdvancedEnchantments' API to provide the following cu
  
 - CAPTURE: Drops a mob's spawn egg. Excludes boss mobs and those defined in the config.
 - RECUPERATE: Reduces cooldown time for shields when they are disabled by an axe.
+- UADD_DURABILITY_CURRENT_ITEM: Adds/removes durability from an item, with consideration for unbreaking enchantment and custom durability items.
+- UADD_DURABILITY_ARMOR: Adds/removes durability from all worn armor, with consideration for unbreaking enchantment and custom durability items.
 
 ## Custom Items
-The plugin also provides some custom items and recipes that add some fresh gameplay elements to the survival experience. All recipes can be found by using the `/recipes` command in-game, and most weapons with abilities have cooldowns that are not listed here, since they are subject to change.
+The plugin also provides some custom items and recipes that add some fresh gameplay elements to the survival experience. All recipes can be found by using the `/recipes` command in-game. Most weapons with abilities have cooldowns that are not listed here, since they are subject to change. Several items have increased durability over their vanilla counterparts, such as the armorsets.
 
 ### Weapons
 - Blaze Sword: Right-click to shoot 3 fireballs in quick succession.
@@ -65,7 +67,10 @@ The plugin also provides some custom items and recipes that add some fresh gamep
 
 ### Armor
 Each armorset has the protection and armor toughness equivalent of Netherite, unless stated otherwise.
-- Mithril: Each piece, when worn, gives +1% movement speed per level of Wisdom (from Aurelium) above 25.
+- Mithril: Each piece, when worn, gives +1% movement speed per level of Agility (from Aurelium) above 25.
+- Obsidian: Each piece gives +0.2 armor toughness per level of Endurance above 25, increasing its resistance against high-damage attacks.
+- Infused: Each piece gives +0.5% attack damage per level of Fighting above 25.
+- Shard: Each piece gives +0.1 max health per level of Mining above 25.
 
 ### Others
 - Diamond Chip: Like iron or gold nuggets, but for diamonds. Used for better economy integration, since Ultima uses a item-based economy with diamonds as its currency.
