@@ -1,13 +1,11 @@
 package com.leomelonseeds.ultimaaddons.invs;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.kingdoms.constants.group.Kingdom;
@@ -19,20 +17,17 @@ import org.kingdoms.constants.player.KingdomPlayer;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
-public class ChallengeInv implements UAInventory {
+public class ChallengeInv extends UAInventory {
     
-    private Inventory inv;
     private Kingdom target;
     private Kingdom attacker;
     private Player player;
     
     public ChallengeInv(Kingdom target, Kingdom attacker, Player player) {
+        super(player, 27, "&8-=( &cChallenge &e" + target.getName() + " &8)=-");
         this.target = target;
         this.attacker = attacker;
         this.player = player;
-        
-        inv = Bukkit.createInventory(null, 27, Utils.toComponent("&8-=( &cChallenge &e" + target.getName() + " &8)=-"));
-        manager.registerInventory(player, this);
     }
 
     @Override
@@ -111,10 +106,4 @@ public class ChallengeInv implements UAInventory {
         });
         
     }
-
-    @Override
-    public Inventory getInventory() {
-        return inv;
-    }
-
 }

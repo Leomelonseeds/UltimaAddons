@@ -23,6 +23,19 @@ challengegui:
 #    name: "&2In 1 min (TEST)"
 #    slot: 6
 #    days: 0.0008
+recipegui:
+  back:
+    material: BARRIER
+    name: "&cBack"
+  next:
+    material: ARROW
+    name: "&fNext Page"
+  prev:
+    material: ARROW
+    name: "&fPrevious Page"
+  fill:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ""
 capture-exclude:
   - ENDER_DRAGON
   - WITHER

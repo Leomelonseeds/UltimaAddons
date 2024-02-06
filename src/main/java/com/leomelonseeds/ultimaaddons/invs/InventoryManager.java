@@ -3,12 +3,16 @@ package com.leomelonseeds.ultimaaddons.invs;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
+
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
 
 public class InventoryManager implements Listener {
     
@@ -24,9 +28,12 @@ public class InventoryManager implements Listener {
     
     // Registers and opens an inventory
     public void registerInventory(Player player, UAInventory inv) {
-        inv.updateInventory();
-        player.openInventory(inv.getInventory());
-        inventoryCache.put(player, inv);
+        // Run on next tick to give time for constructors to assign values
+        Bukkit.getScheduler().runTask(UltimaAddons.getPlugin(), () -> {
+            player.openInventory(inv.getInventory());
+            inventoryCache.put(player, inv);
+            inv.updateInventory();
+        });
     }
     
     public void removePlayer(Player player) {
@@ -34,7 +41,7 @@ public class InventoryManager implements Listener {
     }
     
     /** Handle clicking of custom GUIs */
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW)
     public void onClick(InventoryClickEvent event) {
         // Check if inventory is custom
         Player player = (Player) event.getWhoClicked();

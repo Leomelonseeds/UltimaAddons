@@ -1,29 +1,24 @@
 package com.leomelonseeds.ultimaaddons.invs;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
-public class ConfirmAction implements UAInventory {
+public class ConfirmAction extends UAInventory {
     
-    private Inventory inv;
     private ConfirmCallback callback;
     private UAInventory mwinv;
     private Player player;
     
     public ConfirmAction(String action, Player player, UAInventory mwinv, ConfirmCallback callback) {
+        super(player, 27, "Confirm: " + action);
         this.player = player;
         this.callback = callback;
         this.mwinv = mwinv;
-        
-        inv = Bukkit.createInventory(null, 27, Utils.toComponent("Confirm: " + action));
-        manager.registerInventory(player, this);
     }
 
     @Override
@@ -70,10 +65,4 @@ public class ConfirmAction implements UAInventory {
             callback.onConfirm(false);
         }
     }
-
-    @Override
-    public Inventory getInventory() {
-        return inv;
-    }
-
 }

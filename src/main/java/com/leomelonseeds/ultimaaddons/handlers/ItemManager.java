@@ -289,7 +289,7 @@ public class ItemManager implements Listener {
     }
 
     // Update custom items if necessary
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onClick(InventoryClickEvent e) {
         ItemStack cur = e.getCurrentItem();
         if (cur == null) {
