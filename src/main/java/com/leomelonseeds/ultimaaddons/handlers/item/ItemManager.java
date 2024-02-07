@@ -288,8 +288,13 @@ public class ItemManager implements Listener {
                 cur.setItemMeta(actualMeta);
                 break;
             case 2:
-                curMeta.getAttributeModifiers().keySet().forEach(a -> curMeta.removeAttributeModifier(a));
-                actualMeta.getAttributeModifiers().entries().forEach(a -> curMeta.addAttributeModifier(a.getKey(), a.getValue()));
+                if (curMeta.hasAttributeModifiers()) {
+                    curMeta.getAttributeModifiers().keySet().forEach(a -> curMeta.removeAttributeModifier(a));
+                }
+                
+                if (actualMeta.hasAttributeModifiers()) {
+                    actualMeta.getAttributeModifiers().entries().forEach(a -> curMeta.addAttributeModifier(a.getKey(), a.getValue()));
+                }
                 
                 for (ItemFlag flag : new HashSet<>(curMeta.getItemFlags())) {
                     curMeta.removeItemFlags(flag);

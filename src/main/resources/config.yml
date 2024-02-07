@@ -139,10 +139,26 @@ items:
       - "&620% &eof their remaining health, and"
       - "&etemporarily blind and wither them."
       - "&eThis ability has a &630s &ecooldown."
+      - ""
+      - "&7When in Main Hand:"
+      - "&2 6.5 Attack Damage"
+      - "&2 1.6 Attack Speed"
     enchants:
-      SHARPNESS: 10
       VANISHING_CURSE: 1
-    update: 3
+    update: 2
+    flags:
+      - HIDE_ATTRIBUTES
+    attributes:
+      GENERIC_ATTACK_DAMAGE:
+        name: "Attack Damage"
+        operation: ADD_NUMBER
+        amount: 5.5
+        slot: HAND
+      GENERIC_ATTACK_SPEED:
+        name: "Attack Speed"
+        operation: ADD_NUMBER
+        amount: -2.33
+        slot: HAND
     ability:
       name: "Lifesteal"
       cooldown: 30
