@@ -312,7 +312,8 @@ public class ItemManager implements Listener {
                 
                 // Update lore for custom attribute text for attack damage
                 List<Component> actualLore = actualMeta.lore();
-                if (curMeta.getAttributeModifiers().containsKey(Attribute.GENERIC_ATTACK_DAMAGE)) {
+                if (curMeta.hasAttributeModifiers() && curMeta.getAttributeModifiers()
+                        .containsKey(Attribute.GENERIC_ATTACK_DAMAGE)) {
                     for (int i = 0; i < actualLore.size(); i++) {
                         if (!Utils.toPlain(actualLore.get(i)).contains("Attack Damage")) {
                             continue;

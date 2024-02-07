@@ -141,7 +141,7 @@ items:
       - "&eThis ability has a &630s &ecooldown."
     enchants:
       SHARPNESS: 10
-      CURSE_OF_VANISHING: 1
+      VANISHING_CURSE: 1
     update: 3
     ability:
       name: "Lifesteal"
