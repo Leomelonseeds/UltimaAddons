@@ -24,9 +24,6 @@ challengegui:
 #    slot: 6
 #    days: 0.0008
 recipegui:
-  back:
-    material: BARRIER
-    name: "&cBack"
   next:
     material: ARROW
     name: "&fNext Page"
@@ -36,6 +33,11 @@ recipegui:
   fill:
     material: BLACK_STAINED_GLASS_PANE
     name: ""
+  locked:
+    material: BARRIER
+    name: "&cLocked"
+    lore:
+      - "&7You cannot use this recipe yet!"
 capture-exclude:
   - ENDER_DRAGON
   - WITHER
@@ -202,37 +204,37 @@ items:
   mithril:
     lore:
       - ""
-      - "&eA light, flexible, yet durable"
-      - "&eset of armor. Each piece, when"
-      - "&eworn, gives &6+1% &emovement speed"
-      - "&eper level of &bAgility &eabove 25."
+      - "&eA light, flexible, yet durable set"
+      - "&eof armor. Each piece, when worn,"
+      - "&egives &6+0.5% &emovement speed per"
+      - "&elevel of &bAgility &eabove 25."
     scaled-attribute:
       skill: AGILITY
       type: GENERIC_MOVEMENT_SPEED
       name: "Speed"
       operation: MULTIPLY_SCALAR_1
-      amount: 0.01
+      amount: 0.005
     helmet:
       material: CHAINMAIL_HELMET
-      name: "&6Mithril Helmet"
+      name: "&7&lMithril Helmet"
       custom-model-data: 48727
       durability: 400
       update: 3
     chestplate:
       material: CHAINMAIL_CHESTPLATE
-      name: "&6Mithril Chestplate"
+      name: "&7&lMithril Chestplate"
       custom-model-data: 48728
       durability: 600
       update: 3
     leggings:
       material: CHAINMAIL_LEGGINGS
-      name: "&6Mithril Leggings"
+      name: "&7&lMithril Leggings"
       custom-model-data: 48729
       durability: 550
       update: 3
     boots:
       material: CHAINMAIL_BOOTS
-      name: "&6Mithril Boots"
+      name: "&7&lMithril Boots"
       custom-model-data: 48730
       durability: 500
       update: 3
@@ -240,7 +242,7 @@ items:
     lore:
       - ""
       - "&eForged from the the most fortified"
-      - "&eobsidian from the depths, each piece"
+      - "&eobsidian of the depths, each piece"
       - "&eof this near-imperishable armor set,"
       - "&ewhen worn, gives &6+0.2 &earmor"
       - "&etoughness per level of &bEndurance"
@@ -255,7 +257,7 @@ items:
     helmet:
       material: LEATHER_HELMET
       name: "&5Obsidian Helmet"
-      custom-model-data: 48732
+      custom-model-data: 48731
       color: "61,40,86"
       flags:
         - HIDE_DYE
@@ -264,7 +266,7 @@ items:
     chestplate:
       material: LEATHER_CHESTPLATE
       name: "&5Obsidian Chestplate"
-      custom-model-data: 48733
+      custom-model-data: 48732
       color: "40,31,63"
       flags:
         - HIDE_DYE
@@ -273,7 +275,7 @@ items:
     leggings:
       material: LEATHER_LEGGINGS
       name: "&5Obsidian Leggings"
-      custom-model-data: 48734
+      custom-model-data: 48733
       color: "17,13,29"
       flags:
         - HIDE_DYE
@@ -282,9 +284,107 @@ items:
     boots:
       material: LEATHER_BOOTS
       name: "&5Obsidian Boots"
-      custom-model-data: 48735
+      custom-model-data: 48734
       color: "6,3,12"
       flags:
         - HIDE_DYE
       durability: 1000
+      update: 3
+  infused:
+    lore:
+      - ""
+      - "&eUnleash the power of copper-infused"
+      - "&estrength. Each piece of this set, when"
+      - "&eworn, gives &6+0.5% &eattack damage per"
+      - "&elevel of &bFighting &eabove 25."
+    scaled-attribute:
+      skill: FIGHTING
+      type: GENERIC_ATTACK_DAMAGE
+      name: "Attack Damage"
+      operation: MULTIPLY_SCALAR_1
+      amount: 0.005
+    helmet:
+      material: LEATHER_HELMET
+      name: "&6Infused Helmet"
+      custom-model-data: 48735
+      color: "223,127,104"
+      flags:
+        - HIDE_DYE
+      durability: 350
+      update: 3
+    chestplate:
+      material: LEATHER_CHESTPLATE
+      name: "&6Infused Chestplate"
+      custom-model-data: 48736
+      color: "196,154,86"
+      flags:
+        - HIDE_DYE
+      durability: 525
+      update: 3
+    leggings:
+      material: LEATHER_LEGGINGS
+      name: "&6Infused Leggings"
+      custom-model-data: 48737
+      color: "156,177,106"
+      flags:
+        - HIDE_DYE
+      durability: 475
+      update: 3
+    boots:
+      material: LEATHER_BOOTS
+      name: "&6Infused Boots"
+      custom-model-data: 48738
+      color: "114,192,152"
+      flags:
+        - HIDE_DYE
+      durability: 425
+      update: 3
+  shard:
+    lore:
+      - ""
+      - "&eImbue yourself with the healing"
+      - "&epowers of amethyst. Each piece of"
+      - "&ethis set, when worn, gives &6+0.1 &emax"
+      - "&ehealth per level of &bMining &eabove 25."
+    scaled-attribute:
+      skill: MINING
+      type: GENERIC_MAX_HEALTH
+      name: "Max Health"
+      operation: ADD_NUMBER
+      amount: 0.1
+    helmet:
+      material: LEATHER_HELMET
+      name: "&dShard Helmet"
+      custom-model-data: 48739
+      color: "255,252,211"
+      flags:
+        - HIDE_DYE
+      durability: 350
+      update: 3
+    chestplate:
+      material: LEATHER_CHESTPLATE
+      name: "&dShard Chestplate"
+      custom-model-data: 48740
+      color: "253,203,229"
+      flags:
+        - HIDE_DYE
+      durability: 525
+      update: 3
+    leggings:
+      material: LEATHER_LEGGINGS
+      name: "&dShard Leggings"
+      custom-model-data: 48741
+      color: "196,141,235"
+      flags:
+        - HIDE_DYE
+      durability: 475
+      update: 3
+    boots:
+      material: LEATHER_BOOTS
+      name: "&dShard Boots"
+      custom-model-data: 48742
+      color: "163,118,236"
+      flags:
+        - HIDE_DYE
+      durability: 425
       update: 3

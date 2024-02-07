@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import com.leomelonseeds.ultimaaddons.commands.Command;
-import com.leomelonseeds.ultimaaddons.invs.Recipes;
+import com.leomelonseeds.ultimaaddons.invs.RecipeList;
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 
 public class UARecipes extends Command {
@@ -29,7 +29,7 @@ public class UARecipes extends Command {
 
     @Override
     public void execute(CommandSender sender, org.bukkit.command.Command cmd, String name, String[] args) {
-        new Recipes((Player) sender);
+        new RecipeList((Player) sender);
     }
 
 }

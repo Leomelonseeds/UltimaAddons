@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons.handlers;
+package com.leomelonseeds.ultimaaddons.handlers.item;
 
 import java.util.UUID;
 

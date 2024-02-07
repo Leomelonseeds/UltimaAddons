@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons.handlers;
+package com.leomelonseeds.ultimaaddons.handlers.kingdom;
 
 import java.util.HashSet;
 import java.util.Set;

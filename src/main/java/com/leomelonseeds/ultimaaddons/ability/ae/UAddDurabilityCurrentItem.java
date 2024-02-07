@@ -12,7 +12,7 @@ import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.Damageable;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.handlers.ItemManager;
+import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 import net.advancedplugins.ae.impl.effects.effects.actions.execution.ExecutionTask;

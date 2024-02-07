@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons.handlers;
+package com.leomelonseeds.ultimaaddons.handlers.item;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -53,7 +55,7 @@ public class ItemManager implements Listener {
     private ConfigurationSection itemConfig;
     private UltimaAddons plugin;
     private Map<String, ItemStack> items;
-    private Map<NamespacedKey, CraftingRecipe> recipes;
+    private Map<NamespacedKey, Pair<CraftingRecipe, String>> recipes;
     private AbilityManager abilityManager;
     private ArmorSetManager armorManager;
 
@@ -163,8 +165,8 @@ public class ItemManager implements Listener {
         // Bundle
         ShapedRecipe bundle = new ShapedRecipe(new NamespacedKey(plugin, "bundle_0"), new ItemStack(Material.BUNDLE));
         bundle.shape("SRS", "RXR", "RRR");
-        bundle.setIngredient('S', new ItemStack(Material.STRING));
-        bundle.setIngredient('R', new ItemStack(Material.RABBIT_HIDE));
+        bundle.setIngredient('S', Material.STRING);
+        bundle.setIngredient('R', Material.RABBIT_HIDE);
         addRecipe(bundle);
     }
 
@@ -223,7 +225,7 @@ public class ItemManager implements Listener {
     /**
      * @return an unmodifiable map of all custom recipes
      */
-    public Map<NamespacedKey, CraftingRecipe> getRecipes() {
+    public Map<NamespacedKey, Pair<CraftingRecipe, String>> getRecipes() {
         return Collections.unmodifiableMap(recipes);
     }
 
@@ -242,8 +244,12 @@ public class ItemManager implements Listener {
     }
 
     private void addRecipe(CraftingRecipe r) {
+        addRecipe(r, "");
+    }
+    
+    private void addRecipe(CraftingRecipe r, String permission) {
         Bukkit.addRecipe(r);
-        recipes.put(r.getKey(), r);
+        recipes.put(r.getKey(), ImmutablePair.of(r, permission));
     }
 
     public AbilityManager getAbilities() {
@@ -281,9 +287,14 @@ public class ItemManager implements Listener {
             return;
         }
 
-        // Return if this is a custom recipe
+        // If this is a custom recipe, check permission
         CraftingRecipe cr = (CraftingRecipe) r;
         if (recipes.containsKey(cr.getKey())) {
+            Player p = (Player) e.getView().getPlayer();
+            String perm = recipes.get(cr.getKey()).getRight();
+            if (!perm.isEmpty() && !p.hasPermission(perm)) {
+                e.getInventory().setResult(null);
+            }
             return;
         }
 
