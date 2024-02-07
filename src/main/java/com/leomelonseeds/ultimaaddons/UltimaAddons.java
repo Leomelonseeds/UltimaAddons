@@ -88,6 +88,7 @@ public class UltimaAddons extends JavaPlugin {
         pm.registerEvents(itemManager, this);
         pm.registerEvents(itemManager.getAbilities(), this);
         pm.registerEvents(itemManager.getArmor(), this);
+        pm.registerEvents(itemManager.getRecipes(), this);
         pm.registerEvents(new ShopkeeperTrade(), this);
         pm.registerEvents(new MiscListener(this), this);
 

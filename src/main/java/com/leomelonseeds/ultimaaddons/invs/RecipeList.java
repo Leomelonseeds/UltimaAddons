@@ -38,7 +38,7 @@ public class RecipeList extends UAInventory {
 
         this.player = player;
         this.page = 0;
-        this.recipes = plugin.getItems().getRecipes();
+        this.recipes = plugin.getItems().getRecipes().getRecipes();
         this.sec = plugin.getConfig().getConfigurationSection("recipegui");
     }
 

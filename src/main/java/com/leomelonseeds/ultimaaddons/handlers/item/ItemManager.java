@@ -2,7 +2,6 @@ package com.leomelonseeds.ultimaaddons.handlers.item;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,11 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.configuration.ConfigurationSection;
@@ -23,16 +18,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
-import org.bukkit.inventory.CraftingInventory;
-import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -53,20 +42,17 @@ import net.kyori.adventure.text.Component;
 public class ItemManager implements Listener {
 
     private ConfigurationSection itemConfig;
-    private UltimaAddons plugin;
     private Map<String, ItemStack> items;
-    private Map<NamespacedKey, Pair<CraftingRecipe, String>> recipes;
+    private RecipeManager recipeManager;
     private AbilityManager abilityManager;
     private ArmorSetManager armorManager;
 
     public ItemManager(UltimaAddons plugin) {
-        this.plugin = plugin;
         items = new HashMap<>();
-        recipes = new HashMap<>();
         abilityManager = new AbilityManager();
         armorManager = new ArmorSetManager();
         loadItems();
-        loadRecipes();
+        recipeManager = new RecipeManager(this, plugin);
     }
     
     /**
@@ -78,15 +64,9 @@ public class ItemManager implements Listener {
         abilityManager.clearAbilities();
         armorManager.clearAttrs();
         
-        // Remove currently loaded recipes
-        for (NamespacedKey key : recipes.keySet()) {
-            Bukkit.removeRecipe(key);
-        }
-        recipes.clear();
-        
         // Load everything again
         loadItems();
-        loadRecipes();
+        recipeManager.reload();
     }
 
     /** Load all items from config, adding abilities as necessary. */
@@ -140,56 +120,6 @@ public class ItemManager implements Listener {
                 Bukkit.getLogger().severe("Something went wrong trying to create item " + key + ":");
                 e.printStackTrace();
             }
-        }
-    }
-    
-    /** Reload all recipes, which are currently hardcoded */
-    private void loadRecipes() {
-        // All namespacedkeys follow the format:
-        // [lowercase item result (enum if mc material, key if ua item)]_index
-        // index starts at 0, add more if more crafting recipes for a single item added
-
-        // Diamonds -> Chips
-        ItemStack dchipresult = getItem("dchip");
-        dchipresult.setAmount(9);
-        ShapelessRecipe dchip = new ShapelessRecipe(new NamespacedKey(plugin, "dchip_0"), dchipresult);
-        dchip.addIngredient(1, Material.DIAMOND);
-        addRecipe(dchip);
-
-        // Chips -> Diamonds
-        ShapedRecipe chipToDiamond = new ShapedRecipe(new NamespacedKey(plugin, "diamond_0"), new ItemStack(Material.DIAMOND));
-        chipToDiamond.shape("CCC", "CCC", "CCC");
-        chipToDiamond.setIngredient('C', getItem("dchip"));
-        addRecipe(chipToDiamond);
-        
-        // Bundle
-        ShapedRecipe bundle = new ShapedRecipe(new NamespacedKey(plugin, "bundle_0"), new ItemStack(Material.BUNDLE));
-        bundle.shape("SRS", "RXR", "RRR");
-        bundle.setIngredient('S', Material.STRING);
-        bundle.setIngredient('R', Material.RABBIT_HIDE);
-        addRecipe(bundle);
-        
-        // Obsidian armor
-        String[] armor = new String[] {"helmet", "chestplate", "leggings", "boots"};
-        for (int i = 0; i < 4; i++) {
-            String a = "obsidian." + armor[i];
-            ShapedRecipe ob = new ShapedRecipe(new NamespacedKey(plugin, a + "_0"), getItem(a));
-            switch (i) {
-                case 0:
-                    ob.shape("III", "IXI");
-                    break;
-                case 1:
-                    ob.shape("IXI", "III", "III");
-                    break;
-                case 2:
-                    ob.shape("III", "IXI", "IXI");
-                    break;
-                default:
-                    ob.shape("IXI", "IXI");
-                    break;
-            }
-            ob.setIngredient('I', getItem("obsidianingot"));
-            addRecipe(ob, "ua.recipe.obsidianarmor");
         }
     }
 
@@ -246,13 +176,6 @@ public class ItemManager implements Listener {
     }
 
     /**
-     * @return an unmodifiable map of all custom recipes
-     */
-    public Map<NamespacedKey, Pair<CraftingRecipe, String>> getRecipes() {
-        return Collections.unmodifiableMap(recipes);
-    }
-
-    /**
      * @return an unmodifiable collection of all custom items
      */
     public Collection<ItemStack> getItems() {
@@ -266,21 +189,16 @@ public class ItemManager implements Listener {
         return Collections.unmodifiableCollection(items.keySet());
     }
 
-    private void addRecipe(CraftingRecipe r) {
-        addRecipe(r, "");
-    }
-    
-    private void addRecipe(CraftingRecipe r, String permission) {
-        Bukkit.addRecipe(r);
-        recipes.put(r.getKey(), ImmutablePair.of(r, permission));
-    }
-
     public AbilityManager getAbilities() {
         return abilityManager;
     }
     
     public ArmorSetManager getArmor() {
         return armorManager;
+    }
+    
+    public RecipeManager getRecipes() {
+        return recipeManager;
     }
     
     // Handle durability changes for custom durability items
@@ -295,37 +213,6 @@ public class ItemManager implements Listener {
     public void onMend(PlayerItemMendEvent e) {
         if (damageItem(e.getItem(), e.getRepairAmount() * -1)) {
             e.setCancelled(true);
-        }
-    }
-
-    // Stop custom items being used for non-custom recipes
-    @EventHandler
-    public void onPrepareCraft(PrepareItemCraftEvent e) {
-        Recipe r = e.getRecipe();
-        if (r == null) {
-            return;
-        }
-
-        if (!(r instanceof CraftingRecipe)) {
-            return;
-        }
-
-        // If this is a custom recipe, check permission
-        CraftingRecipe cr = (CraftingRecipe) r;
-        if (recipes.containsKey(cr.getKey())) {
-            Player p = (Player) e.getView().getPlayer();
-            String perm = recipes.get(cr.getKey()).getRight();
-            if (!perm.isEmpty() && !p.hasPermission(perm)) {
-                e.getInventory().setResult(null);
-            }
-            return;
-        }
-
-        // Get all ingredients and results
-        // Kill result if any item has no item ID
-        CraftingInventory ci = e.getInventory();
-        if (Arrays.asList(ci.getContents()).stream().anyMatch(i -> Utils.getItemID(i) != null)) {
-            e.getInventory().setResult(null);
         }
     }
 
