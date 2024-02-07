@@ -8,8 +8,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.configuration.ConfigurationSection;
@@ -17,6 +19,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
@@ -41,6 +44,7 @@ import net.kyori.adventure.text.Component;
 
 public class ItemManager implements Listener {
 
+    private UltimaAddons plugin;
     private ConfigurationSection itemConfig;
     private Map<String, ItemStack> items;
     private RecipeManager recipeManager;
@@ -48,6 +52,7 @@ public class ItemManager implements Listener {
     private ArmorSetManager armorManager;
 
     public ItemManager(UltimaAddons plugin) {
+        this.plugin = plugin;
         items = new HashMap<>();
         abilityManager = new AbilityManager();
         armorManager = new ArmorSetManager();
@@ -341,5 +346,24 @@ public class ItemManager implements Listener {
                 
                 cur.setItemMeta(curMeta);
         }
+    }
+
+    // Drop obsidian ingot when obsidian is blown up
+    @EventHandler
+    public void onExplode(EntityExplodeEvent e) {
+        Random random = new Random();
+        e.blockList().forEach(b -> {
+            if (b.getType() != Material.OBSIDIAN) {
+                return;
+            }
+            
+            double chance = itemConfig.getDouble("obsidianingot.chance");
+            if (random.nextDouble() < chance) {
+                return;
+            }
+            
+            Bukkit.getScheduler().runTask(plugin, () -> b.getWorld().dropItem(
+                    b.getLocation().toCenterLocation(), getItem("obsidianingot")));
+        });
     }
 }
