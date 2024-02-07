@@ -168,6 +168,29 @@ public class ItemManager implements Listener {
         bundle.setIngredient('S', Material.STRING);
         bundle.setIngredient('R', Material.RABBIT_HIDE);
         addRecipe(bundle);
+        
+        // Obsidian armor
+        String[] armor = new String[] {"helmet", "chestplate", "leggings", "boots"};
+        for (int i = 0; i < 4; i++) {
+            String a = "obsidian." + armor[i];
+            ShapedRecipe ob = new ShapedRecipe(new NamespacedKey(plugin, a + "_0"), getItem(a));
+            switch (i) {
+                case 0:
+                    ob.shape("III", "IXI");
+                    break;
+                case 1:
+                    ob.shape("IXI", "III", "III");
+                    break;
+                case 2:
+                    ob.shape("III", "IXI", "IXI");
+                    break;
+                default:
+                    ob.shape("IXI", "IXI");
+                    break;
+            }
+            ob.setIngredient('I', getItem("obsidianingot"));
+            addRecipe(ob, "ua.recipe.obsidianarmor");
+        }
     }
 
     /**

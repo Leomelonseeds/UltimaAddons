@@ -7,16 +7,17 @@ import org.kingdoms.constants.metadata.KingdomMetadataHandler;
 import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
 import org.kingdoms.constants.namespace.Namespace;
 
-import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityArmor;
-import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityCurrentItem;
 import com.leomelonseeds.ultimaaddons.ability.ae.CaptureEffect;
 import com.leomelonseeds.ultimaaddons.ability.ae.RecuperateEffect;
+import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityArmor;
+import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityCurrentItem;
 import com.leomelonseeds.ultimaaddons.commands.BaseCommand;
 import com.leomelonseeds.ultimaaddons.data.Load;
 import com.leomelonseeds.ultimaaddons.data.Save;
 import com.leomelonseeds.ultimaaddons.data.file.ConfigFile;
 import com.leomelonseeds.ultimaaddons.data.file.Data;
 import com.leomelonseeds.ultimaaddons.handlers.LinkManager;
+import com.leomelonseeds.ultimaaddons.handlers.MiscListener;
 import com.leomelonseeds.ultimaaddons.handlers.ShopkeeperTrade;
 import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
 import com.leomelonseeds.ultimaaddons.handlers.kingdom.KingdomsListener;
@@ -88,6 +89,7 @@ public class UltimaAddons extends JavaPlugin {
         pm.registerEvents(itemManager.getAbilities(), this);
         pm.registerEvents(itemManager.getArmor(), this);
         pm.registerEvents(new ShopkeeperTrade(), this);
+        pm.registerEvents(new MiscListener(this), this);
 
         // Register and Load Data File
         tradesFile = new Data("trades.yml");

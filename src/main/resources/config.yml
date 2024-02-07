@@ -48,6 +48,17 @@ skaddon:
   # Time to count down to for restock | Must be "HH:mm:ss" format
   restock_time: "00:00:00"
 items:
+  obsidianingot:
+    material: NETHERITE_INGOT
+    name: "&5Obsidian Ingot"
+    glow: true
+    custom-model-data: 48743
+    chance: 0.2 # out of 1
+    update: 1
+    lore:
+      - "&7A rare ingredient dropped when"
+      - "&7the blast resistance of obsidian"
+      - "&7is overcome."
   dchip:
     material: PRISMARINE_CRYSTALS
     name: "&fDiamond Chip"
