@@ -27,6 +27,8 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.SmithingInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionType;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
@@ -79,27 +81,46 @@ public class RecipeManager implements Listener {
         bundle.setIngredient('R', Material.RABBIT_HIDE);
         addRecipe(bundle);
         
-        // Obsidian armor
+        // Radiant shard
+        ShapedRecipe rshard = new ShapedRecipe(new NamespacedKey(plugin, "radiantshard_0"), im.getItem("radiantshard"));
+        rshard.shape("SPS", "QLQ", "SPS");
+        rshard.setIngredient('S', Material.AMETHYST_CLUSTER);
+        rshard.setIngredient('P', Material.PRISMARINE_SHARD);
+        rshard.setIngredient('Q', Material.QUARTZ);
+        ItemStack lh = new ItemStack(Material.LINGERING_POTION);
+        PotionMeta pmeta = (PotionMeta) lh.getItemMeta();
+        pmeta.setBasePotionType(PotionType.STRONG_HEALING);
+        lh.setItemMeta(pmeta);
+        rshard.setIngredient('L', lh);
+        addRecipe(rshard);
+        
+        // Armor sets
         String[] armor = new String[] {"helmet", "chestplate", "leggings", "boots"};
-        for (int i = 0; i < 4; i++) {
-            String a = "obsidian." + armor[i];
-            ShapedRecipe ob = new ShapedRecipe(new NamespacedKey(plugin, a + "_0"), im.getItem(a));
-            switch (i) {
-                case 0:
-                    ob.shape("III", "IXI");
-                    break;
-                case 1:
-                    ob.shape("IXI", "III", "III");
-                    break;
-                case 2:
-                    ob.shape("III", "IXI", "IXI");
-                    break;
-                default:
-                    ob.shape("IXI", "IXI");
-                    break;
-            }
-            ob.setIngredient('I', im.getItem("obsidianingot"));
-            addRecipe(ob, "ua.recipe.obsidianarmor");
+        Map<String, ItemStack> ingredients = new HashMap<>();
+        ingredients.put("obsidian", im.getItem("obsidianingot"));
+        ingredients.put("shard", im.getItem("radiantshard"));
+        ingredients.put("infused", im.getItem("infusedingot"));
+        for (String set : ingredients.keySet()) {
+            for (int i = 0; i < 4; i++) {
+                String a = set + "." + armor[i];
+                ShapedRecipe sr = new ShapedRecipe(new NamespacedKey(plugin, a + "_0"), im.getItem(a));
+                switch (i) {
+                    case 0:
+                        sr.shape("III", "IXI");
+                        break;
+                    case 1:
+                        sr.shape("IXI", "III", "III");
+                        break;
+                    case 2:
+                        sr.shape("III", "IXI", "IXI");
+                        break;
+                    default:
+                        sr.shape("IXI", "IXI");
+                        break;
+                }
+                sr.setIngredient('I', ingredients.get(set));
+                addRecipe(sr, "ua.recipe." + set + "armor");
+            } 
         }
     }
 

@@ -58,7 +58,34 @@ items:
     lore:
       - "&7A rare ingredient dropped when"
       - "&7the blast resistance of obsidian"
-      - "&7is overcome."
+      - "&7is overcome. You feel tougher as"
+      - "&7you hold it in your palms."
+  radiantshard:
+    material: AMETHYST_SHARD
+    name: "&dRadiant Shard"
+    glow: true
+    custom-model-data: 48744
+    update: 1
+    lore:
+      - "&7It glows with energy and warmth."
+      - "&7Feel yourself rejuvenated as you"
+      - "&7hold it in your palms."
+  infusedingot:
+    material: COPPER_INGOT
+    name: "&6Infused Ingot"
+    glow: true
+    custom-model-data: 48745
+    chance: 0.01
+    chanceadd: 0.01 # % added for every level of oxidation
+    update: 1
+    lore:
+      - "&7A rare ingredient dropped when"
+      - "&7unwaxed copper is destroyed by"
+      - "&7a charged explosion. Drop chance"
+      - "&7increases the more oxidized the"
+      - "&7copper. Feel yourself become"
+      - "&7stronger as you hold it in"
+      - "&7your palms."
   dchip:
     material: PRISMARINE_CRYSTALS
     name: "&fDiamond Chip"

@@ -3,6 +3,7 @@ package com.leomelonseeds.ultimaaddons.handlers.item;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -14,6 +15,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -100,15 +104,50 @@ public class AbilityManager implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
+        UltimaAddons plugin = UltimaAddons.getPlugin();
+        
         tasks.put(p, new BukkitRunnable() {
             
+            long iteration = 0;
             boolean lastAvailable = false;
             String lastData = "";
             
             @Override
             public void run() {
-                ItemStack i = p.getInventory().getItemInMainHand();
-                String data = Utils.getItemID(i);
+                iteration++;
+                PlayerInventory inv = p.getInventory();
+                String data = Utils.getItemID(inv.getItemInMainHand());
+                
+                // Handle radiant shards first
+                for (String d : new String[] {data, Utils.getItemID(inv.getItemInOffHand())}) {
+                    if (d == null) {
+                        continue;
+                    }
+                    
+                    if (d.equals("radiantshard")) {
+                        // Regen only heals when its a multiple of 50, add another proper regen
+                        // This method runs once every 2 ticks, so for healing time of once every
+                        // x ticks, check if iteration * 2 % x == 0 
+                        int dur = (iteration * 2) % 80 == 0 ? 51 : 25;
+                        Bukkit.getScheduler().runTask(plugin, () -> p.addPotionEffect(
+                                new PotionEffect(PotionEffectType.REGENERATION, dur, 0)));
+                        break;
+                    }
+                    
+                    if (d.equals("obsidianingot")) {
+                        Bukkit.getScheduler().runTask(plugin, () -> p.addPotionEffect(
+                                new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 25, 0)));
+                        break;
+                    }
+                    
+                    if (d.equals("infusedingot")) {
+                        Bukkit.getScheduler().runTask(plugin, () -> p.addPotionEffect(
+                                new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 25, 0)));
+                        break;
+                    }
+                }
+                
+                // Clear existing actionbar if no item present
                 if (data == null || !abilities.containsKey(data)) {
                     if (!lastData.isEmpty()) {
                         p.sendActionBar(Utils.toComponent(""));
@@ -135,7 +174,7 @@ public class AbilityManager implements Listener {
                 
                 lastData = data;
             }
-        }.runTaskTimerAsynchronously(UltimaAddons.getPlugin(), 2, 2));
+        }.runTaskTimerAsynchronously(plugin, 2, 2));
     }
     
     @EventHandler

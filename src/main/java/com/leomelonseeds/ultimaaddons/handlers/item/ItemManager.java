@@ -16,7 +16,10 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -354,22 +357,62 @@ public class ItemManager implements Listener {
         }
     }
 
-    // Drop obsidian ingot when obsidian is blown up
+    // Handle custom item drops for blown up items
     @EventHandler
     public void onExplode(EntityExplodeEvent e) {
         Random random = new Random();
-        e.blockList().forEach(b -> {
-            if (b.getType() != Material.OBSIDIAN) {
-                return;
-            }
-            
+        Entity exploded = e.getEntity();
+        
+        // Check for obsidian ingot drops from blue wither skull
+        if (exploded instanceof WitherSkull && ((WitherSkull) exploded).isCharged()) {
             double chance = itemConfig.getDouble("obsidianingot.chance");
-            if (random.nextDouble() < chance) {
-                return;
-            }
+            e.blockList().forEach(b -> {
+                if (b.getType() != Material.OBSIDIAN) {
+                    return;
+                }
+                
+                if (random.nextDouble() > chance) {
+                    return;
+                }
+                
+                b.setType(Material.AIR);
+                Bukkit.getScheduler().runTask(plugin, () -> b.getWorld().dropItem(
+                        b.getLocation().toCenterLocation(), getItem("obsidianingot")));
+            });
             
-            Bukkit.getScheduler().runTask(plugin, () -> b.getWorld().dropItem(
-                    b.getLocation().toCenterLocation(), getItem("obsidianingot")));
-        });
+            return;
+        }
+        
+        // Check for infused ingot drops from charged creeper
+        if (exploded instanceof Creeper && ((Creeper) exploded).isPowered()) {
+            double chance = itemConfig.getDouble("infusedingot.chance");
+            double chanceadd = itemConfig.getDouble("infusedingot.chanceadd");
+            e.blockList().forEach(b -> {
+                String type = b.getType().toString();
+                if (!type.contains("COPPER") || type.contains("WAXED") || type.contains("CUT")) {
+                    return;
+                }
+                
+                int multiplier = 1;
+                if (type.contains("BLOCK")) {
+                    multiplier = 0;
+                } else if (type.contains("OXIDIZED")) {
+                    multiplier = 3;
+                } else if (type.contains("WEATHERED")) {
+                    multiplier = 2;
+                }
+                
+                double fchance = chance + multiplier * chanceadd;
+                if (random.nextDouble() > fchance) {
+                    return;
+                }
+
+                b.setType(Material.AIR);
+                Bukkit.getScheduler().runTask(plugin, () -> b.getWorld().dropItem(
+                        b.getLocation().toCenterLocation(), getItem("infusedingot")));
+            });
+            
+            return;
+        }
     }
 }
