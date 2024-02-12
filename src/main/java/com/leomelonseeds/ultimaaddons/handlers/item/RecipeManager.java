@@ -100,6 +100,7 @@ public class RecipeManager implements Listener {
         ingredients.put("obsidian", im.getItem("obsidianingot"));
         ingredients.put("shard", im.getItem("radiantshard"));
         ingredients.put("infused", im.getItem("infusedingot"));
+        ingredients.put("mithril", im.getItem("mithrilingot"));
         for (String set : ingredients.keySet()) {
             for (int i = 0; i < 4; i++) {
                 String a = set + "." + armor[i];

@@ -145,6 +145,12 @@ public class AbilityManager implements Listener {
                                 new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 25, 0)));
                         break;
                     }
+                    
+                    if (d.equals("mithrilingot")) {
+                        Bukkit.getScheduler().runTask(plugin, () -> p.addPotionEffect(
+                                new PotionEffect(PotionEffectType.SPEED, 25, 0)));
+                        break;
+                    }
                 }
                 
                 // Clear existing actionbar if no item present

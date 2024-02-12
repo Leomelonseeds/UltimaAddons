@@ -86,6 +86,18 @@ items:
       - "&7copper. Feel yourself become"
       - "&7stronger as you hold it in"
       - "&7your palms."
+  mithrilingot:
+    material: IRON_INGOT
+    name: "&7&lMithril Ingot"
+    glow: true
+    custom-model-data: 48746
+    chance: 0.5
+    update: 1
+    lore:
+      - "&7Formed when shulkers are destroyed"
+      - "&7by star-like temperatures, you feel"
+      - "&7lighter on your feet as you hold it"
+      - "&7in your palms."
   dchip:
     material: PRISMARINE_CRYSTALS
     name: "&fDiamond Chip"

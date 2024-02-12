@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -18,7 +19,11 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Shulker;
 import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,6 +31,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
+import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -354,6 +360,43 @@ public class ItemManager implements Listener {
                 }
                 
                 cur.setItemMeta(curMeta);
+        }
+    }
+    
+    // Handle mithril drops when shulker is struck by lightning
+    @EventHandler
+    public void onLightning(LightningStrikeEvent e) {
+        LightningStrike lightning = e.getLightning();
+        double dmg = 5;
+        Random random = new Random();
+        double chance = itemConfig.getDouble("mithrilingot.chance");
+        if (random.nextDouble() > chance) {
+            return;
+        }
+        
+        // For some reason shulkers don't take lightning damage in vanilla!?
+        for (Entity ent : lightning.getLocation().getNearbyEntities(3, 6, 3)) {
+            if (ent.getType() != EntityType.SHULKER) {
+                continue;
+            }
+            
+            Shulker shulk = (Shulker) ent;
+            if (shulk.getPeek() <= 0) {
+                continue;
+            }
+
+            double curHealth = shulk.getHealth();
+            Location loc = shulk.getLocation();
+            shulk.setNoDamageTicks(0);
+            ((org.bukkit.entity.Damageable) shulk).damage(dmg);
+            if (curHealth > dmg) {
+                continue;
+            }
+            
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                Item i = loc.getWorld().dropItem(loc, getItem("mithrilingot"));
+                i.setHealth(200);
+            }, lightning.getFlashCount() * 10);
         }
     }
 
