@@ -98,6 +98,16 @@ items:
       - "&7by star-like temperatures, you feel"
       - "&7lighter on your feet as you hold it"
       - "&7in your palms."
+  totemofwarping:
+    material: TOTEM_OF_UNDYING
+    name: "&dTotem of Warping &8(Unset)"
+    glow: true
+    custom-model-data: 48747
+    update: 1
+    lore:
+      - "&7A totem that, when combined with"
+      - "&7certain ingredients, allows you to"
+      - "&7teleport to a desired location."
   dchip:
     material: PRISMARINE_CRYSTALS
     name: "&fDiamond Chip"

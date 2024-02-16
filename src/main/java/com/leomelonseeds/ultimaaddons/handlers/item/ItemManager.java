@@ -59,12 +59,14 @@ public class ItemManager implements Listener {
     private RecipeManager recipeManager;
     private AbilityManager abilityManager;
     private ArmorSetManager armorManager;
+    private TotemManager totemManager;
 
     public ItemManager(UltimaAddons plugin) {
         this.plugin = plugin;
         items = new HashMap<>();
         abilityManager = new AbilityManager();
         armorManager = new ArmorSetManager();
+        totemManager = new TotemManager();
         loadItems();
         recipeManager = new RecipeManager(this, plugin);
     }
@@ -213,6 +215,10 @@ public class ItemManager implements Listener {
     
     public RecipeManager getRecipes() {
         return recipeManager;
+    }
+    
+    public TotemManager getTotems() {
+        return totemManager;
     }
     
     // Handle durability changes for custom durability items
