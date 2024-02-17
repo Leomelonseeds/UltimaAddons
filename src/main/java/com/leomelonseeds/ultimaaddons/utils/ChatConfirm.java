@@ -51,18 +51,19 @@ public class ChatConfirm implements Listener {
     
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncPlayerChatEvent e) {
-        if (!e.getPlayer().equals(player)) {
+        Player sender = e.getPlayer();
+        if (!sender.equals(player)) {
             return;
         }
         
-        if (!e.getMessage().equals(req)) {
-            return;
+        success = e.getMessage().equals(req);
+        if (!success) {
+            sender.sendMessage(Utils.toComponent("&cOperation cancelled."));
         }
         
-        success = true;
         e.setCancelled(true);
         stop();
-        Bukkit.getScheduler().runTask(plugin, () -> callback.onConfirm(true));
+        Bukkit.getScheduler().runTask(plugin, () -> callback.onConfirm(success));
     }
     
     public void stop() {

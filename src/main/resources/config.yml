@@ -99,15 +99,64 @@ items:
       - "&7lighter on your feet as you hold it"
       - "&7in your palms."
   totemofwarping:
-    material: TOTEM_OF_UNDYING
-    name: "&dTotem of Warping &8(Unset)"
-    glow: true
-    custom-model-data: 48747
-    update: 1
-    lore:
-      - "&7A totem that, when combined with"
-      - "&7certain ingredients, allows you to"
-      - "&7teleport to a desired location."
+    unset:
+      material: TOTEM_OF_UNDYING
+      name: "&dTotem of Warping &8(Unset)"
+      glow: true
+      custom-model-data: 48747
+      update: 1
+      lore:
+        - "&7A totem that, when combined with"
+        - "&7certain ingredients, allows you to"
+        - "&7teleport to a desired location."
+    khome:
+      material: TOTEM_OF_UNDYING
+      name: "&dTotem of Warping &8(Kingdom Home)"
+      glow: true
+      custom-model-data: 48748
+      update: 1
+      lore:
+        - "&7Right-click to initiate a teleportation"
+        - "&7to your kingdom home location."
+    home:
+      material: TOTEM_OF_UNDYING
+      name: "&dTotem of Warping &8(Bed)"
+      glow: true
+      custom-model-data: 48749
+      update: 1
+      lore:
+        - "&7Right-click to initiate a teleportation"
+        - "&7to your bed or respawn anchor location."
+    death:
+      material: TOTEM_OF_UNDYING
+      name: "&dTotem of Warping &8(Returning)"
+      glow: true
+      custom-model-data: 48750
+      update: 1
+      lore:
+        - "&7Right-click to initiate a teleportation"
+        - "&7to your last death location. Only works"
+        - "&7up to &f5 minutes &7after your last death."
+        - "&7This item is kept in inventory on death."
+    lodestone:
+      material: TOTEM_OF_UNDYING
+      name: "&dTotem of Warping &8(Lodestone: %location%)"
+      glow: true
+      custom-model-data: 48751
+      update: 1
+      lore:
+        - "&7Right-click to initiate a teleportation"
+        - "&7to a set lodestone. Does not work if the"
+        - "&7lodestone has been destroyed."
+    player:
+      material: TOTEM_OF_UNDYING
+      name: "&dTotem of Warping &8(Player: %player%)"
+      glow: true
+      custom-model-data: 48752
+      update: 1
+      lore:
+        - "&7Right-click to request a teleportation"
+        - "&7to a set player, if they are online."
   dchip:
     material: PRISMARINE_CRYSTALS
     name: "&fDiamond Chip"
