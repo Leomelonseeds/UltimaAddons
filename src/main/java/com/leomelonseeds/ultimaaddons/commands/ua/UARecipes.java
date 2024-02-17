@@ -29,6 +29,8 @@ public class UARecipes extends Command {
 
     @Override
     public void execute(CommandSender sender, org.bukkit.command.Command cmd, String name, String[] args) {
+        CommandUtils.sendMsg(sender, "&bNote: There is currently an issue where the resultant slot in recipe displays "
+                + "may not show the correct item. In this case, the recipe list still shows the correct item.");
         new RecipeList((Player) sender);
     }
 

@@ -97,6 +97,12 @@ public class ItemManager implements Listener {
                     continue;
                 }
                 
+                // Use totem manager if warp totem section found
+                if (sec.getName().equals(TotemManager.TOTEM_INDICATOR)) {
+                    items.putAll(totemManager.createTotems(sec));
+                    continue;
+                }
+                
                 ItemStack i = Utils.createItem(sec);
                 items.put(key, i);
 

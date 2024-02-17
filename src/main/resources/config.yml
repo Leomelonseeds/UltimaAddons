@@ -107,8 +107,9 @@ items:
       update: 1
       lore:
         - "&7A totem that, when combined with"
-        - "&7certain ingredients, allows you to"
-        - "&7teleport to a desired location."
+        - "&7certain ingredients (&f/recipes&7), allows"
+        - "&7you to teleport to a desired location."
+        - "&7Totems are consumed on use."
     khome:
       material: TOTEM_OF_UNDYING
       name: "&dTotem of Warping &8(Kingdom Home)"
@@ -140,23 +141,50 @@ items:
         - "&7This item is kept in inventory on death."
     lodestone:
       material: TOTEM_OF_UNDYING
-      name: "&dTotem of Warping &8(Lodestone: %location%)"
+      name: "&dTotem of Warping &8(Lodestone)"
+      set-name: "&dTotem of Warping &8(Lodestone: %location%)"
       glow: true
       custom-model-data: 48751
-      update: 1
+      update: 3
       lore:
         - "&7Right-click to initiate a teleportation"
         - "&7to a set lodestone. Does not work if the"
         - "&7lodestone has been destroyed."
     player:
       material: TOTEM_OF_UNDYING
-      name: "&dTotem of Warping &8(Player: %player%)"
+      name: "&dTotem of Warping &8(Player)"
+      set-name: "&dTotem of Warping &8(Player: %player%)"
       glow: true
       custom-model-data: 48752
-      update: 1
+      update: 3
       lore:
         - "&7Right-click to request a teleportation"
         - "&7to a set player, if they are online."
+  exlodestone:
+    material: COMPASS
+    name: "&fLodestone Compass"
+    glow: true
+    lore:
+      - "&7Right-click a compass on a lodestone"
+      - "&7to create a Lodestone Compass. The"
+      - "&7resulting totem will be bound to the"
+      - "&7same lodestone as this compass."
+  exbook:
+    material: WRITTEN_BOOK
+    name: "&fWritten Book"
+    book:
+      title: "Written Book"
+      author: "M310N"
+      pages:
+        - "hello there"
+      generation: ORIGINAL
+    lore:
+      - ""
+      - "&7The resulting totem will be bound"
+      - "&7to the writer of this book. The"
+      - "&7contents and name of the book do"
+      - "&7not matter, but it must be an"
+      - "&7original copy."
   dchip:
     material: PRISMARINE_CRYSTALS
     name: "&fDiamond Chip"

@@ -123,6 +123,38 @@ public class RecipeManager implements Listener {
                 addRecipe(sr, "ua.recipe." + set + "armor");
             } 
         }
+        
+        // Totems
+        // Totem of Warping
+        String stot = TotemManager.TOTEM_INDICATOR + ".";
+        String sunsettot = stot + "unset";
+        ItemStack iunsettot = im.getItem(sunsettot);
+        ShapedRecipe unsettot = new ShapedRecipe(new NamespacedKey(plugin, sunsettot + "_0"), iunsettot);
+        unsettot.shape("XCX", "XTX", "XEX");
+        unsettot.setIngredient('C', Material.CHORUS_FRUIT);
+        unsettot.setIngredient('T', Material.TOTEM_OF_UNDYING);
+        unsettot.setIngredient('E', Material.ENDER_EYE);
+        addRecipe(unsettot);
+        
+        // Kingdom home, respawn point, and returning all use basic materials
+        shapelessTotemHelper(iunsettot, stot + "khome", Material.WHITE_BED, null);
+        shapelessTotemHelper(iunsettot, stot + "death", Material.CALIBRATED_SCULK_SENSOR, null);
+        shapelessTotemHelper(iunsettot, stot + "home", Material.COMPASS, null);
+        
+        // Recall and player both use recipes with EXAMPLE ITEMS
+        shapelessTotemHelper(iunsettot, stot + "lodestone", null, im.getItem("exlodestone"));
+        shapelessTotemHelper(iunsettot, stot + "player", null, im.getItem("exbook"));
+    }
+    
+    private void shapelessTotemHelper(ItemStack unset, String name, Material m, ItemStack i) {
+        ShapelessRecipe sr = new ShapelessRecipe(new NamespacedKey(plugin, name + "_0"), im.getItem(name));
+        sr.addIngredient(unset);
+        if (i != null) {
+            sr.addIngredient(i);
+        } else {
+            sr.addIngredient(m);
+        }
+        addRecipe(sr);
     }
 
     /**
