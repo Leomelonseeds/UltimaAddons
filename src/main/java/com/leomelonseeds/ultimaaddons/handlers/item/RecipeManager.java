@@ -137,13 +137,13 @@ public class RecipeManager implements Listener {
         addRecipe(unsettot);
         
         // Kingdom home, respawn point, and returning all use basic materials
-        shapelessTotemHelper(iunsettot, stot + "khome", Material.WHITE_BED, null);
-        shapelessTotemHelper(iunsettot, stot + "death", Material.CALIBRATED_SCULK_SENSOR, null);
-        shapelessTotemHelper(iunsettot, stot + "home", Material.COMPASS, null);
+        shapelessTotemHelper(iunsettot, stot + TotemType.KHOME, Material.WHITE_BED, null);
+        shapelessTotemHelper(iunsettot, stot + TotemType.DEATH, Material.CALIBRATED_SCULK_SENSOR, null);
+        shapelessTotemHelper(iunsettot, stot + TotemType.HOME, Material.COMPASS, null);
         
         // Recall and player both use recipes with EXAMPLE ITEMS
-        shapelessTotemHelper(iunsettot, stot + "lodestone", null, im.getItem("exlodestone"));
-        shapelessTotemHelper(iunsettot, stot + "player", null, im.getItem("exbook"));
+        shapelessTotemHelper(iunsettot, stot + TotemType.LODESTONE, null, im.getItem("exlodestone"));
+        shapelessTotemHelper(iunsettot, stot + TotemType.PLAYER, null, im.getItem("exbook"));
     }
     
     private void shapelessTotemHelper(ItemStack unset, String name, Material m, ItemStack i) {

@@ -66,7 +66,7 @@ public class ItemManager implements Listener {
         items = new HashMap<>();
         abilityManager = new AbilityManager();
         armorManager = new ArmorSetManager();
-        totemManager = new TotemManager();
+        totemManager = new TotemManager(this, plugin);
         loadItems();
         recipeManager = new RecipeManager(this, plugin);
     }
@@ -156,7 +156,7 @@ public class ItemManager implements Listener {
             return false;
         }
         
-        String dura = Utils.getItemInfo(item, UltimaAddons.duraKey);
+        String dura = Utils.getItemID(item, UltimaAddons.duraKey);
         if (dura == null) {
             return false;
         }
@@ -265,7 +265,7 @@ public class ItemManager implements Listener {
         // If item durability and actual durability are unmatched,
         // try to match the durabilities. This is used in cases such as
         // anvil repairs, crafting combination, and grindstone combination.
-        String dura = Utils.getItemInfo(cur, UltimaAddons.duraKey);
+        String dura = Utils.getItemID(cur, UltimaAddons.duraKey);
         if (dura != null) {
             Damageable dmeta = (Damageable) cur.getItemMeta();
             int amax = cur.getType().getMaxDurability();

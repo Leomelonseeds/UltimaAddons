@@ -23,12 +23,14 @@ public class ChatConfirm implements Listener {
     private boolean success;
     private String req;
     private UltimaAddons plugin;
+    private String cancelmsg;
     
-    public ChatConfirm(Player player, String req, int time, ConfirmCallback callback) {
+    public ChatConfirm(Player player, String req, int time, String cancelmsg, ConfirmCallback callback) {
         this.callback = callback;
         this.req = req;
         this.success = false;
         this.player = player;
+        this.cancelmsg = cancelmsg;
         
         // Return if player already is in a chat window
         if (instances.containsKey(player)) {
@@ -44,7 +46,7 @@ public class ChatConfirm implements Listener {
                 return;
             }
             
-            callback.onConfirm(false);
+            callback();
             stop();
         }, time * 20);
     }
@@ -57,13 +59,22 @@ public class ChatConfirm implements Listener {
         }
         
         success = e.getMessage().equals(req);
-        if (!success) {
-            sender.sendMessage(Utils.toComponent("&cOperation cancelled."));
-        }
-        
         e.setCancelled(true);
         stop();
-        Bukkit.getScheduler().runTask(plugin, () -> callback.onConfirm(success));
+        Bukkit.getScheduler().runTask(plugin, () -> callback());
+    }
+    
+    public String getReq() {
+        return req;
+    }
+    
+    private void callback() {
+        if (!success) {
+            player.sendMessage(Utils.toComponent("&c" + cancelmsg));
+        }
+        
+        callback.onConfirm(success);
+        stop();
     }
     
     public void stop() {

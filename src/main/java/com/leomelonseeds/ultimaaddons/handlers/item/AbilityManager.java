@@ -100,7 +100,7 @@ public class AbilityManager implements Listener {
         }
     }
     
-    // Handle actionbars
+    // Handle actionbars and ingot effects
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();

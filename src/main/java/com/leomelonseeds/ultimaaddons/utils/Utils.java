@@ -195,7 +195,7 @@ public class Utils {
             // Stop chat confirm from happening
             if (t.equals("Challenge")) {
                 ChatConfirm pc = ChatConfirm.instances.get(p);
-                if (pc != null) {
+                if (pc != null && pc.getReq().equals("confirm")) {
                     pc.stop();
                 }
             }
@@ -371,10 +371,10 @@ public class Utils {
      * @return
      */
     public static String getItemID(ItemStack i) {
-        return getItemInfo(i, UltimaAddons.itemKey);
+        return getItemID(i, UltimaAddons.itemKey);
     }
 
-    public static String getItemInfo(ItemStack i, NamespacedKey key) {
+    public static String getItemID(ItemStack i, NamespacedKey key) {
         if (i == null || i.getItemMeta() == null) {
             return null;
         }

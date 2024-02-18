@@ -112,7 +112,7 @@ items:
         - "&7Totems are consumed on use."
     khome:
       material: TOTEM_OF_UNDYING
-      name: "&dTotem of Warping &8(Kingdom Home)"
+      name: "&dTotem of Warping &b(Kingdom Home)"
       glow: true
       custom-model-data: 48748
       update: 1
@@ -121,7 +121,7 @@ items:
         - "&7to your kingdom home location."
     home:
       material: TOTEM_OF_UNDYING
-      name: "&dTotem of Warping &8(Bed)"
+      name: "&dTotem of Warping &b(Bed)"
       glow: true
       custom-model-data: 48749
       update: 1
@@ -130,7 +130,7 @@ items:
         - "&7to your bed or respawn anchor location."
     death:
       material: TOTEM_OF_UNDYING
-      name: "&dTotem of Warping &8(Returning)"
+      name: "&dTotem of Warping &b(Returning)"
       glow: true
       custom-model-data: 48750
       update: 1
@@ -141,8 +141,8 @@ items:
         - "&7This item is kept in inventory on death."
     lodestone:
       material: TOTEM_OF_UNDYING
-      name: "&dTotem of Warping &8(Lodestone)"
-      set-name: "&dTotem of Warping &8(Lodestone: %location%)"
+      name: "&dTotem of Warping &b(Lodestone)"
+      set-name: "&dTotem of Warping &b(Lodestone: %location%)"
       glow: true
       custom-model-data: 48751
       update: 3
@@ -152,8 +152,8 @@ items:
         - "&7lodestone has been destroyed."
     player:
       material: TOTEM_OF_UNDYING
-      name: "&dTotem of Warping &8(Player)"
-      set-name: "&dTotem of Warping &8(Player: %player%)"
+      name: "&dTotem of Warping &b(Player)"
+      set-name: "&dTotem of Warping &b(Player: %player%)"
       glow: true
       custom-model-data: 48752
       update: 3
@@ -183,8 +183,8 @@ items:
       - "&7The resulting totem will be bound"
       - "&7to the writer of this book. The"
       - "&7contents and name of the book do"
-      - "&7not matter, but it must be an"
-      - "&7original copy."
+      - "&7not matter, but its generation"
+      - "&7must be original."
   dchip:
     material: PRISMARINE_CRYSTALS
     name: "&fDiamond Chip"

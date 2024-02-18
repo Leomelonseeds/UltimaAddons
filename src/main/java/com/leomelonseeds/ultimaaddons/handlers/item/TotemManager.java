@@ -1,16 +1,43 @@
 package com.leomelonseeds.ultimaaddons.handlers.item;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.lang3.math.NumberUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Statistic;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+import org.kingdoms.constants.player.KingdomPlayer;
+import org.kingdoms.server.location.ImmutableLocation;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.utils.ChatConfirm;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class TotemManager implements Listener {
@@ -18,11 +45,19 @@ public class TotemManager implements Listener {
     public static final String TOTEM_INDICATOR = "totemofwarping";
     private static NamespacedKey totemKey;
     
+    private UltimaAddons plugin;
+    private ItemManager im;
     private ConfigurationSection totemSec;
+    private Map<Player, BukkitTask> pendingTP;
+    private Set<Player> pendingAccept;
     
-    public TotemManager() {
+    public TotemManager(ItemManager im, UltimaAddons plugin) {
+        this.im = im;
+        this.plugin = plugin;
+        this.pendingTP = new HashMap<>();
+        this.pendingAccept = new HashSet<>();
         if (totemKey == null) {
-            totemKey = new NamespacedKey(UltimaAddons.getPlugin(), "totem");
+            totemKey = new NamespacedKey(plugin, "totem");
         }
     }
 
@@ -39,6 +74,360 @@ public class TotemManager implements Listener {
         }
         
         return res;
+    }
+    
+    public void cancelTasks() {
+        pendingTP.values().forEach(t -> t.cancel());
+    }
+    
+    private void removePlayer(Player p, String reason) {
+        if (!pendingTP.containsKey(p)) {
+            return;
+        }
+        
+        pendingTP.remove(p).cancel();
+        if (reason != null) {
+            msg(p, "&cTeleportation cancelled because you " + reason + ".");
+        }
+    }
+
+    private void initiateTeleportation(Player player, ItemStack totem, Location loc) {
+        initiateTeleportation(player, totem, loc, null);
+    }
+    
+    /**
+     * Start a teleportation. Loc cannot be null.
+     * 
+     * @param player
+     * @param loc
+     * @param safe if true, searches upwards from loc until safe airblocks found.
+     */
+    private void initiateTeleportation(Player player, ItemStack totem, Location loc, Player other) {
+        if (pendingTP.containsKey(player)) {
+            return;
+        }
+        
+        pendingTP.put(player, new BukkitRunnable() {
+            
+            int iteration = 5;
+            
+            @Override
+            public void run() {
+                if (iteration > 0) {
+                    msg(player, "&bTeleporting in &f" + iteration + " &bseconds, do not move...");
+                    iteration--;
+                    return;
+                }
+                
+                // Stop other player tp if they are no longer online
+                boolean playertp = other != null; // TRUE if we tp to another player
+                if (playertp && !other.isOnline()) {
+                    msg(player, "&f" + Utils.toPlain(other.displayName()) + " &cis no longer online!");
+                    this.cancel();
+                    removePlayer(player, null);
+                }
+                
+                // Only perform safe TP if we are NOT teleporting to another player.
+                Location curLoc = playertp ? other.getLocation() : loc;
+                if (!playertp) {
+                    while (curLoc.getBlock().getType() != Material.AIR || 
+                           curLoc.clone().add(0, 1, 0).getBlock().getType() != Material.AIR) {
+                        curLoc.add(0, 1, 0);
+                    } 
+                }
+
+                totem.setAmount(totem.getAmount() - 1);
+                msg(player, "&bTeleporting...");
+                Bukkit.getScheduler().runTask(plugin, () -> player.teleport(curLoc));
+                this.cancel();
+                removePlayer(player, null);
+            }
+        }.runTaskTimerAsynchronously(plugin, 0, 20));
+    }
+    
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+        // Check pending tp set first for better performance
+        Player p = e.getPlayer();
+        if (!pendingTP.containsKey(p)) {
+            return;
+        }
+        
+        Location from = e.getFrom();
+        Location to = e.getTo();
+        if (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ()) {
+            removePlayer(e.getPlayer(), "moved");
+        }
+    }
+    
+    @EventHandler
+    public void onSwap(PlayerSwapHandItemsEvent e) {
+        removePlayer(e.getPlayer(), "changed items");
+    }
+    
+    @EventHandler
+    public void onHotkey(PlayerItemHeldEvent e) {
+        removePlayer(e.getPlayer(), "changed items");
+    }
+    
+    // Handle totem right-clicks and teleportations
+    @EventHandler
+    public void onClick(PlayerInteractEvent e) {
+        if (!e.getAction().isRightClick()) {
+            return;
+        }
+
+        ItemStack totem = e.getItem();
+        String totid = Utils.getItemID(totem, totemKey);
+        if (totid == null || isType(totid, TotemType.UNSET)) {
+            return;
+        }
+        
+        // KINGDOM HOME TELEPORT
+        Player player = e.getPlayer();
+        if (isType(totid, TotemType.KHOME)) {
+            KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(player);
+            if (!kp.hasKingdom()) {
+                msg(player, "&cYou do not have a Kingdom!");
+                return;
+            }
+            
+            ImmutableLocation loc = kp.getKingdom().getHome();
+            if (loc == null) {
+                msg(player, "&cYour kingdom does not have a valid home!");
+                return;
+            }
+            
+            World w = Bukkit.getWorld(loc.getWorld().getName());
+            Location tpLoc = new Location(w, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
+            initiateTeleportation(player, totem, tpLoc);
+            return;
+        }
+        
+        // REGULAR HOME TELEPORT
+        if (isType(totid, TotemType.HOME)) {
+            Location loc = player.getRespawnLocation();
+            if (loc == null) {
+                msg(player, "&cYou do not have a valid respawn location!");
+                return;
+            }
+            
+            initiateTeleportation(player, totem, loc);
+            return;
+        }
+        
+        // LAST DEATH TELEPORT
+        if (isType(totid, TotemType.DEATH)) {
+            int deathTimeout = 20 * 300; // 5 minutes in ticks
+            int lastDeath = player.getStatistic(Statistic.TIME_SINCE_DEATH);
+            Location loc = player.getLastDeathLocation();
+            if (loc == null || lastDeath > deathTimeout) {
+                msg(player, "&cYou have not died within the last 5 minutes!");
+                return;
+            }
+            
+            initiateTeleportation(player, totem, loc);
+            return;
+        }
+
+        String[] args = totid.split(":");
+        if (args.length != 2) {
+            msg(player, "&cYour totem is invalid! Please contact an administrator.");
+            Bukkit.getLogger().warning("Invalid totem detected. Item: " + totem);
+            return;
+        }
+        
+        // LODESTONE TELEPORT
+        if (isType(args[0], TotemType.LODESTONE)) {
+            // Reset totem to unset if lodestone no longer exists.
+            Location loc = stringToLoc(args[1]);
+            if (loc.getBlock().getType() != Material.LODESTONE) {
+                msg(player, "&cThat lodestone no longer exists :(");
+                return;
+            }
+            
+            initiateTeleportation(player, totem, loc.toCenterLocation().add(0, 0.5, 0));
+            return;
+        }
+        
+        // PLAYER TELEPORT
+        if (isType(args[0], TotemType.PLAYER)) {
+            Player other = Bukkit.getPlayer(args[1]);
+            if (other == null) {
+                msg(player, "&cThat player is not online!");
+                return;
+            }
+            
+            if (other.equals(player)) {
+                return;
+            }
+            
+            String otherName = Utils.toPlain(other.displayName());
+            if (pendingAccept.contains(player)) {
+                msg(player, "&bRequest to &f" + otherName + " &bstill pending...");
+                return;
+            }
+            
+            pendingAccept.add(player);
+            msg(player, "&bSent a teleportation request to &f" + otherName + "&b...");
+            other.sendMessage(Utils.toComponent("&c&l[!] &f" + Utils.toPlain(player.displayName()) + " &7 has requested to teleport to you."));
+            other.sendMessage(Utils.toComponent("&c&l[!] &7To accept, type \"&aaccept&7\" in the chat within &f30 seconds&7."));
+            other.sendMessage(Utils.toComponent("&c&l[!] &7To deny, type anything else in the chat."));
+            new ChatConfirm(other, "accept", 30, "Teleportation request denied.", result -> {
+                pendingAccept.remove(player);
+                if (!player.isOnline()) {
+                    return;
+                }
+                
+                if (result == null || !result) {
+                    msg(player, "&cYour request was not accepted.");
+                    return;
+                }
+                
+                if (!player.getInventory().getItem(e.getHand()).equals(totem)) {
+                    msg(player, "&cTeleportation cancelled because you changed items.");
+                    return;
+                }
+                
+                initiateTeleportation(player, totem, null, other);
+                return;
+            });
+            return;
+        }
+        
+        msg(player, "&cYour totem is invalid! Please contact an administrator.");
+        Bukkit.getLogger().warning("Invalid totem detected. Item: " + totem);
+    }
+    
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        removePlayer(e.getPlayer(), null);
+    }
+    
+    // Handle shapeless totem recipes. The recipes added to RecipeManager are only for display in /recipes,
+    // the actual recipes are handled here for different bed types, compass/book meta, and creating totems
+    // from any other totem.
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onCraft(PrepareItemCraftEvent e) {
+        CraftingInventory ci = e.getInventory();
+        List<ItemStack> curItems = new ArrayList<>();
+        
+        // Add all non-null items in grid to a list to use for later.
+        for (ItemStack item : ci.getMatrix()) {
+            if (item != null) {
+                curItems.add(item);
+            }
+        }
+        
+        // Must only have 2 ingredients
+        if (curItems.size() != 2) {
+            return;
+        }
+        
+        // Must have a totem and another item
+        ItemStack other = null;
+        ItemStack curTotem = null;
+        for (ItemStack item : curItems) {
+            if (Utils.getItemID(item, totemKey) == null) {
+                other = item;
+            } else {
+                curTotem = item;
+            }
+        }
+        
+        if (curTotem == null || other == null) {
+            return;
+        }
+        
+        String mat = other.getType().toString();
+        if (mat.contains("_BED")) {
+            setResult(ci, curTotem, getTotem(TotemType.KHOME));
+            return;
+        }
+        
+        if (mat.equals("COMPASS")) {
+            CompassMeta cmeta = (CompassMeta) other.getItemMeta();
+            if (!cmeta.hasLodestone()) {
+                setResult(ci, curTotem, getTotem(TotemType.HOME));
+                return;
+            }
+            
+            Location lodestone = cmeta.getLodestone();
+            if (lodestone == null) {
+                ci.setResult(null);
+                return;
+            }
+            
+            ItemStack ltot = getTotem(TotemType.LODESTONE);
+            String lodeloc = locToString(lodestone);
+            String totname = totemSec.getString("lodestone.set-name").replace("%location%", lodeloc);
+            ItemMeta tmeta = ltot.getItemMeta();
+            tmeta.displayName(Utils.toComponent(totname));
+            tmeta.getPersistentDataContainer().set(totemKey, PersistentDataType.STRING, "lodestone:" + lodeloc);
+            ltot.setItemMeta(tmeta);
+            setResult(ci, curTotem, ltot);
+            return;
+        }
+        
+        if (mat.equals("CALIBRATED_SCULK_SENSOR")) {
+            setResult(ci, curTotem, getTotem(TotemType.DEATH));
+            return;
+        }
+        
+        if (mat.equals("WRITTEN_BOOK")) {
+            // Apparently if a book meta does NOT have generation, then it must be original
+            BookMeta bmeta = (BookMeta) other.getItemMeta();
+            if (!bmeta.hasAuthor() || bmeta.hasGeneration()) {
+                ci.setResult(null);
+                return;
+            }
+            
+            String player = bmeta.getAuthor();
+            ItemStack btot = getTotem(TotemType.PLAYER);
+            ItemMeta tmeta = btot.getItemMeta();
+            String totname = totemSec.getString("player.set-name").replace("%player%", player);
+            tmeta.displayName(Utils.toComponent(totname));
+            tmeta.getPersistentDataContainer().set(totemKey, PersistentDataType.STRING, "player:" + player);
+            btot.setItemMeta(tmeta);
+            setResult(ci, curTotem, btot);
+            return;
+        }
+    }
+    
+    // Sets the crafting inventory result to the specified item, unless the given
+    // curTotem is already the same as the result. Requires that curTotem and nTotem
+    // both have a totem tag
+    private void setResult(CraftingInventory ci, ItemStack curTotem, ItemStack nTotem) {
+        if (Utils.getItemID(curTotem, totemKey).equals(Utils.getItemID(nTotem, totemKey))) {
+            ci.setResult(null);
+        } else {
+            ci.setResult(nTotem);
+        }
+    }
+    
+    private boolean isType(String s, TotemType type) {
+        return s.equals(type.toString());
+    }
+    
+    private ItemStack getTotem(TotemType type) {
+        return im.getItem(TOTEM_INDICATOR + "." + type);
+    }
+    
+    // Requires a non-null location
+    private String locToString(Location loc) {
+        return loc.getWorld().getName() + ", " + loc.getBlockX() + ", " + 
+                loc.getBlockY() + ", " + loc.getBlockZ();
+    }
+    
+    // Requires that s be a valid string produced from locToString
+    private Location stringToLoc(String s) {
+        String[] args = s.split(", ");
+        return new Location(Bukkit.getWorld(args[0]), NumberUtils.toInt(args[1]), 
+                NumberUtils.toInt(args[2]), NumberUtils.toInt(args[3]));
+    }
+    
+    private void msg(Player p, String s) {
+        p.sendActionBar(Utils.toComponent(s));
     }
 
 }

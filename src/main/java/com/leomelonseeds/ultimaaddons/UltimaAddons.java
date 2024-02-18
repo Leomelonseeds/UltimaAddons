@@ -100,6 +100,7 @@ public class UltimaAddons extends JavaPlugin {
     public void onDisable() {
         writeTradesFile();
         itemManager.getAbilities().cancelTasks();
+        itemManager.getTotems().cancelTasks();
     }
 
     public InventoryManager getInvs() {

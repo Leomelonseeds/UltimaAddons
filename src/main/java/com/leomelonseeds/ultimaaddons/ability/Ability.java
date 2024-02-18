@@ -103,7 +103,7 @@ public abstract class Ability {
         }
         
         PlayerInteractEvent pie = (PlayerInteractEvent) e;
-        return pie.getAction().toString().contains("RIGHT");
+        return pie.getAction().isRightClick();
     }
     
     @Override

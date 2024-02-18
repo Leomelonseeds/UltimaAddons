@@ -153,7 +153,7 @@ public class UAChallenge extends Command {
                     "&7. Challenging another kingdom will remove this shield, and you will have to wait &e" +
                     Utils.formatDate(Utils.getNextShield(attacker) - date) + " &7before you can buy another one. " +
                     "Please type 'confirm' in the chat within 30 seconds to continue.");
-            new ChatConfirm(player, "confirm", 30, result ->
+            new ChatConfirm(player, "confirm", 30, "Declaration cancelled.", result ->
             {
                 if (result == null || !result)
                     return;
@@ -182,7 +182,7 @@ public class UAChallenge extends Command {
         CommandUtils.sendMsg(player, "&cFinally, neither kingdom will be able to claim/unclaim lands or move their nexus during the preparation period.");
         CommandUtils.sendMsg(player, "");
         CommandUtils.sendMsg(player, "&cPlease type 'confirm' in the chat within 1 minute to continue.");
-        new ChatConfirm(player, "confirm", 60, result ->
+        new ChatConfirm(player, "confirm", 60, "Declaration cancelled.", result ->
         {
             if (result == null || !result)
                 return;
