@@ -12,13 +12,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.Statistic;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -26,11 +30,14 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.CraftingInventory;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.kingdoms.constants.player.KingdomPlayer;
@@ -76,10 +83,6 @@ public class TotemManager implements Listener {
         return res;
     }
     
-    public void cancelTasks() {
-        pendingTP.values().forEach(t -> t.cancel());
-    }
-    
     private void removePlayer(Player p, String reason) {
         if (!pendingTP.containsKey(p)) {
             return;
@@ -107,13 +110,32 @@ public class TotemManager implements Listener {
             return;
         }
         
+        Location from = player.getLocation().clone().add(0, 1, 0);
+        final int TIME = 5;
         pendingTP.put(player, new BukkitRunnable() {
             
-            int iteration = 5;
+            int iteration = TIME;
             
             @Override
             public void run() {
                 if (iteration > 0) {
+                    if (iteration == TIME) {
+                        Utils.sendSound(Sound.BLOCK_BEACON_POWER_SELECT, 2F, 2F, from);
+                    } else {
+                        player.playSound(from, Sound.BLOCK_NOTE_BLOCK_HARP, 1F, 1F);
+                    }
+                    
+                    if (iteration == 2) {
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 0));
+                    } else if (iteration == 1) {
+                        Utils.sendSound(Sound.ENTITY_ZOMBIE_VILLAGER_CONVERTED, 2F, 0.9F, from);
+                    }
+                    
+                    int since = TIME - iteration;
+                    if (iteration > 1) {
+                        player.spawnParticle(Particle.PORTAL, from, 50 + since * 50, 0.1, 0.1, 0.1, 0.7 + since * 0.1);
+                    }
+                    Utils.sendSound(Sound.BLOCK_BEACON_AMBIENT, 2F, 1.2F + since * 0.2F, from);
                     msg(player, "&bTeleporting in &f" + iteration + " &bseconds, do not move...");
                     iteration--;
                     return;
@@ -138,11 +160,15 @@ public class TotemManager implements Listener {
 
                 totem.setAmount(totem.getAmount() - 1);
                 msg(player, "&bTeleporting...");
-                Bukkit.getScheduler().runTask(plugin, () -> player.teleport(curLoc));
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    player.teleport(curLoc);
+                    player.spawnParticle(Particle.DRAGON_BREATH, curLoc.clone().add(0, 1, 0), 50, 0, 0, 0, 0.1);
+                    Utils.sendSound(Sound.ITEM_TOTEM_USE, 0.8F, 2F, curLoc);
+                });
                 this.cancel();
                 removePlayer(player, null);
             }
-        }.runTaskTimerAsynchronously(plugin, 0, 20));
+        }.runTaskTimer(plugin, 1, 20)); // Start 1 tick later to make sure its not immediately cancelled due to movement or something
     }
     
     @EventHandler
@@ -153,9 +179,7 @@ public class TotemManager implements Listener {
             return;
         }
         
-        Location from = e.getFrom();
-        Location to = e.getTo();
-        if (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ()) {
+        if (e.getFrom().distance(e.getTo()) > 0.1) {
             removePlayer(e.getPlayer(), "moved");
         }
     }
@@ -168,6 +192,25 @@ public class TotemManager implements Listener {
     @EventHandler
     public void onHotkey(PlayerItemHeldEvent e) {
         removePlayer(e.getPlayer(), "changed items");
+    }
+    
+    // Do not allow totems to resurrect players
+    @EventHandler(ignoreCancelled = true)
+    public void onTotem(EntityResurrectEvent e) {
+        if (e.getEntityType() != EntityType.PLAYER) {
+            return;
+        }
+        
+        EquipmentSlot hand = e.getHand();
+        if (hand == null) {
+            return;
+        }
+        
+        Player p = (Player) e.getEntity();
+        ItemStack tot = p.getInventory().getItem(hand);
+        if (Utils.getItemID(tot, totemKey) != null) {
+            e.setCancelled(true);
+        }
     }
     
     // Handle totem right-clicks and teleportations
@@ -427,6 +470,9 @@ public class TotemManager implements Listener {
     }
     
     private void msg(Player p, String s) {
+        if (s.indexOf("&c") == 0) {
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1F, 1F);
+        }
         p.sendActionBar(Utils.toComponent(s));
     }
 
