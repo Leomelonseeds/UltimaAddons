@@ -67,13 +67,26 @@ The plugin also provides some custom items and recipes that add some fresh gamep
 
 ### Armor
 Each armorset has the protection and armor toughness equivalent of Netherite, unless stated otherwise.
-- Mithril: Each piece, when worn, gives +1% movement speed per level of Agility (from Aurelium) above 25.
+- Mithril: Each piece, when worn, gives +0.5% movement speed per level of Agility (from Aurelium) above 25.
 - Obsidian: Each piece gives +0.2 armor toughness per level of Endurance above 25, increasing its resistance against high-damage attacks.
 - Infused: Each piece gives +0.5% attack damage per level of Fighting above 25.
 - Shard: Each piece gives +0.1 max health per level of Mining above 25.
 
+### Warp Totems
+The plugin replaces regular teleportation commands with item-based teleports. After crafting a Totem of Warping, it can be combined in the crafting table with various items to create totems set to different locations. Totems are consumed on use, and require a 5 second timer without moving before teleportation succeeds.
+- Totem of Warping (Kingdom Home): Crafted using any bed, right-click to initiate a teleportation to your kingdom home location.
+- Totem of Warping (Bed): Crafted using a compass, right-click to initiate a teleportation to your bed or respawn anchor location. Does not work if your respawn point was destroyed.
+- Totem of Warping (Death): Crafted using a calibrated sculk sensor, right-click to initiate a teleportation to your last death location. Only works up to 5 minutes after your last death. The item is kept in inventory on death.
+- Totem of Warping (Lodestone): Crafted using a lodestone compass, right-click to initiate a teleportation to the lodestone set by the lodestone compass. Does not work if the lodestone has been destroyed.
+- Totem of Warping (Player): Crafting this item requires an original generation (non-copy) written book signed by another player. Right-click to request a teleportation to the player set by the book, if they are online.
+
 ### Others
 - Diamond Chip: Like iron or gold nuggets, but for diamonds. Used for better economy integration, since Ultima uses a item-based economy with diamonds as its currency.
+- Obsidian Ingot: A rare ingredient dropped when the blast resistance of obsidian is overcome. Gives Resistance I when held. Used to craft obsidian armor.
+- Radiant Shard: Gives Regeneration I when held. Used to craft Shard armor.
+- Infused Ingot: A rare ingredient dropped when unwaxed copper is destroyed by a charged explosion. Drop chance increases the more oxidized the copper. Gives Strength I when held. Used to craft Infused armor.
+- Mithril Ingot: Formed when shulkers are destroyed by star-like temperatires. Gives Speed I when held. Used to craft Mithril armor.
+- Bundle: An item that never became obtainable in survival, now has a recipe.
 
 ## Shopkeepers
 The plugin also hooks onto Shopkeepers and creates two new types of shopkeepers (combinable), namely:
