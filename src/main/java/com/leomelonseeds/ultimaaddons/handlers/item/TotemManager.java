@@ -23,6 +23,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityResurrectEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -192,6 +193,23 @@ public class TotemManager implements Listener {
     @EventHandler
     public void onHotkey(PlayerItemHeldEvent e) {
         removePlayer(e.getPlayer(), "changed items");
+    }
+    
+    // Keep death totems on death
+    @EventHandler
+    public void onDeath(PlayerDeathEvent e) {
+        List<ItemStack> drops = e.getDrops();
+        for (ItemStack i : new ArrayList<>(drops)) {
+            String id = Utils.getItemID(i, totemKey);
+            if (id == null) {
+                continue;
+            }
+            
+            if (isType(id, TotemType.DEATH)) {
+                drops.remove(i);
+                e.getItemsToKeep().add(i);
+            }
+        }
     }
     
     // Do not allow totems to resurrect players
