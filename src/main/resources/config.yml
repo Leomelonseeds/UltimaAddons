@@ -541,3 +541,13 @@ items:
         - HIDE_DYE
       durability: 425
       update: 3
+  dragonfirework:
+    material: FIREWORK_ROCKET
+    name: "&dDragon Firework"
+    lore:
+      - "&7The only firework capable of"
+      - "&7boosting elytra flight. Boost"
+      - "&7is tripled while in the end."
+    custom-mode-ldata: 48753
+    glow: true
+    update: 1
