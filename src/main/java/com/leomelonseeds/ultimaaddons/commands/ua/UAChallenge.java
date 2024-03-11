@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.kingdoms.constants.group.Kingdom;
-import org.kingdoms.constants.group.model.relationships.StandardRelationAttribute;
+import org.kingdoms.constants.group.model.relationships.KingdomRelation;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.constants.player.StandardKingdomPermission;
 
@@ -94,17 +94,17 @@ public class UAChallenge extends Command {
             return true;
         }
 
+        // Must not be allies or truced
+        KingdomRelation relation = attacker.getRelationWith(target);
+        if (relation == KingdomRelation.ALLY || relation == KingdomRelation.TRUCE) {
+            CommandUtils.sendErrorMsg(sender, "You cannot attack allied or truced kingdoms!");
+            return true;
+        }
+
         // Cannot have a shield
         if (target.hasShield()) {
             CommandUtils.sendErrorMsg(sender, "The kingdom you are trying to attack is shielded for &e" +
                     Utils.formatDate(target.getShieldTimeLeft()));
-            return true;
-        }
-
-        // Must not be allies or truced
-        StandardRelationAttribute ceasefire = StandardRelationAttribute.CEASEFIRE;
-        if (ceasefire.hasAttribute(attacker, target)) {
-            CommandUtils.sendErrorMsg(sender, "You cannot attack allied or truced kingdoms!");
             return true;
         }
 
