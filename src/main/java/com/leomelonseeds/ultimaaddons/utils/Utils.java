@@ -43,7 +43,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class Utils {
     
-    private static Map<UUID, UUID> chalreminders = new HashMap<>(); // Attacker, Defender (since attacker can only challenge 1)
+    public static Map<UUID, UUID> chalreminders = new HashMap<>(); // Attacker, Defender (since attacker can only challenge 1)
     
     // Kingdoms config constants
     public static long getNewbieTime() {
@@ -219,6 +219,10 @@ public class Utils {
         int wartime = (int) timeleft / 1000; // seconds until war
         if (wartime > 0) {
             Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
+                if (!chalreminders.containsKey(k.getId())) {
+                    return;
+                }
+                
                 if (k.getMembers().isEmpty() || target.getMembers().isEmpty()) {
                     chalreminders.remove(k.getId());
                     return;
@@ -239,7 +243,10 @@ public class Utils {
         // Wartime over announcement (if this method is called it must be positive)
         int wartimeover = wartime + (int) (getWarTime() / 1000);
         Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
-            chalreminders.remove(k.getId());
+            if (chalreminders.remove(k.getId()) == null) {
+                return;
+            }
+            
             if (k.getMembers().isEmpty() || target.getMembers().isEmpty()) {
                 return;
             }
@@ -258,6 +265,10 @@ public class Utils {
         int oneminremind = (int) (timeleft / 1000 - 60);
         if (oneminremind > 0) {
             Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
+                if (!chalreminders.containsKey(k.getId())) {
+                    return;
+                }
+                
                 if (k.getMembers().isEmpty() || target.getMembers().isEmpty()) {
                     chalreminders.remove(k.getId());
                     return;

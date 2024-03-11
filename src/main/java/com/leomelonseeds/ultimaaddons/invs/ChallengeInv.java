@@ -11,6 +11,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.group.model.logs.misc.challenge.LogKingdomChallenged;
 import org.kingdoms.constants.group.model.logs.misc.challenge.LogKingdomChallenger;
+import org.kingdoms.constants.group.model.relationships.KingdomRelation;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 
@@ -83,23 +84,32 @@ public class ChallengeInv extends UAInventory {
             attacker.log(new LogKingdomChallenger(target, kp, wartime));
             target.log(new LogKingdomChallenged(attacker, kp, wartime));
             
+            // Make the Kingdoms enemies
+            if (attacker.getRelationWith(target) != KingdomRelation.ENEMY) {
+                attacker.setRelationShipWith(target, KingdomRelation.ENEMY);
+            }
+            
             // Send warning messages and close GUIs
+            String prep = Utils.formatDate(timeleft);
             for (Player p : attacker.getOnlineMembers()) {
                 p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.MASTER, 1, 1.2F);
                 p.sendMessage(Utils.toComponent("&e" + player.getName() + " &chas declared war on &e" + target.getName() + 
-                        "&c, with &6" + days + " &cday(s) of preparation!"));
+                        "&c, with &6" + prep + " &cof preparation!"));
+                p.sendMessage(Utils.toComponent("&7War can be cancelled by requesting a neutral, truce, or ally relation."));
                 Utils.closeInventory(p, "Challenge", "Shields");
             }
             
             for (Player p : target.getOnlineMembers()) {
                 p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.MASTER, 1, 1.2F);
                 p.sendMessage(Utils.toComponent("&e" + player.getName() + " &cfrom &e" + attacker.getName() + 
-                        " &chas declared war on your kingdom, with &6" + days + " &cday(s) of preparation!"));
+                        " &chas declared war on your kingdom, with &6" + prep + " &cof preparation!"));
+                p.sendMessage(Utils.toComponent("&7War can be cancelled by requesting a neutral, truce, or ally relation."));
                 Utils.closeInventory(p, "Challenge", "Shields");
             }
 
+            long wartimesec = wartime / 1000;
             Utils.discord(":scroll: " + player.getName() + " from **" + attacker.getName() + "** has declared war on **" + 
-                    target.getName() + "**, with " + days + " day(s) of preparation!");
+                    target.getName() + "**, with " + prep + " of preparation! War starts <t:" + wartimesec + ":f>");
             
             // Setup reminders
             Utils.setupReminders(attacker, target, timeleft);

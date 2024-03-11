@@ -1,8 +1,11 @@
 package com.leomelonseeds.ultimaaddons.handlers.kingdom;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.invs.ConfirmAction;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -17,6 +20,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.kingdoms.config.KingdomsConfig;
 import org.kingdoms.constants.group.Kingdom;
+import org.kingdoms.constants.group.model.relationships.KingdomRelation;
 import org.kingdoms.constants.land.Land;
 import org.kingdoms.constants.land.abstraction.data.KingdomItemBuilder;
 import org.kingdoms.constants.land.location.SimpleChunkLocation;
@@ -29,7 +33,12 @@ import org.kingdoms.constants.metadata.KingdomMetadata;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.constants.player.StandardKingdomPermission;
-import org.kingdoms.events.general.*;
+import org.kingdoms.events.general.GroupDisband;
+import org.kingdoms.events.general.GroupRelationshipChangeEvent;
+import org.kingdoms.events.general.GroupShieldPurchaseEvent;
+import org.kingdoms.events.general.KingdomCreateEvent;
+import org.kingdoms.events.general.KingdomDisbandEvent;
+import org.kingdoms.events.general.KingdomPacifismStateChangeEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEndEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEvent;
 import org.kingdoms.events.items.KingdomItemBreakEvent;
@@ -45,18 +54,59 @@ import org.kingdoms.utils.nbt.ItemNBT;
 import org.kingdoms.utils.nbt.NBTType;
 import org.kingdoms.utils.nbt.NBTWrappers;
 
-import java.util.HashSet;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.invs.ConfirmAction;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class KingdomsListener implements Listener {
+
+    private static Set<Structure> justRemoved = new HashSet<>();
+    
+    // -------------------------------------------------
+    // CANCEL CHALLENGES ON RELATION CHANGE
+    // -------------------------------------------------
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onRelation(GroupRelationshipChangeEvent e) {
+        if (e.getOldRelation() != KingdomRelation.ENEMY) {
+            return;
+        }
+
+        long date = System.currentTimeMillis();
+        for (int i = 0; i < 2; i++) {
+            Kingdom k1 = (Kingdom) (i == 0 ? e.getFirst() : e.getSecond());
+            Kingdom k2 = (Kingdom) (i == 1 ? e.getFirst() : e.getSecond());
+            
+            String lastChallenge = Utils.getLastChallenge(k1);
+            if (lastChallenge == null) {
+                continue;
+            }
+            
+            String[] slck = lastChallenge.split("@");
+            long lcd = Long.parseLong(slck[1]);
+            UUID cur = UUID.fromString(slck[0]);
+            if (!cur.equals(k2.getId()) || lcd < date) {
+                continue;
+            }
+            
+            // If we got here, k1 has challenged k2 and war is pending. Call it off
+            Utils.chalreminders.remove(k1.getId());
+            String data = UUID.randomUUID() + "@" + lcd;
+            k1.getMetadata().put(UltimaAddons.lckh, new StandardKingdomMetadata(data));
+            k2.getChallenges().remove(k1.getId());
+            List<Player> toNotify = k1.getOnlineMembers();
+            toNotify.addAll(k2.getOnlineMembers());
+            for (Player p : toNotify) {
+                message(p, "&2The upcoming war between &6" + k1.getName() + " &2and &6" + k2.getName() + " &2has been cancelled.");
+            }
+            Utils.discord(":dove: The upcoming war between **" + k1.getName() + "** and **" + k2.getName() + "** has been cancelled.");
+            return;
+        }
+    }
 
     // -------------------------------------------------
     // EXTRA DISCORDSRV MESSAGES
     // -------------------------------------------------
-
-    private static Set<Structure> justRemoved = new HashSet<>();
 
     // Close GUIs to stop bad things from happening
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

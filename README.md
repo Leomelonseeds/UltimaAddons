@@ -10,6 +10,8 @@ UltimaAddons uses the KingdomsX API by Crypto Morin to provide several extra fea
 - Players will now receive messages upon logging in for upcoming and current wars.
 - Players will now receive messages 1 minute before war starts, when it starts, and when it ends.
 - You cannot make claims, unclaim, or move your nexus while being challenged.
+- Only neutral and enemy Kingdoms can be challenged. Challenging a neutral Kingdom will automatically make them an enemy.
+- Challenges can be cancelled by changing relation with the challenged Kingdom to neutral, truce, or ally.
 
 ### Invasions
 - The goal of an invasion is now solely to *capture the chunk*, similar to a King of the Hill game. Attackers must stand inside the invasion chunk for 3 minutes in order for the chunk to be captured.

@@ -69,6 +69,29 @@ public class UAChallenge extends Command {
             CommandUtils.sendErrorMsg(sender, "You must place your nexus using &a/k nexus &cbefore you can declare war!");
             return true;
         }
+        
+        // Kingdom must not already have challenged a kingdom
+        String lastChallenge = Utils.getLastChallenge(attacker);
+        if (lastChallenge != null) {
+            String[] slck = lastChallenge.split("@");
+            long lcd = Long.parseLong(slck[1]);
+            Kingdom cur = Kingdom.getKingdom(UUID.fromString(slck[0]));
+            long cooldown = lcd + UltimaAddons.CHALLENGE_COOLDOWN_TIME;
+
+            // A challenge is pending
+            if (cur != null && lcd > date) {
+                CommandUtils.sendErrorMsg(sender, "Your kingdom has already challenged &e" + cur.getName() +
+                        "&7! War starts in &e" + Utils.formatDate(lcd - date));
+                return true;
+            }
+
+            // After invasion cooldown
+            if (cooldown > date) {
+                CommandUtils.sendErrorMsg(sender, "You must wait &e" + Utils.formatDate(cooldown - date) +
+                        " &7before you can challenge again.");
+                return true;
+            }
+        }
 
         // Challenged kingdom must exist (handled by KingdomArgument)
         if (super.hasInvalidArgs(sender, args))
@@ -120,29 +143,6 @@ public class UAChallenge extends Command {
 
             if (time + Utils.getWarTime() > date) {
                 CommandUtils.sendErrorMsg(sender, "Your war with &e" + target.getName() + " &7is still ongoing!");
-                return true;
-            }
-        }
-
-        // Kingdom must not already have challenged a kingdom
-        String lastChallenge = Utils.getLastChallenge(attacker);
-        if (lastChallenge != null) {
-            String[] slck = lastChallenge.split("@");
-            long lcd = Long.parseLong(slck[1]);
-            Kingdom cur = Kingdom.getKingdom(UUID.fromString(slck[0]));
-            long cooldown = lcd + UltimaAddons.CHALLENGE_COOLDOWN_TIME;
-
-            // A challenge is pending
-            if (cur != null && lcd > date) {
-                CommandUtils.sendErrorMsg(sender, "Your kingdom has already challenged &e" + cur.getName() +
-                        "&7! War starts in &e" + Utils.formatDate(lcd - date));
-                return true;
-            }
-
-            // After invasion cooldown
-            if (cooldown > date) {
-                CommandUtils.sendErrorMsg(sender, "You must wait &e" + Utils.formatDate(cooldown - date) +
-                        " &7before you can challenge again.");
                 return true;
             }
         }
