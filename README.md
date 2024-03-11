@@ -86,6 +86,7 @@ The plugin replaces regular teleportation commands with item-based teleports. Af
 - Radiant Shard: Gives Regeneration I when held. Used to craft Shard armor.
 - Infused Ingot: A rare ingredient dropped when unwaxed copper is destroyed by a charged explosion. Drop chance increases the more oxidized the copper. Gives Strength I when held. Used to craft Infused armor.
 - Mithril Ingot: Formed when shulkers are destroyed by star-like temperatires. Gives Speed I when held. Used to craft Mithril armor.
+- Dragon Firework: The only firework that can boost elytras in flight. Boost is tripled in the End.
 - Bundle: An item that never became obtainable in survival, now has a recipe.
 
 ## Shopkeepers
@@ -97,3 +98,8 @@ In addition, these shopkeepers have new parameters to further enhance supply/dem
 ### Parameters
 - Weights: Adds weights which affects an item's ability to appear in rotations.
 - Limits: Adds a buy & sell limit to a certain item.
+
+## Game Mechanics
+Finally, the plugin adds a few game mechanics to make the survival experience more balanced and enjoyable.
+
+- Elytras do not work if exposed to rain.
