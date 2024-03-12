@@ -61,12 +61,11 @@ public class ChallengeInv extends UAInventory {
         }
         
         double days = Double.parseDouble(meta.split("-")[0]);
-        new ConfirmAction("Challenge " + target.getName() + " in " + days + "d", player, this, result -> {
+        new ConfirmAction("Challenge " + target.getName() + " in " + days + "d", player, null, result -> {
             if (result == null || !result) {
                 return;
             }
 
-            inv.close();
             if (target.getMembers().isEmpty() || target.hasShield()) {
                 player.sendMessage(Utils.toComponent("&cThe target kingdom either bought a shield or no longer exists..."));
                 return;
@@ -89,29 +88,29 @@ public class ChallengeInv extends UAInventory {
                 attacker.setRelationShipWith(target, KingdomRelation.ENEMY);
             }
             
-            // Send warning messages and close GUIs
+            // Send warning messages
             String prep = Utils.formatDate(timeleft);
-            for (Player p : attacker.getOnlineMembers()) {
-                p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.MASTER, 1, 1.2F);
+            long wartimesec = wartime / 1000;
+            Utils.warAnnounce(attacker, target, false, p -> {
                 p.sendMessage(Utils.toComponent("&e" + player.getName() + " &chas declared war on &e" + target.getName() + 
                         "&c, with &6" + prep + " &cof preparation!"));
-                p.sendMessage(Utils.toComponent("&7War can be cancelled by requesting a neutral, truce, or ally relation."));
-                Utils.closeInventory(p, "Challenge", "Shields");
-            }
-            
-            for (Player p : target.getOnlineMembers()) {
-                p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.MASTER, 1, 1.2F);
+            }, p -> {
                 p.sendMessage(Utils.toComponent("&e" + player.getName() + " &cfrom &e" + attacker.getName() + 
                         " &chas declared war on your kingdom, with &6" + prep + " &cof preparation!"));
+            }, p -> {
+                p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.MASTER, 1, 1.2F);
+                p.sendMessage(Utils.toComponent("&e" + player.getName() + " &cfrom &e" + attacker.getName() + 
+                        " &chas declared war on &e" + target.getName() + "&c, with &6" + prep + " &cof preparation!"));
+            }, ":scroll: " + player.getName() + " from **" + attacker.getName() + "** has declared war on **" + 
+                    target.getName() + "**, with " + prep + " of preparation! War starts <t:" + wartimesec + ":f>");
+
+            // For both kingdoms, send dragon growl and close inventories
+            Utils.warAnnounce(attacker, target, true, p -> {
+                p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.MASTER, 1, 1.2F);
                 p.sendMessage(Utils.toComponent("&7War can be cancelled by requesting a neutral, truce, or ally relation."));
                 Utils.closeInventory(p, "Challenge", "Shields");
-            }
-
-            long wartimesec = wartime / 1000;
-            Utils.discord(":scroll: " + player.getName() + " from **" + attacker.getName() + "** has declared war on **" + 
-                    target.getName() + "**, with " + prep + " of preparation! War starts <t:" + wartimesec + ":f>");
+            }, null, null, null);
             
-            // Setup reminders
             Utils.setupReminders(attacker, target, timeleft);
         });
         

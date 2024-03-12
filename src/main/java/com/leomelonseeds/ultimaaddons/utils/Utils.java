@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -44,6 +46,101 @@ import net.md_5.bungee.api.ChatColor;
 public class Utils {
     
     public static Map<UUID, UUID> chalreminders = new HashMap<>(); // Attacker, Defender (since attacker can only challenge 1)
+
+    public static void setupReminders(Kingdom k, Kingdom target, long timeleft) {
+        if (chalreminders.containsKey(k.getId())) {
+            return;
+        }
+        chalreminders.put(k.getId(), target.getId());
+        String aname = k.getName();
+        String tname = target.getName();
+        
+        // Remind 1 min before
+        int oneminremind = (int) (timeleft / 1000 - 60);
+        reminder(oneminremind, k, target, (a, t) -> {
+            warAnnounce(a, t, true, p -> {
+                p.playSound(p.getLocation(), Sound.ENTITY_GHAST_SCREAM, SoundCategory.MASTER, 1, 1);
+                p.sendMessage(toComponent("&cThere is &61 minute left &cuntil war between &e" + aname + " &cand &e" + tname + " &cstarts!"));
+            }, null, null, null);
+        });
+        
+        // Wartime announcement
+        int wartime = (int) timeleft / 1000; // seconds until war
+        reminder(wartime, k, target, (a, t) -> {
+            warAnnounce(a, t, true, p -> {
+                p.playSound(p.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_2, SoundCategory.MASTER, 1, 0.8F);
+                p.sendMessage(toComponent("&cWar between &e" + aname + " &cand &e" + tname +
+                        " &chas begun! Each kingdom has &6" + getWarTime() / 1000 / 3600 + " hours &cto &4/k invade &ceach other's lands."));
+            }, null, p -> {
+                p.sendMessage(toComponent("&cWar between &e" + aname + " &cand &e" + tname +" &chas begun!"));
+            }, ":bangbang: War between **" + aname + "** and **" + tname + "** has begun");
+        });
+        
+        // Wartime over announcement
+        int wartimeover = wartime + (int) (getWarTime() / 1000);
+        reminder(wartimeover, k, target, (a, t) -> {
+            warAnnounce(a, t, true, p -> {
+                p.playSound(p.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_6, SoundCategory.MASTER, 1, 1);
+                p.sendMessage(toComponent("&cWar between &e" + aname + " &cand &e" + tname + " &chas ended!"));
+            }, null, p -> {
+                p.sendMessage(toComponent("&cWar between &e" + aname + " &cand &e" + tname + " &chas ended!"));
+            }, ":checkered_flag: War between **" + aname + "** and **" + tname + "** has ended");
+            chalreminders.remove(a.getId());
+        });
+    }
+    
+    private static void reminder(int time, Kingdom attacker, Kingdom target, BiConsumer<Kingdom, Kingdom> announce) {
+        if (time <= 0) {
+            return;
+        }
+        
+        Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
+            if (!chalreminders.containsKey(attacker.getId())) {
+                return;
+            }
+            
+            if (attacker.getMembers().isEmpty() || target.getMembers().isEmpty()) {
+                chalreminders.remove(attacker.getId());
+                return;
+            }
+            
+            announce.accept(attacker, target);
+        }, time * 20);
+    }
+    
+    /**
+     * Executes a function for each player of 2 kingdoms.
+     * 
+     * @param attacker
+     * @param target
+     * @param same if true, t can be set to null and a will be executed for both kingdoms' players
+     * @param a
+     * @param t
+     * @param o all other players on the server. Can be null.
+     * @param discord The message to send to the discord log channel. Can be null
+     */
+    public static void warAnnounce(Kingdom attacker, Kingdom target, boolean same, Consumer<Player> a, Consumer<Player> t, Consumer<Player> o, String discord) {
+        List<Player> ap = attacker.getOnlineMembers();
+        List<Player> tp = target.getOnlineMembers();
+        ap.forEach(p -> a.accept(p));
+        if (same) {
+            tp.forEach(p -> a.accept(p));
+        } else {
+            tp.forEach(p -> t.accept(p));
+        }
+        
+        if (o != null) {
+            List<Player> all = new ArrayList<>(Bukkit.getOnlinePlayers());
+            all.removeAll(ap);
+            all.removeAll(tp);
+            all.forEach(p -> o.accept(p));
+        }
+        
+        if (discord != null) {
+            discord(discord);
+        }
+    }
+    
     
     // Kingdoms config constants
     public static long getNewbieTime() {
@@ -206,81 +303,6 @@ public class Utils {
             
             p.closeInventory();
             return;
-        }
-    }
-    
-    public static void setupReminders(Kingdom k, Kingdom target, long timeleft) {
-        if (chalreminders.containsKey(k.getId())) {
-            return;
-        }
-        chalreminders.put(k.getId(), target.getId());
-        
-        // Wartime announcement
-        int wartime = (int) timeleft / 1000; // seconds until war
-        if (wartime > 0) {
-            Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
-                if (!chalreminders.containsKey(k.getId())) {
-                    return;
-                }
-                
-                if (k.getMembers().isEmpty() || target.getMembers().isEmpty()) {
-                    chalreminders.remove(k.getId());
-                    return;
-                }
-                
-                List<Player> involved = k.getOnlineMembers();
-                involved.addAll(target.getOnlineMembers());
-                for (Player q : involved) {
-                    q.playSound(q.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_2, SoundCategory.MASTER, 1, 0.8F);
-                    q.sendMessage(toComponent("&cWar between &e" + k.getName() + " &cand &e" + target.getName() +
-                            " &chas begun! Each kingdom has &6" + getWarTime() / 1000 / 3600 + " hours &cto &4/k invade &ceach other's lands."));
-                }
-                
-                discord(":bangbang: War between **" + k.getName() + "** and **" + target.getName() + "** has begun");
-            }, wartime * 20);
-        }
-        
-        // Wartime over announcement (if this method is called it must be positive)
-        int wartimeover = wartime + (int) (getWarTime() / 1000);
-        Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
-            if (chalreminders.remove(k.getId()) == null) {
-                return;
-            }
-            
-            if (k.getMembers().isEmpty() || target.getMembers().isEmpty()) {
-                return;
-            }
-            
-            List<Player> involved = k.getOnlineMembers();
-            involved.addAll(target.getOnlineMembers());
-            for (Player q : involved) {
-                q.playSound(q.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_6, SoundCategory.MASTER, 1, 1);
-                q.sendMessage(toComponent("&cWar between &e" + k.getName() + " &cand &e" + target.getName() + " &chas ended!"));
-            }
-            
-            discord(":checkered_flag: War between **" + k.getName() + "** and **" + target.getName() + "** has ended");
-        }, wartimeover * 20);
-        
-        // Remind 1 min before
-        int oneminremind = (int) (timeleft / 1000 - 60);
-        if (oneminremind > 0) {
-            Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
-                if (!chalreminders.containsKey(k.getId())) {
-                    return;
-                }
-                
-                if (k.getMembers().isEmpty() || target.getMembers().isEmpty()) {
-                    chalreminders.remove(k.getId());
-                    return;
-                }
-                
-                List<Player> involved = k.getOnlineMembers();
-                involved.addAll(target.getOnlineMembers());
-                for (Player q : involved) {
-                    q.playSound(q.getLocation(), Sound.ENTITY_GHAST_SCREAM, SoundCategory.MASTER, 1, 1);
-                    q.sendMessage(toComponent("&cThere is &61 minute left &cuntil war between &e" + k.getName() + " &cand &e" + target.getName() + " &cstarts!"));
-                }
-            }, oneminremind * 20);
         }
     }
     

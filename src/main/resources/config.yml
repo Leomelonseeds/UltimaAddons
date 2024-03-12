@@ -43,6 +43,76 @@ capture-exclude:
   - WITHER
   - ELDER_GUARDIAN
   - WARDEN
+staff-log:
+  - gm
+  - gmsp
+  - gamemode
+  - creative
+  - creativemode
+  - gmc
+  - spec
+  - spectator
+  - give
+  - item
+  - i
+  - tppos
+  - tp
+  - tele
+  - teleport
+  - tp2p
+  - back
+  - return
+  - fly
+  - feed
+  - eat
+  - heal
+  - repair
+  - fix
+  - enchant
+  - enchantment
+  - xp
+  - fly
+  - egm
+  - egmsp
+  - egamemode
+  - ecreative
+  - ecreativemode
+  - egmc
+  - espec
+  - espectator
+  - egive
+  - eitem
+  - ei
+  - etppos
+  - etp
+  - etele
+  - eteleport
+  - etp2p
+  - eback
+  - ereturn
+  - efly
+  - efeed
+  - eeat
+  - eheal
+  - erepair
+  - efix
+  - eenchant
+  - eenchantment
+  - exp
+  - efly
+  - eecreative
+  - eexp
+  - ugive
+  - /wand
+  - /set
+  - /replace
+  - minecraft:tp
+  - minecraft:teleport
+  - minecraft:give
+  - minecraft:effect
+  - minecraft:gamemode
+  - sv
+  - vanish
 skaddon:
   limit_warn_start: 5
   # Time to count down to for restock | Must be "HH:mm:ss" format

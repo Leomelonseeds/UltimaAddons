@@ -2,10 +2,12 @@ package com.leomelonseeds.ultimaaddons.handlers;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World.Environment;
@@ -16,6 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.inventory.PrepareGrindstoneEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.GrindstoneInventory;
 import org.bukkit.inventory.ItemFlag;
@@ -30,6 +33,13 @@ import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
+import me.clip.placeholderapi.PlaceholderAPI;
+
+/**
+ * Used for various game mechanics and staff logger
+ */
 public class MiscListener implements Listener {
     
     private static Map<Player, String> msgs = new HashMap<>();
@@ -132,6 +142,36 @@ public class MiscListener implements Listener {
                 return;
             }
         }
+    }
+
+    // Log Staff
+    @EventHandler
+    public void listen(PlayerCommandPreprocessEvent e) {
+        // No need to log non-staff members
+        Player p = e.getPlayer();
+        if (!p.hasPermission("group.helper")) {
+            return;
+        }
+        
+        // Get first arg
+        String cmd = e.getMessage();
+        String base = cmd.split(" ")[0].replace("/", "");
+        if (base.isBlank()) {
+            return;
+        }
+        
+        // Check if is logged command
+        List<String> logged = UltimaAddons.getPlugin().getConfig().getStringList("staff-log");
+        if (!logged.contains(base)) {
+            return;
+        }
+        
+        String group = PlaceholderAPI.setPlaceholders(p, "%vault_group_capital%");
+        Location loc = p.getLocation(); 
+        String locStr = "[" + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + "]";
+        String msg = "**" + p.getName() + "** (" + group + ") at " + locStr + " used command `" + cmd + "`";
+        TextChannel logChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("staff-log");
+        logChannel.sendMessage(msg).queue();
     }
     
     private void msg(Player p, String msg) {

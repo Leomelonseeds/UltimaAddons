@@ -11,14 +11,14 @@ import com.leomelonseeds.ultimaaddons.utils.Utils;
 public class ConfirmAction extends UAInventory {
     
     private ConfirmCallback callback;
-    private UAInventory mwinv;
+    private UAInventory uainv;
     private Player player;
     
     public ConfirmAction(String action, Player player, UAInventory mwinv, ConfirmCallback callback) {
         super(player, 27, "Confirm: " + action);
         this.player = player;
         this.callback = callback;
-        this.mwinv = mwinv;
+        this.uainv = mwinv;
     }
 
     @Override
@@ -53,16 +53,16 @@ public class ConfirmAction extends UAInventory {
             return;
         }
         
-        if (mwinv != null) {
-            manager.registerInventory(player, mwinv);
-        } else {
-            player.closeInventory();
-        }
-        
         if (material == Material.EMERALD_BLOCK) {
             callback.onConfirm(true);
         } else if (material == Material.REDSTONE_BLOCK) {
             callback.onConfirm(false);
+        }
+        
+        if (uainv != null) {
+            manager.registerInventory(player, uainv);
+        } else {
+            player.closeInventory();
         }
     }
 }

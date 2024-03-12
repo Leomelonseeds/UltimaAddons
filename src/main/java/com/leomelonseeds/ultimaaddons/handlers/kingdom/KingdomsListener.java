@@ -1,12 +1,12 @@
 package com.leomelonseeds.ultimaaddons.handlers.kingdom;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
@@ -63,6 +64,33 @@ public class KingdomsListener implements Listener {
     private static Set<Structure> justRemoved = new HashSet<>();
     
     // -------------------------------------------------
+    // ONLY ALLOW INVASIONS ON NON-AIR BLOCKS
+    // -------------------------------------------------
+    
+    @EventHandler
+    public void onInvadeCommand(PlayerCommandPreprocessEvent e) {
+        String[] args = e.getMessage().split(" ");
+        if (args.length < 2) {
+            return;
+        }
+        
+        if (!(args[0].equals("/k") || args[0].contains("kingdom"))) {
+            return;
+        }
+        
+        if (!(args[1].equals("invade") || args[1].equals("invasion"))) {
+            return;
+        }
+        
+        Player p = e.getPlayer();
+        Location loc = p.getLocation().clone();
+        if (loc.add(0, -1, 0).getBlock().getType() == Material.AIR) {
+            e.setCancelled(true);
+            message(p, "&cYou cannot use this command while midair!");
+        }
+    }
+    
+    // -------------------------------------------------
     // CANCEL CHALLENGES ON RELATION CHANGE
     // -------------------------------------------------
 
@@ -94,12 +122,12 @@ public class KingdomsListener implements Listener {
             String data = UUID.randomUUID() + "@" + lcd;
             k1.getMetadata().put(UltimaAddons.lckh, new StandardKingdomMetadata(data));
             k2.getChallenges().remove(k1.getId());
-            List<Player> toNotify = k1.getOnlineMembers();
-            toNotify.addAll(k2.getOnlineMembers());
-            for (Player p : toNotify) {
+            Utils.warAnnounce(k1, k2, true, p -> {
+                p.playSound(p.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1F, 0.5F);
                 message(p, "&2The upcoming war between &6" + k1.getName() + " &2and &6" + k2.getName() + " &2has been cancelled.");
-            }
-            Utils.discord(":dove: The upcoming war between **" + k1.getName() + "** and **" + k2.getName() + "** has been cancelled.");
+            }, null, p -> {
+                message(p, "&2The upcoming war between &6" + k1.getName() + " &2and &6" + k2.getName() + " &2has been cancelled.");
+            }, ":dove: The upcoming war between **" + k1.getName() + "** and **" + k2.getName() + "** has been cancelled.");
             return;
         }
     }
