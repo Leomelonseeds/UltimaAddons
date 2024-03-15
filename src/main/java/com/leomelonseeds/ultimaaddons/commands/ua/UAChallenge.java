@@ -149,9 +149,9 @@ public class UAChallenge extends Command {
 
         // Remove kingdom shield if they have one
         if (attacker.hasShield()) {
-            CommandUtils.sendErrorMsg(sender, "Your kingdom is shielded for &e" + Utils.formatDate(attacker.getShieldTimeLeft()) +
-                    "&7. Challenging another kingdom will remove this shield, and you will have to wait &e" +
-                    Utils.formatDate(Utils.getNextShield(attacker) - date) + " &7before you can buy another one. " +
+            CommandUtils.sendMsg(sender, "&cYour kingdom is shielded for &e" + Utils.formatDate(attacker.getShieldTimeLeft()) +
+                    "&c. Challenging another kingdom will remove this shield, and you will have to wait &e" +
+                    Utils.formatDate(Utils.getNextShield(attacker) - date) + " &cbefore you can buy another one. " +
                     "Please type 'confirm' in the chat within 30 seconds to continue.");
             new ChatConfirm(player, "confirm", 30, "Declaration cancelled.", result ->
             {
@@ -172,21 +172,29 @@ public class UAChallenge extends Command {
 
         CommandUtils.sendMsg(player, "");
         CommandUtils.sendMsg(player, "&cYou are sending a declaration of war to &e" + target.getName() + "&c. After a chosen amount of time, "
-                + "both you and the enemy will have &62 hours &cto invade each other's lands. You can only challenge 1 kingdom at a time, "
-                + "and after the war you will need to wait &61 day &cbefore challenging another kingdom.");
-        CommandUtils.sendMsg(player, "");
-        CommandUtils.sendMsg(player, "&cAdditionally, you will need to pay resource points to begin invasion when war starts, depending on how "
-                + "many lands you have. Currently, it is estimated that each invasion will cost &e" + attacker.getLands().size()
-                + " &cresource points.");
-        CommandUtils.sendMsg(player, "");
-        CommandUtils.sendMsg(player, "&cFinally, neither kingdom will be able to claim/unclaim lands or move their nexus during the preparation period.");
-        CommandUtils.sendMsg(player, "");
-        CommandUtils.sendMsg(player, "&cPlease type 'confirm' in the chat within 1 minute to continue.");
-        new ChatConfirm(player, "confirm", 60, "Declaration cancelled.", result ->
-        {
-            if (result == null || !result)
-                return;
-            new ChallengeInv(target, attacker, player);
+                + "both you and the enemy will have &62 hours &cto invade each other's lands. You can only challenge 1 Kingdom at a time, "
+                + "and after the war you will need to wait &61 day &cbefore challenging another Kingdom.");
+        
+        Utils.schedule(40, () -> {
+            CommandUtils.sendMsg(player, "");
+            CommandUtils.sendMsg(player, "&cAdditionally, invading each enemy chunk will cost resource points depending on how many lands you have. "
+                    + "Currently, it is estimated that each invasion will cost &e" + attacker.getLands().size() + " &cresource points.");
+        });
+        
+        Utils.schedule(80, () -> {
+            CommandUtils.sendMsg(player, "");
+            CommandUtils.sendMsg(player, "&cFinally, both Kingdoms &4cannot &cclaim/unclaim lands or move their nexus during the preparation period.");
+        });
+        
+        Utils.schedule(120, () -> {
+            CommandUtils.sendMsg(player, "");
+            CommandUtils.sendMsg(player, "&cPlease type 'confirm' in the chat within 1 minute to continue.");
+            new ChatConfirm(player, "confirm", 60, "Declaration cancelled.", result ->
+            {
+                if (result == null || !result)
+                    return;
+                new ChallengeInv(target, attacker, player);
+            });
         });
     }
 }

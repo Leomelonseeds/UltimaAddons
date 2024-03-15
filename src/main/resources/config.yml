@@ -14,6 +14,72 @@ challengegui:
     name: "&2In 3 days"
     slot: 15
     days: 3
+introgui:
+  kingdomshandbook:
+    material: WRITTEN_BOOK
+    book:
+      title: "KINGDOMS HANDBOOK"
+      author: "Ultima"
+      pages:
+        - "KINGDOMS HANDBOOK\n\nWelcome to Kingdoms! To get started, use /k create to create a Kingdom, or ask someone to invite you to theirs."
+        - "Kingdoms can be PACI- FIST or AGGRESSORS. Pacifist Kingdoms can’t invade and can't be invaded, but also can't claim as many lands, and do not make passive income. Pacifists can switch to aggressors, but aggressors cannot change to pacifist."
+        - "Kingdoms can claim lands using /k claim, which are chunks that are protected from grief. Aggressor Kingdoms can invade other Kingdoms and take over their lands. The INVASION HANDBOOK has more information on how to start wars."
+        - "The most important block in your Kingdom is the NEXUS, which is placed when you create the Kingdom. You can move it around with /k nexus. If your nexus is captured by an enemy, your Kingdom will be disbanded."
+        - "From the nexus, you can level up your Kingdom by purchasing upgrades, structures, and turrets. You can also manage Kingdom shields, permissions, and ranks."
+        - "All nexus purchases cost RESOURCE POINTS. You can gain resource points by depositing diamonds or diamond blocks within your nexus’ resource point converter, and they can be withdrawn back into diamonds later."
+        - "Use /k help and explore your Nexus to discover more Kingdoms features. Happy claiming!"
+      generation: COPY_OF_ORIGINAL
+    lore:
+      - ""
+      - "&7A guide to the basics of the"
+      - "&7Kingdoms system."
+    slot: 0
+  invasionhandbook:
+    material: WRITTEN_BOOK
+    book:
+      title: "INVASION HANDBOOK"
+      author: "Ultima"
+      pages:
+        - "INVASION HANDBOOK\n\nSo, you want to start a war with another Kingdom. Here’s how."
+        - "First, you need to declare war by using /k challenge. You’ll pick a preparation period of 1-3 days, after which you and the enemy are allowed to invade each other for up to 2 hours. The exact war start time can be seen in our discord, in your local time zone. Don't miss it!"
+        - "You can only declare war on neutral or enemy Kingdoms. To cancel a war, request a neutral, truce, or ally relation with your opponent using /k [relation] [kingdom]."
+        - "When war starts, use /k invade to start an invasion on an enemy chunk. You can only capture lands that are not completely surrounded by other enemy chunks - in other words, you can only invade chunks on enemy borders."
+        - "After starting an invasion, the enemy CHAMPION will spawn. The champion is a mob that helps Kingdoms defend their lands. It can be upgraded through the Nexus."
+        - "To capture the chunk, you have to stand in it for 3 minutes. Any defenders in the chunk will stop cap- ture progress from advancing. Defenders include enemy players, their allies, and the champion. Failing to capture within 15 minutes will result in a defeat."
+        - "If the invasion is successful, the chunk will become your Kingdom’s land. If you capture an Outpost land, all other lands claimed from that Outpost will be unclaimed. If you capture the enemy Nexus land, the enemy Kingdom will be disbanded."
+        - "So get out there, become as powerful as you desire, and godspeed."
+      generation: COPY_OF_ORIGINAL
+    lore:
+      - ""
+      - "&7A guide to invading other Kingdoms."
+    slot: 1
+  specialfeatures:
+    material: WRITTEN_BOOK
+    book:
+      title: "NON-VANILLA FEATURES"
+      author: "Ultima"
+      pages:
+        - "The Market\n\nThere is a Kingdom known as the Market near the center of the world, where you can buy and sell items in exchange for diamonds. You may also setup your own shops to become a capitalist overlord."
+        - "Minecarts\n\nPowered rails placed on redstone blocks make minecarts travel 4x faster than vanilla. Make sure to have smooth turns so your carts don't derail."
+        - "Elytra\n\nElytra boosting is only possible with Dragon Fireworks, which can be obtained, among other means, through trading at the Market."
+        - "Custom Items\n\nCustom items and recipes are available, including powerful weapons and armor sets - use /recipes to see them."
+        - "Teleportation\n\nUse Totems of Warping to TP to locations like your Kingdom home, last death location, lodestones, or other players. They are craftable and also available at the Market."
+        - "The Nether\n\n1 block in the Nether = 2 blocks in the Overworld. This differs from vanilla, which has a 1:8 ratio by default."
+        - "Worldborder\n\nThe Overworld and End borders are 8000 blocks from the center, while the Nether border is 4000 blocks away."
+      generation: COPY_OF_ORIGINAL
+    lore:
+      - ""
+      - "&7Useful features unique to Ultima."
+    slot: 2
+  diamond:
+    material: DIAMOND
+    name: "&bTake Intro Quiz"
+    lore:
+      - ""
+      - "&7Take this quiz based on the books"
+      - "&7to get several free diamonds. Trust"
+      - "&7me, it doesn't take long!"
+    slot: 4
 #  0.0002-day:
 #    material: IRON_BLOCK
 #    name: "&2In about 10 sec (TEST)"
@@ -621,3 +687,20 @@ items:
     custom-mode-ldata: 48753
     glow: true
     update: 1
+  introbook:
+    material: WRITTEN_BOOK
+    book:
+      title: "Ultima Guide (FREE DIAMONDS)"
+      author: "Ultima"
+      pages:
+        - "How did you open this book?"
+      generation: COPY_OF_ORIGINAL
+    lore:
+      - ""
+      - "&7A basic server guide. I highly"
+      - "&7recommend you read this. Or else"
+      - "&7you will be banned. Just kidding."
+      - "&7Read it though."
+    ability:
+      name: "introbook"
+      cooldown: 0

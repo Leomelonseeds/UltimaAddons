@@ -45,6 +45,7 @@ import com.leomelonseeds.ultimaaddons.ability.BlazeFireball;
 import com.leomelonseeds.ultimaaddons.ability.Blink;
 import com.leomelonseeds.ultimaaddons.ability.DualWield;
 import com.leomelonseeds.ultimaaddons.ability.Lifesteal;
+import com.leomelonseeds.ultimaaddons.ability.OpenMenu;
 import com.leomelonseeds.ultimaaddons.ability.Shiruken;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
@@ -128,6 +129,9 @@ public class ItemManager implements Listener {
                         break;
                     case "shiruken":
                         a = new Shiruken(asec.getDouble("speed"), asec.getDouble("damage"), asec.getInt("ticks"));
+                        break;
+                    case "introbook":
+                        a = new OpenMenu();
                         break;
                 }
 

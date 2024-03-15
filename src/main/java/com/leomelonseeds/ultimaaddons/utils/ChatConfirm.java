@@ -10,6 +10,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.scheduler.BukkitTask;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.invs.ConfirmCallback;
@@ -19,8 +20,8 @@ public class ChatConfirm implements Listener {
     
     public static Map<Player, ChatConfirm> instances = new HashMap<>();
     private ConfirmCallback callback;
+    private BukkitTask timeout;
     private Player player;
-    private boolean success;
     private String req;
     private UltimaAddons plugin;
     private String cancelmsg;
@@ -28,12 +29,12 @@ public class ChatConfirm implements Listener {
     public ChatConfirm(Player player, String req, int time, String cancelmsg, ConfirmCallback callback) {
         this.callback = callback;
         this.req = req;
-        this.success = false;
         this.player = player;
         this.cancelmsg = cancelmsg;
         
         // Return if player already is in a chat window
         if (instances.containsKey(player)) {
+            player.sendMessage(Utils.toComponent("&cYou already have an existing chat dialogue!"));
             callback.onConfirm(false);
             return;
         }
@@ -41,14 +42,10 @@ public class ChatConfirm implements Listener {
         instances.put(player, this);
         this.plugin = UltimaAddons.getPlugin();
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            if (success) {
-                return;
-            }
-            
-            callback();
+        this.timeout = Utils.schedule(time * 20, () -> {
             stop();
-        }, time * 20);
+            callback(false);
+        });
     }
     
     @EventHandler(priority = EventPriority.LOWEST)
@@ -58,23 +55,23 @@ public class ChatConfirm implements Listener {
             return;
         }
         
-        success = e.getMessage().equals(req);
+        boolean success = e.getMessage().equalsIgnoreCase(req);
+        this.timeout.cancel();
         e.setCancelled(true);
         stop();
-        Bukkit.getScheduler().runTask(plugin, () -> callback());
+        Bukkit.getScheduler().runTask(plugin, () -> callback(success));
     }
     
     public String getReq() {
         return req;
     }
     
-    private void callback() {
-        if (!success) {
+    private void callback(boolean success) {
+        if (!success && cancelmsg != null) {
             player.sendMessage(Utils.toComponent("&c" + cancelmsg));
         }
         
         callback.onConfirm(success);
-        stop();
     }
     
     public void stop() {

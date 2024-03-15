@@ -21,6 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitTask;
 import org.kingdoms.config.KingdomsConfig;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.land.Land;
@@ -94,7 +95,7 @@ public class Utils {
             return;
         }
         
-        Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
+        schedule(time * 20, () -> {
             if (!chalreminders.containsKey(attacker.getId())) {
                 return;
             }
@@ -105,7 +106,18 @@ public class Utils {
             }
             
             announce.accept(attacker, target);
-        }, time * 20);
+        });
+    }
+    
+    /**
+     * Helper method to schedule a task to run ticks later
+     * 
+     * @param ticks
+     * @param r
+     * @return the task
+     */
+    public static BukkitTask schedule(int ticks, Runnable r) {
+        return Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> r.run(), ticks);
     }
     
     /**
@@ -348,6 +360,16 @@ public class Utils {
             result.add(toComponent(s));
         }
         return result;
+    }
+    
+    /**
+     * Short function for sending player a message
+     * 
+     * @param p
+     * @param s
+     */
+    public static void msg(Player p, String s) {
+        p.sendMessage(toComponent(s));
     }
     
     public static String formatDate(long i) {

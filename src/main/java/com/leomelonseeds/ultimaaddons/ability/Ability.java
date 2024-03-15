@@ -12,7 +12,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 public abstract class Ability {
     
     private Map<Player, Long> cooldowns; // Player, time when cooldown EXPIRES
-    private String displayName;
+    protected String displayName;
     private int cooldown;
     
     public Ability() {
