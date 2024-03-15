@@ -90,7 +90,7 @@ public class UASk extends Command {
                 : subcommands.get(args[0]);
         if (!subCmd.hasPermission(sender))
             CommandUtils.sendErrorMsg(sender, "You do not have permission to run this subcommand");
-        else
+        else if (!subCmd.hasInvalidArgs(sender, args))
             subCmd.execute(sender, cmd, name, args.length != 0 ? Arrays.copyOfRange(args, 1, args.length) : args);
     }
 

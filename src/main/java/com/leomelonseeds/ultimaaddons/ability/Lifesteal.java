@@ -1,5 +1,6 @@
 package com.leomelonseeds.ultimaaddons.ability;
 
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
@@ -9,31 +10,29 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.leomelonseeds.ultimaaddons.utils.Utils;
-
 public class Lifesteal extends Ability {
-    
+
     private int percent;
-    
+
     public Lifesteal(int percent) {
         this.percent = percent;
     }
-    
-    
+
+
     @Override
     public boolean executeAbility(Player player, LivingEntity target, Event e) {
         if (!(target instanceof Player)) {
             return false;
         }
-        
+
         if (!(e instanceof EntityDamageByEntityEvent)) {
             return false;
         }
-        
+
         if (!((EntityDamageByEntityEvent) e).isCritical()) {
             return false;
         }
-        
+
         // Deal custom damage with setHealth
         // This happens within the event so target health is still value before damage
         double dmg = target.getHealth() * (percent / 100.0);

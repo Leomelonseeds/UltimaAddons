@@ -40,7 +40,7 @@ public class SyncCommand extends Command {
             return true;
         }
         if (this.plugin.getSKLinker().hasShopkeeper(parent)) {
-            CommandUtils.sendErrorMsg(sender, "Parent is linked as a child");
+            CommandUtils.sendErrorMsg(sender, "Parent is linked as a child (chain linking is not allowed)");
             return true;
         }
         // Check that it isn't itself
