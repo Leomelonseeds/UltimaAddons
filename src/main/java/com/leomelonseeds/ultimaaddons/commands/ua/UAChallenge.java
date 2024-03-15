@@ -1,5 +1,17 @@
 package com.leomelonseeds.ultimaaddons.commands.ua;
 
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.kingdoms.constants.group.Kingdom;
+import org.kingdoms.constants.group.model.relationships.KingdomRelation;
+import org.kingdoms.constants.player.KingdomPlayer;
+import org.kingdoms.constants.player.StandardKingdomPermission;
+
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.commands.Argument;
 import com.leomelonseeds.ultimaaddons.commands.Command;
@@ -7,17 +19,6 @@ import com.leomelonseeds.ultimaaddons.invs.ChallengeInv;
 import com.leomelonseeds.ultimaaddons.utils.ChatConfirm;
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.kingdoms.constants.group.Kingdom;
-import org.kingdoms.constants.group.model.relationships.StandardRelationAttribute;
-import org.kingdoms.constants.player.KingdomPlayer;
-import org.kingdoms.constants.player.StandardKingdomPermission;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 public class UAChallenge extends Command {
     public UAChallenge(String name, List<String> aliases, String permission, String description, List<? extends Argument> arguments) {
@@ -68,6 +69,29 @@ public class UAChallenge extends Command {
             CommandUtils.sendErrorMsg(sender, "You must place your nexus using &a/k nexus &cbefore you can declare war!");
             return true;
         }
+        
+        // Kingdom must not already have challenged a kingdom
+        String lastChallenge = Utils.getLastChallenge(attacker);
+        if (lastChallenge != null) {
+            String[] slck = lastChallenge.split("@");
+            long lcd = Long.parseLong(slck[1]);
+            Kingdom cur = Kingdom.getKingdom(UUID.fromString(slck[0]));
+            long cooldown = lcd + UltimaAddons.CHALLENGE_COOLDOWN_TIME;
+
+            // A challenge is pending
+            if (cur != null && lcd > date) {
+                CommandUtils.sendErrorMsg(sender, "Your kingdom has already challenged &e" + cur.getName() +
+                        "&7! War starts in &e" + Utils.formatDate(lcd - date));
+                return true;
+            }
+
+            // After invasion cooldown
+            if (cooldown > date) {
+                CommandUtils.sendErrorMsg(sender, "You must wait &e" + Utils.formatDate(cooldown - date) +
+                        " &7before you can challenge again.");
+                return true;
+            }
+        }
 
         // Challenged kingdom must exist (handled by KingdomArgument)
         if (super.hasInvalidArgs(sender, args))
@@ -93,17 +117,17 @@ public class UAChallenge extends Command {
             return true;
         }
 
+        // Must not be allies or truced
+        KingdomRelation relation = attacker.getRelationWith(target);
+        if (relation == KingdomRelation.ALLY || relation == KingdomRelation.TRUCE) {
+            CommandUtils.sendErrorMsg(sender, "You cannot attack allied or truced kingdoms!");
+            return true;
+        }
+
         // Cannot have a shield
         if (target.hasShield()) {
             CommandUtils.sendErrorMsg(sender, "The kingdom you are trying to attack is shielded for &e" +
                     Utils.formatDate(target.getShieldTimeLeft()));
-            return true;
-        }
-
-        // Must not be allies or truced
-        StandardRelationAttribute ceasefire = StandardRelationAttribute.CEASEFIRE;
-        if (ceasefire.hasAttribute(attacker, target)) {
-            CommandUtils.sendErrorMsg(sender, "You cannot attack allied or truced kingdoms!");
             return true;
         }
 
@@ -123,36 +147,13 @@ public class UAChallenge extends Command {
             }
         }
 
-        // Kingdom must not already have challenged a kingdom
-        String lastChallenge = Utils.getLastChallenge(attacker);
-        if (lastChallenge != null) {
-            String[] slck = lastChallenge.split("@");
-            long lcd = Long.parseLong(slck[1]);
-            Kingdom cur = Kingdom.getKingdom(UUID.fromString(slck[0]));
-            long cooldown = lcd + UltimaAddons.CHALLENGE_COOLDOWN_TIME;
-
-            // A challenge is pending
-            if (cur != null && lcd > date) {
-                CommandUtils.sendErrorMsg(sender, "Your kingdom has already challenged &e" + cur.getName() +
-                        "&7! War starts in &e" + Utils.formatDate(lcd - date));
-                return true;
-            }
-
-            // After invasion cooldown
-            if (cooldown > date) {
-                CommandUtils.sendErrorMsg(sender, "You must wait &e" + Utils.formatDate(cooldown - date) +
-                        " &7before you can challenge again.");
-                return true;
-            }
-        }
-
         // Remove kingdom shield if they have one
         if (attacker.hasShield()) {
-            CommandUtils.sendErrorMsg(sender, "Your kingdom is shielded for &e" + Utils.formatDate(attacker.getShieldTimeLeft()) +
-                    "&7. Challenging another kingdom will remove this shield, and you will have to wait &e" +
-                    Utils.formatDate(Utils.getNextShield(attacker) - date) + " &7before you can buy another one. " +
+            CommandUtils.sendMsg(sender, "&cYour kingdom is shielded for &e" + Utils.formatDate(attacker.getShieldTimeLeft()) +
+                    "&c. Challenging another kingdom will remove this shield, and you will have to wait &e" +
+                    Utils.formatDate(Utils.getNextShield(attacker) - date) + " &cbefore you can buy another one. " +
                     "Please type 'confirm' in the chat within 30 seconds to continue.");
-            new ChatConfirm(player, "confirm", 30, result ->
+            new ChatConfirm(player, "confirm", 30, "Declaration cancelled.", result ->
             {
                 if (result == null || !result)
                     return;
@@ -164,9 +165,6 @@ public class UAChallenge extends Command {
 
     @Override
     public void execute(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command cmd, @NotNull String name, @NotNull String[] args) {
-        if (hasInvalidArgs(sender, args))
-            return;
-
         Player player = (Player) sender;
         KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(player);
         Kingdom attacker = kp.getKingdom();
@@ -174,21 +172,29 @@ public class UAChallenge extends Command {
 
         CommandUtils.sendMsg(player, "");
         CommandUtils.sendMsg(player, "&cYou are sending a declaration of war to &e" + target.getName() + "&c. After a chosen amount of time, "
-                + "both you and the enemy will have &62 hours &cto invade each other's lands. You can only challenge 1 kingdom at a time, "
-                + "and after the war you will need to wait &61 day &cbefore challenging another kingdom.");
-        CommandUtils.sendMsg(player, "");
-        CommandUtils.sendMsg(player, "&cAdditionally, you will need to pay resource points to begin invasion when war starts, depending on how "
-                + "many lands you have. Currently, it is estimated that each invasion will cost &e" + attacker.getLands().size()
-                + " &cresource points.");
-        CommandUtils.sendMsg(player, "");
-        CommandUtils.sendMsg(player, "&cFinally, neither kingdom will be able to claim/unclaim lands or move their nexus during the preparation period.");
-        CommandUtils.sendMsg(player, "");
-        CommandUtils.sendMsg(player, "&cPlease type 'confirm' in the chat within 1 minute to continue.");
-        new ChatConfirm(player, "confirm", 60, result ->
-        {
-            if (result == null || !result)
-                return;
-            new ChallengeInv(target, attacker, player);
+                + "both you and the enemy will have &62 hours &cto invade each other's lands. You can only challenge 1 Kingdom at a time, "
+                + "and after the war you will need to wait &61 day &cbefore challenging another Kingdom.");
+        
+        Utils.schedule(40, () -> {
+            CommandUtils.sendMsg(player, "");
+            CommandUtils.sendMsg(player, "&cAdditionally, invading each enemy chunk will cost resource points depending on how many lands you have. "
+                    + "Currently, it is estimated that each invasion will cost &e" + attacker.getLands().size() + " &cresource points.");
+        });
+        
+        Utils.schedule(80, () -> {
+            CommandUtils.sendMsg(player, "");
+            CommandUtils.sendMsg(player, "&cFinally, both Kingdoms &4cannot &cclaim/unclaim lands or move their nexus during the preparation period.");
+        });
+        
+        Utils.schedule(120, () -> {
+            CommandUtils.sendMsg(player, "");
+            CommandUtils.sendMsg(player, "&cPlease type 'confirm' in the chat within 1 minute to continue.");
+            new ChatConfirm(player, "confirm", 60, "Declaration cancelled.", result ->
+            {
+                if (result == null || !result)
+                    return;
+                new ChallengeInv(target, attacker, player);
+            });
         });
     }
 }

@@ -1,12 +1,13 @@
 package com.leomelonseeds.ultimaaddons.commands;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+import java.util.Collections;
+import java.util.List;
+
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.List;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 
 public abstract class Command {
     protected final UltimaAddons plugin = UltimaAddons.getPlugin();
@@ -41,6 +42,10 @@ public abstract class Command {
     }
 
     public boolean hasPermission(@NotNull CommandSender sender) {
+        if (permission == null || permission.isBlank()) {
+            return true;
+        }
+        
         return sender.hasPermission(permission);
     }
 

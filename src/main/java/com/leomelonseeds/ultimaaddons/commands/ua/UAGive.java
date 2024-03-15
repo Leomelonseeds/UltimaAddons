@@ -1,19 +1,20 @@
 package com.leomelonseeds.ultimaaddons.commands.ua;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.commands.Argument;
-import com.leomelonseeds.ultimaaddons.commands.Command;
-import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import java.util.List;
+
 import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Objects;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.commands.Argument;
+import com.leomelonseeds.ultimaaddons.commands.Command;
+import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class UAGive extends Command {
 
@@ -33,9 +34,6 @@ public class UAGive extends Command {
     @Override
     public void execute(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command cmd, @NotNull String name,
                         @NotNull String[] args) {
-        if (hasInvalidArgs(sender, args))
-            return;
-
         Player p = Bukkit.getPlayerExact(args[0]);
         assert p != null;
         ItemStack i = UltimaAddons.getPlugin().getItems().getItem(args[1]);
@@ -43,6 +41,12 @@ public class UAGive extends Command {
         if (args.length == 3)
             i.setAmount(NumberUtils.toInt(args[2], 1));
         p.getInventory().addItem(i);
-        CommandUtils.sendSuccessMsg(sender, "Gave &c" + i.getAmount() + "x " + PlainTextComponentSerializer.plainText().serialize(Objects.requireNonNull(i.getItemMeta().displayName())) + "&7 to &c" + p.getName());
+        
+        String iname = i.getType().toString();
+        ItemMeta meta = i.getItemMeta();
+        if (meta != null && meta.hasDisplayName()) {
+            iname = Utils.toPlain(meta.displayName());
+        }
+        CommandUtils.sendSuccessMsg(sender, "Gave &c" + i.getAmount() + "x " + iname + "&7 to &c" + p.getName());
     }
 }

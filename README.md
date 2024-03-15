@@ -10,6 +10,8 @@ UltimaAddons uses the KingdomsX API by Crypto Morin to provide several extra fea
 - Players will now receive messages upon logging in for upcoming and current wars.
 - Players will now receive messages 1 minute before war starts, when it starts, and when it ends.
 - You cannot make claims, unclaim, or move your nexus while being challenged.
+- Only neutral and enemy Kingdoms can be challenged. Challenging a neutral Kingdom will automatically make them an enemy.
+- Challenges can be cancelled by changing relation with the challenged Kingdom to neutral, truce, or ally.
 
 ### Invasions
 - The goal of an invasion is now solely to *capture the chunk*, similar to a King of the Hill game. Attackers must stand inside the invasion chunk for 3 minutes in order for the chunk to be captured.
@@ -51,9 +53,11 @@ The plugin also hooks into AdvancedEnchantments' API to provide the following cu
  
 - CAPTURE: Drops a mob's spawn egg. Excludes boss mobs and those defined in the config.
 - RECUPERATE: Reduces cooldown time for shields when they are disabled by an axe.
+- UADD_DURABILITY_CURRENT_ITEM: Adds/removes durability from an item, with consideration for unbreaking enchantment and custom durability items.
+- UADD_DURABILITY_ARMOR: Adds/removes durability from all worn armor, with consideration for unbreaking enchantment and custom durability items.
 
 ## Custom Items
-The plugin also provides some custom items and recipes that add some fresh gameplay elements to the survival experience. All recipes can be found by using the `/recipes` command in-game, and most weapons with abilities have cooldowns that are not listed here, since they are subject to change.
+The plugin also provides some custom items and recipes that add some fresh gameplay elements to the survival experience. All recipes can be found by using the `/recipes` command in-game. Most weapons with abilities have cooldowns that are not listed here, since they are subject to change. Several items have increased durability over their vanilla counterparts, such as the armorsets.
 
 ### Weapons
 - Blaze Sword: Right-click to shoot 3 fireballs in quick succession.
@@ -65,10 +69,27 @@ The plugin also provides some custom items and recipes that add some fresh gamep
 
 ### Armor
 Each armorset has the protection and armor toughness equivalent of Netherite, unless stated otherwise.
-- Mithril: Each piece, when worn, gives +1% movement speed per level of Wisdom (from Aurelium) above 25.
+- Mithril: Each piece, when worn, gives +0.5% movement speed per level of Agility (from Aurelium) above 25.
+- Obsidian: Each piece gives +0.2 armor toughness per level of Endurance above 25, increasing its resistance against high-damage attacks.
+- Infused: Each piece gives +0.5% attack damage per level of Fighting above 25.
+- Shard: Each piece gives +0.1 max health per level of Mining above 25.
+
+### Warp Totems
+The plugin replaces regular teleportation commands with item-based teleports. After crafting a Totem of Warping, it can be combined in the crafting table with various items to create totems set to different locations. Totems are consumed on use, and require a 5 second timer without moving before teleportation succeeds.
+- Totem of Warping (Kingdom Home): Crafted using any bed, right-click to initiate a teleportation to your kingdom home location.
+- Totem of Warping (Bed): Crafted using a compass, right-click to initiate a teleportation to your bed or respawn anchor location. Does not work if your respawn point was destroyed.
+- Totem of Warping (Death): Crafted using a calibrated sculk sensor, right-click to initiate a teleportation to your last death location. Only works up to 5 minutes after your last death. The item is kept in inventory on death.
+- Totem of Warping (Lodestone): Crafted using a lodestone compass, right-click to initiate a teleportation to the lodestone set by the lodestone compass. Does not work if the lodestone has been destroyed.
+- Totem of Warping (Player): Crafting this item requires an original generation (non-copy) written book signed by another player. Right-click to request a teleportation to the player set by the book, if they are online.
 
 ### Others
 - Diamond Chip: Like iron or gold nuggets, but for diamonds. Used for better economy integration, since Ultima uses a item-based economy with diamonds as its currency.
+- Obsidian Ingot: A rare ingredient dropped when the blast resistance of obsidian is overcome. Gives Resistance I when held. Used to craft obsidian armor.
+- Radiant Shard: Gives Regeneration I when held. Used to craft Shard armor.
+- Infused Ingot: A rare ingredient dropped when unwaxed copper is destroyed by a charged explosion. Drop chance increases the more oxidized the copper. Gives Strength I when held. Used to craft Infused armor.
+- Mithril Ingot: Formed when shulkers are destroyed by star-like temperatires. Gives Speed I when held. Used to craft Mithril armor.
+- Dragon Firework: The only firework that can boost elytras in flight. Boost is tripled in the End.
+- Bundle: An item that never became obtainable in survival, now has a recipe.
 
 ## Shopkeepers
 The plugin also hooks onto Shopkeepers and creates two new types of shopkeepers (combinable), namely:
@@ -79,3 +100,8 @@ In addition, these shopkeepers have new parameters to further enhance supply/dem
 ### Parameters
 - Weights: Adds weights which affects an item's ability to appear in rotations.
 - Limits: Adds a buy & sell limit to a certain item.
+
+## Game Mechanics
+Finally, the plugin adds a few game mechanics to make the survival experience more balanced and enjoyable.
+
+- Elytras do not work if exposed to rain.

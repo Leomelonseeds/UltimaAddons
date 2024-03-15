@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons.handlers;
+package com.leomelonseeds.ultimaaddons.handlers.kingdom;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import org.bukkit.Bukkit;

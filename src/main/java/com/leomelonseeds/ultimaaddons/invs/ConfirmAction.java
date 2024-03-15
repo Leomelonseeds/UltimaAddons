@@ -1,30 +1,24 @@
 package com.leomelonseeds.ultimaaddons.invs;
 
-import com.leomelonseeds.ultimaaddons.utils.Utils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.Objects;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 
-public class ConfirmAction implements UAInventory {
-
-    private Inventory inv;
+public class ConfirmAction extends UAInventory {
+    
     private ConfirmCallback callback;
-    private UAInventory mwinv;
+    private UAInventory uainv;
     private Player player;
-
+    
     public ConfirmAction(String action, Player player, UAInventory mwinv, ConfirmCallback callback) {
+        super(player, 27, "Confirm: " + action);
         this.player = player;
         this.callback = callback;
-        this.mwinv = mwinv;
-
-        inv = Bukkit.createInventory(null, 27, Utils.toComponent("Confirm: " + action));
-        manager.registerInventory(player, this);
+        this.uainv = mwinv;
     }
 
     @Override
@@ -34,10 +28,10 @@ public class ConfirmAction implements UAInventory {
             int mod = i % 9;
             Material material;
             String name = "";
-            if (mod <= 3) {
+            if (0 <= mod && mod <= 3) {
                 material = Material.EMERALD_BLOCK;
                 name = "&aConfirm";
-            } else if (5 <= mod) {
+            } else if (5 <= mod && mod <= 8) {
                 material = Material.REDSTONE_BLOCK;
                 name = "&cCancel";
             } else {
@@ -53,28 +47,22 @@ public class ConfirmAction implements UAInventory {
 
     @Override
     public void registerClick(int slot, ClickType type) {
-        Material material = Objects.requireNonNull(inv.getItem(slot)).getType();
-
+        Material material = inv.getItem(slot).getType();
+        
         if (material == Material.IRON_BARS) {
             return;
         }
-
-        if (mwinv != null) {
-            manager.registerInventory(player, mwinv);
-        } else {
-            player.closeInventory();
-        }
-
+        
         if (material == Material.EMERALD_BLOCK) {
             callback.onConfirm(true);
         } else if (material == Material.REDSTONE_BLOCK) {
             callback.onConfirm(false);
         }
+        
+        if (uainv != null) {
+            manager.registerInventory(player, uainv);
+        } else {
+            player.closeInventory();
+        }
     }
-
-    @Override
-    public Inventory getInventory() {
-        return inv;
-    }
-
 }
