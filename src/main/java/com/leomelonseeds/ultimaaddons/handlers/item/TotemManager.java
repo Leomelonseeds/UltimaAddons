@@ -134,7 +134,7 @@ public class TotemManager implements Listener {
                     
                     int since = TIME - iteration;
                     if (iteration > 1) {
-                        player.spawnParticle(Particle.PORTAL, from, 50 + since * 50, 0.1, 0.1, 0.1, 0.7 + since * 0.1);
+                        from.getWorld().spawnParticle(Particle.PORTAL, from, 50 + since * 50, 0.1, 0.1, 0.1, 0.7 + since * 0.1);
                     }
                     Utils.sendSound(Sound.BLOCK_BEACON_AMBIENT, 2F, 1.2F + since * 0.2F, from);
                     msg(player, "&bTeleporting in &f" + iteration + " &bseconds, do not move...");
@@ -163,7 +163,7 @@ public class TotemManager implements Listener {
                 msg(player, "&bTeleporting...");
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     player.teleport(curLoc);
-                    player.spawnParticle(Particle.DRAGON_BREATH, curLoc.clone().add(0, 1, 0), 50, 0, 0, 0, 0.1);
+                    curLoc.getWorld().spawnParticle(Particle.DRAGON_BREATH, curLoc.clone().add(0, 1, 0), 50, 0, 0, 0, 0.1);
                     Utils.sendSound(Sound.ITEM_TOTEM_USE, 0.8F, 2F, curLoc);
                 });
                 this.cancel();
@@ -307,7 +307,7 @@ public class TotemManager implements Listener {
                 return;
             }
             
-            initiateTeleportation(player, totem, loc.toCenterLocation().add(0, 0.5, 0));
+            initiateTeleportation(player, totem, loc.toCenterLocation().add(0, -0.5, 0));
             return;
         }
         
