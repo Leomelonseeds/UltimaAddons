@@ -1,12 +1,5 @@
 package com.leomelonseeds.ultimaaddons;
 
-import org.bukkit.NamespacedKey;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.kingdoms.constants.metadata.KingdomMetadataHandler;
-import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
-import org.kingdoms.constants.namespace.Namespace;
-
 import com.leomelonseeds.ultimaaddons.ability.ae.CaptureEffect;
 import com.leomelonseeds.ultimaaddons.ability.ae.RecuperateEffect;
 import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityArmor;
@@ -18,29 +11,34 @@ import com.leomelonseeds.ultimaaddons.data.file.ConfigFile;
 import com.leomelonseeds.ultimaaddons.data.file.Data;
 import com.leomelonseeds.ultimaaddons.handlers.LinkManager;
 import com.leomelonseeds.ultimaaddons.handlers.MiscListener;
-import com.leomelonseeds.ultimaaddons.handlers.ShopkeeperTrade;
+import com.leomelonseeds.ultimaaddons.handlers.ShopkeeperListener;
 import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
 import com.leomelonseeds.ultimaaddons.handlers.kingdom.KingdomsListener;
 import com.leomelonseeds.ultimaaddons.handlers.kingdom.UAUnclaimProcessor;
 import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 import com.leomelonseeds.ultimaaddons.utils.UAPlaceholders;
-
 import net.advancedplugins.ae.api.AEAPI;
+import org.bukkit.NamespacedKey;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.kingdoms.constants.metadata.KingdomMetadataHandler;
+import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
+import org.kingdoms.constants.namespace.Namespace;
 
 
 public class UltimaAddons extends JavaPlugin {
 
     public static final long CHALLENGE_COOLDOWN_TIME = 1 * 24 * 3600 * 1000; // 1 day
-    
+
     public static KingdomMetadataHandler lckh;
     public static KingdomMetadataHandler shield_time;
     public static KingdomMetadataHandler outpost_id;
-    
+
     public static NamespacedKey itemKey;
     public static NamespacedKey duraKey;
-    
+
     private static UltimaAddons plugin;
-    
+
     private LinkManager linkManager;
     private InventoryManager invManager;
     private ItemManager itemManager;
@@ -90,7 +88,7 @@ public class UltimaAddons extends JavaPlugin {
         pm.registerEvents(itemManager.getArmor(), this);
         pm.registerEvents(itemManager.getRecipes(), this);
         pm.registerEvents(itemManager.getTotems(), this);
-        pm.registerEvents(new ShopkeeperTrade(), this);
+        pm.registerEvents(new ShopkeeperListener(), this);
         pm.registerEvents(new MiscListener(), this);
 
         // Register and Load Data File
