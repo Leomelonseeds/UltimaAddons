@@ -125,7 +125,7 @@ public class ItemManager implements Listener {
                         a = new Blink(asec.getInt("distance"));
                         break;
                     case "oxtailsaber":
-                        a = new DualWield(key);
+                        a = new DualWield(key, asec.getInt("speed"));
                         break;
                     case "shiruken":
                         a = new Shiruken(asec.getDouble("speed"), asec.getDouble("damage"), asec.getInt("ticks"));

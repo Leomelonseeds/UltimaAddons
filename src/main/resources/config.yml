@@ -450,12 +450,12 @@ items:
     lore:
       - ""
       - "&eDual wield this weapon to attack"
-      - "&eenemies twice as fast, halving"
+      - "&eenemies 1.5x as fast, reducing"
       - "&etheir damage tick cooldown."
       - ""
       - "&7When in Main Hand:"
       - "&2 6 Attack Damage"
-      - "&2 3.3 Attack Speed"
+      - "&2 2.5 Attack Speed"
     update: 2
     flags:
       - HIDE_ATTRIBUTES
@@ -468,11 +468,12 @@ items:
       GENERIC_ATTACK_SPEED:
         name: "Attack Speed"
         operation: ADD_NUMBER
-        amount: -0.66
+        amount: -1.5
         slot: HAND
     ability:
       name: "Dual"
       cooldown: 0
+      speed: 8
   shiruken:
     material: NETHER_STAR
     name: "&6Shiruken"
@@ -689,6 +690,7 @@ items:
     update: 1
   introbook:
     material: WRITTEN_BOOK
+    name: "&dUltima Guide &b(FREE DIAMONDS)"
     book:
       title: "Ultima Guide (FREE DIAMONDS)"
       author: "Ultima"

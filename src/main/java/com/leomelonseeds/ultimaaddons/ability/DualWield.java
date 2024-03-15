@@ -1,8 +1,8 @@
 package com.leomelonseeds.ultimaaddons.ability;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
-import io.papermc.paper.event.player.PlayerArmSwingEvent;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -17,20 +17,22 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
+
+import io.papermc.paper.event.player.PlayerArmSwingEvent;
 
 public class DualWield extends Ability implements Listener {
-
-    private static final int DEFAULT_COOLDOWN = 12;
 
     // Players who swung mainhand but not offhand
     // are added to this list, removed otherwise
     private Map<Player, BukkitTask> cd;
     private String weaponName;
+    private int speed; // The ATTACK SPEED of the weapon measured in TICKS (default 12)
 
-    public DualWield(String weaponName) {
+    public DualWield(String weaponName, int speed) {
         this.weaponName = weaponName;
+        this.speed = speed;
         Bukkit.getServer().getPluginManager().registerEvents(this, UltimaAddons.getPlugin());
         cd = new HashMap<>();
     }
@@ -52,8 +54,8 @@ public class DualWield extends Ability implements Listener {
         ItemMeta mainMeta = main.getItemMeta();
         main.setItemMeta(off.getItemMeta());
         off.setItemMeta(mainMeta);
-
-        Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> target.setNoDamageTicks(DEFAULT_COOLDOWN / 2 - 1), 1);
+        
+        Utils.schedule(1, () -> target.setNoDamageTicks(speed - 1));
         return true;
     }
 
@@ -77,7 +79,7 @@ public class DualWield extends Ability implements Listener {
         }
 
         if (!cd.containsKey(p)) {
-            cd.put(p, Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> cd.remove(p), DEFAULT_COOLDOWN));
+            Utils.schedule(speed * 2, () -> cd.remove(p));
             return;
         }
 
