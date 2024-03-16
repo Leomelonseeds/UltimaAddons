@@ -23,6 +23,7 @@ import com.leomelonseeds.ultimaaddons.commands.arguments.PlayerArgument;
 import com.leomelonseeds.ultimaaddons.commands.arguments.ShopkeeperArgument;
 import com.leomelonseeds.ultimaaddons.commands.ua.UAChallenge;
 import com.leomelonseeds.ultimaaddons.commands.ua.UAGive;
+import com.leomelonseeds.ultimaaddons.commands.ua.UAIntro;
 import com.leomelonseeds.ultimaaddons.commands.ua.UARecipes;
 import com.leomelonseeds.ultimaaddons.commands.ua.UAReload;
 import com.leomelonseeds.ultimaaddons.commands.ua.uask.UASk;
@@ -55,7 +56,8 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
                         )),
                 "ureload", new UAReload("ureload", Collections.emptyList(), "ua.reload", ""),
                 "usk", new UASk("uask", Collections.emptyList(), "ua.sk", ""),
-                "recipes", new UARecipes("recipes", Collections.emptyList(), "", "")
+                "recipes", new UARecipes("recipes", Collections.emptyList(), "", ""),
+                "uintro", new UAIntro("uintro", Collections.emptyList(), "", "")
         );
         commands.forEach((key, value) ->
                 {

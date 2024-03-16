@@ -149,7 +149,7 @@ public class MiscListener implements Listener {
     public void listen(PlayerCommandPreprocessEvent e) {
         // No need to log non-staff members
         Player p = e.getPlayer();
-        if (!p.hasPermission("group.helper")) {
+        if (!p.hasPermission("group.helper") && !p.hasPermission("group.builder")) {
             return;
         }
         

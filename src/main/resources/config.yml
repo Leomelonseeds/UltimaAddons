@@ -63,7 +63,7 @@ introgui:
         - "Minecarts\n\nPowered rails placed on redstone blocks make minecarts travel 4x faster than vanilla. Make sure to have smooth turns so your carts don't derail."
         - "Elytra\n\nElytra boosting is only possible with Dragon Fireworks, which can be obtained, among other means, through trading at the Market."
         - "Custom Items\n\nCustom items and recipes are available, including powerful weapons and armor sets - use /recipes to see them."
-        - "Teleportation\n\nUse Totems of Warping to TP to locations like your Kingdom home, last death location, lodestones, or other players. They are craftable and also available at the Market."
+        - "Teleportation\n\nUse Totems of Warping to TP to locations like your Kingdom home, last death location, lodestones, or other players. They are craftable (check /recipes) and also available at the Market."
         - "The Nether\n\n1 block in the Nether = 2 blocks in the Overworld. This differs from vanilla, which has a 1:8 ratio by default."
         - "Worldborder\n\nThe Overworld and End borders are 8000 blocks from the center, while the Nether border is 4000 blocks away."
       generation: COPY_OF_ORIGINAL
@@ -110,6 +110,9 @@ capture-exclude:
   - ELDER_GUARDIAN
   - WARDEN
 staff-log:
+  - spawn
+  - home
+  - sethome
   - gm
   - gmsp
   - gamemode
@@ -138,6 +141,9 @@ staff-log:
   - enchantment
   - xp
   - fly
+  - espawn
+  - ehome
+  - esethome
   - egm
   - egmsp
   - egamemode
@@ -690,9 +696,9 @@ items:
     update: 1
   introbook:
     material: WRITTEN_BOOK
-    name: "&dUltima Guide &b(FREE DIAMONDS)"
+    name: "&dKingdoms Guide &b(FREE DIAMONDS)"
     book:
-      title: "Ultima Guide (FREE DIAMONDS)"
+      title: "Kingdoms Guide (FREE DIAMONDS)"
       author: "Ultima"
       pages:
         - "How did you open this book?"

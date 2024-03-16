@@ -147,7 +147,11 @@ public class KingdomsListener implements Listener {
         Kingdom k = (Kingdom) e.getGroup();
         long shieldtime = System.currentTimeMillis() + e.getShieldDuration() * 2;
         k.getMetadata().put(UltimaAddons.shield_time, new StandardKingdomMetadata(shieldtime));
-        Utils.discord(":shield: **" + k.getName() + "** has activated a shield for " + Utils.formatDate(e.getShieldDuration()));
+        String time = Utils.formatDate(e.getShieldDuration());
+        Utils.discord(":shield: **" + k.getName() + "** has activated a shield for " + time);
+        Bukkit.getOnlinePlayers().forEach(p -> {
+            Utils.msg(p, "&6" + k.getName() + " &2has activated a shield for &6" + time);
+        });
 
         // Close other shield buyers to stop abuse
         k.getOnlineMembers().forEach(p -> Utils.closeInventory(p, "Shields", "Challenge"));
@@ -170,20 +174,25 @@ public class KingdomsListener implements Listener {
         Utils.discord(":fleur_de_lis: **" + k.getName() + "** has been founded");
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPacifist(KingdomPacifismStateChangeEvent e) {
+        String k = e.getKingdom().getName();
+        String inGame;
+        if (e.isPacifist()) {
+            Utils.discord(":peace: **" + k + "** is a pacifist Kingdom");
+            inGame = "&6" + k + " &2is a pacifist Kingdom.";
+        } else {
+            Utils.discord(":fire: **" + k + "** is now an aggressor Kingdom");
+            inGame = "&6" + k + " &2is is now an aggressor Kingdom.";
+        }
+        
+        Bukkit.getOnlinePlayers().forEach(p -> Utils.msg(p, inGame));
+    }
+
 
     // -------------------------------------------------
     // INVASION HANDLERS
     // -------------------------------------------------
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPacifist(KingdomPacifismStateChangeEvent e) {
-        Kingdom k = e.getKingdom();
-        if (e.isPacifist()) {
-            Utils.discord(":peace: **" + k.getName() + "** is a pacifist kingdom");
-        } else {
-            Utils.discord(":fire: **" + k.getName() + "** is now an aggressor kingdom");
-        }
-    }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInvasionSuccess(KingdomInvadeEndEvent e) {
