@@ -78,7 +78,7 @@ public class RecipeManager implements Listener {
         ShapedRecipe bundle = new ShapedRecipe(new NamespacedKey(plugin, "bundle_0"), new ItemStack(Material.BUNDLE));
         bundle.shape("SRS", "RXR", "RRR");
         bundle.setIngredient('S', Material.STRING);
-        bundle.setIngredient('R', Material.RABBIT_HIDE);
+        bundle.setIngredient('R', Material.LEATHER);
         addRecipe(bundle);
         
         // Radiant shard
