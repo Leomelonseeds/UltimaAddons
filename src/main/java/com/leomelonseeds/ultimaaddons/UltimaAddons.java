@@ -11,6 +11,7 @@ import com.leomelonseeds.ultimaaddons.data.file.ConfigFile;
 import com.leomelonseeds.ultimaaddons.data.file.Data;
 import com.leomelonseeds.ultimaaddons.handlers.LinkManager;
 import com.leomelonseeds.ultimaaddons.handlers.MiscListener;
+import com.leomelonseeds.ultimaaddons.handlers.RegionManager;
 import com.leomelonseeds.ultimaaddons.handlers.ShopkeeperListener;
 import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
 import com.leomelonseeds.ultimaaddons.handlers.kingdom.KingdomsListener;
@@ -40,10 +41,12 @@ public class UltimaAddons extends JavaPlugin {
     private static UltimaAddons plugin;
 
     private LinkManager linkManager;
+    private RegionManager regionManager;
     private InventoryManager invManager;
     private ItemManager itemManager;
     private ConfigFile configFile;
     private Data tradesFile;
+    private Data regionsFile;
 
 
     public static UltimaAddons getPlugin() {
@@ -70,6 +73,7 @@ public class UltimaAddons extends JavaPlugin {
 
         // Register managers and stuff
         linkManager = new LinkManager();
+        regionManager = new RegionManager();
         invManager = new InventoryManager();
         itemManager = new ItemManager(this);
         UAUnclaimProcessor.register();
@@ -91,14 +95,16 @@ public class UltimaAddons extends JavaPlugin {
         pm.registerEvents(new ShopkeeperListener(), this);
         pm.registerEvents(new MiscListener(), this);
 
-        // Register and Load Data File
+        // Register and Load Data Files
         tradesFile = new Data("trades.yml");
+        regionsFile = new Data("regions.yml");
         new Load();
     }
 
     @Override
     public void onDisable() {
         writeTradesFile();
+        writeRegionsFile();
         itemManager.getAbilities().cancelTasks();
     }
 
@@ -114,8 +120,16 @@ public class UltimaAddons extends JavaPlugin {
         return linkManager;
     }
 
+    public RegionManager getRegionLinker() {
+        return regionManager;
+    }
+
     public Data getTradesFile() {
         return tradesFile;
+    }
+
+    public Data getRegionsFile() {
+        return regionsFile;
     }
 
     public ConfigFile getConfigFile() {
@@ -129,11 +143,19 @@ public class UltimaAddons extends JavaPlugin {
         tradesFile.save();
     }
 
+    public void writeRegionsFile() {
+        for (String region : regionManager.keySet()) {
+            new Save(region, regionManager.getShopkeeperFromRegion(region));
+        }
+        regionsFile.save();
+    }
+
     public void reload() {
         reloadConfig();
         getConfigFile().reload();
         getItems().reload();
         getTradesFile().reload();
+        getRegionsFile().reload();
         getSKLinker().clear();
         new Load();
     }
