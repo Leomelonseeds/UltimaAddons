@@ -356,7 +356,7 @@ public class KingdomsListener implements Listener {
 
         // Check if its a structure
         String tag = nbt.get(StructureType.METADATA, NBTType.STRING);
-        if (!tag.equals("outpost")) {
+        if (tag == null || !tag.equals("outpost")) {
             return;
         }
 
