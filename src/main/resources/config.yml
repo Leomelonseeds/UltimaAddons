@@ -175,9 +175,9 @@ staff-log:
   - eecreative
   - eexp
   - ugive
-  - /wand
-  - /set
-  - /replace
+  - wand
+  - set
+  - replace
   - minecraft:tp
   - minecraft:teleport
   - minecraft:give
