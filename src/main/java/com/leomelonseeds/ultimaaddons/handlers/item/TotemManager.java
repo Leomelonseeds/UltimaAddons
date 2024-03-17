@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -26,10 +27,8 @@ import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -95,8 +94,8 @@ public class TotemManager implements Listener {
         }
     }
 
-    private void initiateTeleportation(Player player, ItemStack totem, Location loc) {
-        initiateTeleportation(player, totem, loc, null);
+    private void initiateTeleportation(Player player, EquipmentSlot hand, ItemStack totem, Location loc) {
+        initiateTeleportation(player, hand, totem, loc, null);
     }
     
     /**
@@ -106,7 +105,7 @@ public class TotemManager implements Listener {
      * @param loc
      * @param safe if true, searches upwards from loc until safe airblocks found.
      */
-    private void initiateTeleportation(Player player, ItemStack totem, Location loc, Player other) {
+    private void initiateTeleportation(Player player, EquipmentSlot hand, ItemStack totem, Location loc, Player other) {
         if (pendingTP.containsKey(player)) {
             return;
         }
@@ -119,6 +118,12 @@ public class TotemManager implements Listener {
             
             @Override
             public void run() {
+                ItemStack curItem = player.getInventory().getItem(hand);
+                if (!curItem.isSimilar(totem)) {
+                    removePlayer(player, "aren't holding the totem");
+                    return;
+                }
+                
                 if (iteration > 0) {
                     if (iteration == TIME) {
                         Utils.sendSound(Sound.BLOCK_BEACON_POWER_SELECT, 2F, 2F, from);
@@ -159,7 +164,10 @@ public class TotemManager implements Listener {
                     } 
                 }
 
-                totem.setAmount(totem.getAmount() - 1);
+                if (player.getGameMode() != GameMode.CREATIVE) {
+                    curItem.setAmount(curItem.getAmount() - 1);
+                }
+                
                 msg(player, "&bTeleporting...");
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     player.teleport(curLoc);
@@ -185,19 +193,10 @@ public class TotemManager implements Listener {
         }
     }
     
-    @EventHandler
-    public void onSwap(PlayerSwapHandItemsEvent e) {
-        removePlayer(e.getPlayer(), "changed items");
-    }
-    
-    @EventHandler
-    public void onHotkey(PlayerItemHeldEvent e) {
-        removePlayer(e.getPlayer(), "changed items");
-    }
-    
     // Keep death totems on death
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
+        removePlayer(e.getPlayer(), "died");
         List<ItemStack> drops = e.getDrops();
         for (ItemStack i : new ArrayList<>(drops)) {
             String id = Utils.getItemID(i, totemKey);
@@ -246,6 +245,7 @@ public class TotemManager implements Listener {
         
         // KINGDOM HOME TELEPORT
         Player player = e.getPlayer();
+        EquipmentSlot hand = e.getHand();
         if (isType(totid, TotemType.KHOME)) {
             KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(player);
             if (!kp.hasKingdom()) {
@@ -261,7 +261,7 @@ public class TotemManager implements Listener {
             
             World w = Bukkit.getWorld(loc.getWorld().getName());
             Location tpLoc = new Location(w, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
-            initiateTeleportation(player, totem, tpLoc);
+            initiateTeleportation(player, hand, totem, tpLoc);
             return;
         }
         
@@ -273,7 +273,7 @@ public class TotemManager implements Listener {
                 return;
             }
             
-            initiateTeleportation(player, totem, loc);
+            initiateTeleportation(player, hand, totem, loc);
             return;
         }
         
@@ -287,7 +287,7 @@ public class TotemManager implements Listener {
                 return;
             }
             
-            initiateTeleportation(player, totem, loc);
+            initiateTeleportation(player, hand, totem, loc);
             return;
         }
 
@@ -307,7 +307,7 @@ public class TotemManager implements Listener {
                 return;
             }
             
-            initiateTeleportation(player, totem, loc.toCenterLocation().add(0, -0.5, 0));
+            initiateTeleportation(player, hand, totem, loc.toCenterLocation().add(0, 0.51, 0));
             return;
         }
         
@@ -345,12 +345,13 @@ public class TotemManager implements Listener {
                     return;
                 }
                 
-                if (!player.getInventory().getItem(e.getHand()).equals(totem)) {
+                ItemStack curItem = player.getInventory().getItem(hand);
+                if (!curItem.isSimilar(totem)) {
                     msg(player, "&cTeleportation cancelled because you changed items.");
                     return;
                 }
                 
-                initiateTeleportation(player, totem, null, other);
+                initiateTeleportation(player, hand, curItem, null, other);
                 return;
             });
             return;
