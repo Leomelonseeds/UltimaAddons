@@ -1,16 +1,11 @@
 package com.leomelonseeds.ultimaaddons.handlers;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.skaddon.RotatingShopkeeper;
-import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
-import com.leomelonseeds.ultimaaddons.utils.TimeParser;
-import com.nisovin.shopkeepers.api.events.ShopkeeperOpenUIEvent;
-import com.nisovin.shopkeepers.api.events.ShopkeeperTradeCompletedEvent;
-import com.nisovin.shopkeepers.api.events.ShopkeeperTradeEvent;
-import com.nisovin.shopkeepers.api.ui.DefaultUITypes;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.trading.MerchantOffers;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftAbstractVillager;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftVillager;
@@ -21,15 +16,114 @@ import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.Merchant;
+import org.bukkit.inventory.MerchantInventory;
+import org.bukkit.inventory.MerchantRecipe;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.skaddon.RotatingShopkeeper;
+import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+import com.leomelonseeds.ultimaaddons.utils.TimeParser;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
+import com.nisovin.shopkeepers.api.ShopkeepersAPI;
+import com.nisovin.shopkeepers.api.events.PlayerCreatePlayerShopkeeperEvent;
+import com.nisovin.shopkeepers.api.events.PlayerDeleteShopkeeperEvent;
+import com.nisovin.shopkeepers.api.events.ShopkeeperOpenUIEvent;
+import com.nisovin.shopkeepers.api.events.ShopkeeperTradeCompletedEvent;
+import com.nisovin.shopkeepers.api.events.ShopkeeperTradeEvent;
+import com.nisovin.shopkeepers.api.shopkeeper.ShopCreationData;
+import com.nisovin.shopkeepers.api.shopkeeper.player.PlayerShopkeeper;
+import com.nisovin.shopkeepers.api.shopkeeper.player.trade.TradingPlayerShopkeeper;
+import com.nisovin.shopkeepers.api.ui.DefaultUITypes;
+
+import net.alex9849.arm.AdvancedRegionMarket;
+import net.alex9849.arm.events.PreBuyEvent;
+import net.alex9849.arm.events.RestoreRegionEvent;
+import net.alex9849.arm.events.UnsellRegionEvent;
+import net.alex9849.arm.regions.Region;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.trading.MerchantOffers;
 
 public class ShopkeeperListener implements Listener {
     private final UltimaAddons plugin = UltimaAddons.getPlugin();
+    
+    @EventHandler
+    public void onRegionPurchase(PreBuyEvent e) {
+        TradingPlayerShopkeeper sk = getRegionShopkeeper(e.getRegion());
+        Player buyer = e.getBuyer();
+        if (sk == null) {
+            Utils.msg(buyer, "&cThis region does not have a shopkeeper! Please contact an admin to fix this.");
+        }
+        
+        sk.setOwner(buyer);
+    }
+    
+    @EventHandler
+    public void onRegionUnsell(UnsellRegionEvent e) {
+        TradingPlayerShopkeeper sk = getRegionShopkeeper(e.getRegion());
+        Player buyer = Bukkit.getPlayer(e.getRegion().getOwner());
+        if (sk == null) {
+            Utils.msg(buyer, "&cThis region does not have a shopkeeper! Please contact an admin to fix this.");
+        }
+        
+        sk.clearOffers();
+        sk.setForHire(UltimaAddons.getPlugin().getItems().getItem("shopkeeperhire"));
+    }
+    
+    @EventHandler
+    public void onRegionReset(RestoreRegionEvent e) {
+        // This event is called after unselling as well
+        // Since unselling clears shopkeeper and makes it unsold,
+        // we don't need to do anything here
+        Region r = e.getRegion();
+        if (!r.isSold()) {
+            return;
+        }
+        
+        TradingPlayerShopkeeper sk = getRegionShopkeeper(r);
+        Player buyer = Bukkit.getPlayer(r.getOwner());
+        if (sk == null) {
+            Utils.msg(buyer, "&cThis region does not have a shopkeeper! Please contact an admin to fix this.");
+        }
+        
+        sk.clearOffers();
+    }
+    
+    @EventHandler
+    public void onCreate(PlayerCreatePlayerShopkeeperEvent e) {
+        ShopCreationData cd = e.getShopCreationData();
+        Player creator = cd.getCreator();
+        if (creator.hasPermission("shopkeeper.admin")) {
+            return;
+        }
+        
+        Location spawnLoc = cd.getSpawnLocation();
+        if (AdvancedRegionMarket.getInstance().getRegionManager().getRegionsByLocation(spawnLoc).isEmpty()) {
+            return;
+        }
+        
+        e.setCancelled(true);
+        Utils.msg(creator, "&cYou cannot create a shop here!");
+    }
+    
+    @EventHandler
+    public void onDelete(PlayerDeleteShopkeeperEvent e) {
+        Player p = e.getPlayer();
+        if (p.hasPermission("shopkeeper.admin")) {
+            return;
+        }
+        
+        Location delLoc = e.getShopkeeper().getLocation();
+        if (AdvancedRegionMarket.getInstance().getRegionManager().getRegionsByLocation(delLoc).isEmpty()) {
+            return;
+        }
+        
+        e.setCancelled(true);
+        Utils.msg(p, "&cYou cannot delete shops here!");
+    }
 
     @EventHandler
     public void onTrade(ShopkeeperTradeEvent e) {
@@ -132,6 +226,23 @@ public class ShopkeeperListener implements Listener {
                     sendOffers(p);
                 }
         );
+    }
+    
+    // Fetch first playertradingshopkeepers in region
+    private TradingPlayerShopkeeper getRegionShopkeeper(Region region) {
+        for (PlayerShopkeeper shopkeeper : ShopkeepersAPI.getPlugin().getShopkeeperRegistry().getAllPlayerShopkeepers()) {
+            if (!(shopkeeper instanceof TradingPlayerShopkeeper)) {
+                continue;
+            }
+            
+            Location loc = shopkeeper.getLocation();
+            if (region.getRegion().contains(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())) {
+                return (TradingPlayerShopkeeper) shopkeeper;
+            }
+        }
+
+        Bukkit.getLogger().severe("No trading shopkeeper found in region " + region.getRegion().getId());
+        return null;
     }
 
     /**

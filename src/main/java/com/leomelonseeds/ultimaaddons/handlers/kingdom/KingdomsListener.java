@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -30,6 +31,7 @@ import org.kingdoms.constants.land.structures.Structure;
 import org.kingdoms.constants.land.structures.StructureRegistry;
 import org.kingdoms.constants.land.structures.StructureStyle;
 import org.kingdoms.constants.land.structures.StructureType;
+import org.kingdoms.constants.land.turrets.Turret;
 import org.kingdoms.constants.metadata.KingdomMetadata;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
@@ -62,6 +64,39 @@ import com.leomelonseeds.ultimaaddons.utils.Utils;
 public class KingdomsListener implements Listener {
 
     private static Set<Structure> justRemoved = new HashSet<>();
+    
+    // -------------------------------------------------
+    // ALLOW EXPLOSIONS TO DESTROY TURRETS
+    // -------------------------------------------------
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onExplode(EntityExplodeEvent e) {
+        if (!e.getEntityType().toString().contains("TNT")) {
+            return;
+        }
+        
+        Set<Block> turrets = new HashSet<>();
+        e.blockList().forEach(b -> {
+            if (b.getType() != Material.PLAYER_HEAD) {
+                return;
+            }
+            
+            Land land = Land.getLand(b);
+            if (land == null) {
+                return;
+            }
+            
+            Turret turret = land.getTurrets().get(SimpleLocation.of(b));
+            if (turret == null) {
+                return;
+            }
+            
+            turrets.add(b);
+            turret.remove();
+        });
+        
+        e.blockList().removeIf(b -> turrets.contains(b));
+    }
     
     // -------------------------------------------------
     // ONLY ALLOW INVASIONS ON NON-AIR BLOCKS
@@ -314,7 +349,7 @@ public class KingdomsListener implements Listener {
 
         // For some reason without the 1 tick delay it skips the confirmation screen
         p.closeInventory();
-        Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> {
+        Utils.schedule(1, () -> {
             new ConfirmAction("Unclaim Outpost Lands", p, null, result -> {
                 if (result == null || !result) {
                     return;
@@ -325,7 +360,7 @@ public class KingdomsListener implements Listener {
                 int amt = Utils.unclaimOutpost(kp, kp.getKingdom(), structure);
                 Utils.msg(p, "&2You unclaimed &6" + amt + " &2land(s).");
             });
-        }, 1);
+        });
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
