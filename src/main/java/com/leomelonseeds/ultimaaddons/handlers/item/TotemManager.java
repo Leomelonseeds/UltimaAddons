@@ -23,14 +23,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.CompassMeta;
@@ -323,6 +329,10 @@ public class TotemManager implements Listener {
                 return;
             }
             
+            if (pendingTP.containsKey(player)) {
+                return;
+            }
+            
             String otherName = Utils.toPlain(other.displayName());
             if (pendingAccept.contains(player)) {
                 msg(player, "&bRequest to &f" + otherName + " &bstill pending...");
@@ -397,7 +407,34 @@ public class TotemManager implements Listener {
             }
         }
         
-        if (curTotem == null || other == null) {
+        // curTotem being null means no totem was found
+        if (curTotem == null) {
+            return;
+        }
+        
+        // If other is still null, we have combined two valid totems.
+        // Check for totem duplication recipe
+        if (other == null) {
+            // Check if 1 totem is unset and another is something else
+            // Attempt to assign "other" to the UNSET totem
+            // and toDupe to the SET totem
+            ItemStack toDupe = null;
+            for (ItemStack tot : curItems) {
+                String id = Utils.getItemID(tot, totemKey);
+                if (isType(id, TotemType.UNSET)) {
+                    other = tot;
+                } else {
+                    toDupe = tot;
+                }
+            }
+            
+            if (toDupe == null || other == null) {
+                return;
+            }
+            
+            ItemStack result = toDupe.clone();
+            result.setAmount(2);
+            ci.setResult(result);
             return;
         }
         
@@ -456,6 +493,67 @@ public class TotemManager implements Listener {
         }
     }
     
+    // Unstack stacked totems from duplication
+    @EventHandler
+    public void onClick(InventoryClickEvent e) {
+        // Check if clicked slot has item and is a RESULT slot type
+        Inventory inv = e.getClickedInventory();
+        if (inv == null) {
+            return;
+        }
+        
+        if (!(inv.getType() == InventoryType.WORKBENCH || inv.getType() == InventoryType.CRAFTING)) {
+            return;
+        }
+        
+        if (e.getSlotType() != SlotType.RESULT) {
+            return;
+        }
+        
+        if (e.getCurrentItem() == null) {
+            return;
+        }
+        
+        ItemStack i = e.getCurrentItem().clone();
+        if (i.getType() != Material.TOTEM_OF_UNDYING || i.getAmount() <= 1) {
+            return;
+        }
+
+        InventoryAction action = e.getAction();
+        if (!(action == InventoryAction.HOTBAR_MOVE_AND_READD || action == InventoryAction.MOVE_TO_OTHER_INVENTORY ||
+              action == InventoryAction.HOTBAR_SWAP)) {
+            return;
+        }
+
+        Player p = (Player) e.getWhoClicked();
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            for (ItemStack item : p.getInventory().getContents()) {
+                if (item == null || !item.equals(i)) {
+                    continue;
+                }
+                
+                addOrDropItem(item, p);
+                return;
+            }
+        });
+    }
+    
+    // Unstack stacked totems on pickup
+    @EventHandler
+    public void onPickup(EntityPickupItemEvent e) {
+        ItemStack i = e.getItem().getItemStack();
+        if (i.getType() != Material.TOTEM_OF_UNDYING || i.getAmount() <= 1) {
+            return;
+        }
+        
+        if (e.getEntityType() != EntityType.PLAYER) {
+            return;
+        }
+        
+        addOrDropItem(i, (Player) e.getEntity());
+        e.getItem().setItemStack(i);
+    }
+    
     // Sets the crafting inventory result to the specified item, unless the given
     // curTotem is already the same as the result. Requires that curTotem and nTotem
     // both have a totem tag
@@ -465,6 +563,30 @@ public class TotemManager implements Listener {
         } else {
             ci.setResult(nTotem);
         }
+    }
+    
+    // Add a totem to inventory, dropping if full
+    private void addOrDropItem(ItemStack totem, Player p) {
+        // Set initial stack size to 1
+        ItemStack extra = totem.clone();
+        extra.setAmount(extra.getAmount() - 1);
+        totem.setAmount(1);
+        
+        // Add extras as singular stacks back to inv
+        List<ItemStack> extras = new ArrayList<>();
+        for (int i = 0; i < extra.getAmount(); i++) {
+            ItemStack cur = extra.clone();
+            cur.setAmount(1);
+            Map<Integer, ItemStack> notFit = p.getInventory().addItem(cur);
+            extras.addAll(notFit.values());
+        }
+        
+        if (extras.isEmpty()) {
+            return;
+        }
+        
+        // Leftovers are dropped
+        extras.forEach(i -> p.getWorld().dropItem(p.getLocation(), i));
     }
     
     private boolean isType(String s, TotemType type) {

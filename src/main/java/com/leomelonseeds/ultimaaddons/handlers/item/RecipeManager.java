@@ -144,6 +144,15 @@ public class RecipeManager implements Listener {
         // Recall and player both use recipes with EXAMPLE ITEMS
         shapelessTotemHelper(iunsettot, stot + TotemType.LODESTONE, null, im.getItem("exlodestone"));
         shapelessTotemHelper(iunsettot, stot + TotemType.PLAYER, null, im.getItem("exbook"));
+        
+        // Totem duplication
+        ItemStack totemDupeAny = im.getItem("exampleanytotem");
+        ItemStack totemDupeAnyRes = totemDupeAny.clone();
+        totemDupeAnyRes.setAmount(2);
+        ShapelessRecipe totemDupe = new ShapelessRecipe(new NamespacedKey(plugin, "totemdupe_0"), totemDupeAnyRes);
+        totemDupe.addIngredient(iunsettot);
+        totemDupe.addIngredient(totemDupeAny);
+        addRecipe(totemDupe);
     }
     
     private void shapelessTotemHelper(ItemStack unset, String name, Material m, ItemStack i) {
@@ -170,6 +179,10 @@ public class RecipeManager implements Listener {
     }
 
     private void addRecipe(CraftingRecipe r, String permission) {
+        NamespacedKey rkey = r.getKey();
+        if (Bukkit.getRecipe(rkey) != null) {
+            Bukkit.removeRecipe(rkey);
+        }
         Bukkit.addRecipe(r);
         recipes.put(r.getKey(), ImmutablePair.of(r, permission));
     }

@@ -1,5 +1,12 @@
 package com.leomelonseeds.ultimaaddons;
 
+import org.bukkit.NamespacedKey;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.kingdoms.constants.metadata.KingdomMetadataHandler;
+import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
+import org.kingdoms.constants.namespace.Namespace;
+
 import com.leomelonseeds.ultimaaddons.ability.ae.CaptureEffect;
 import com.leomelonseeds.ultimaaddons.ability.ae.RecuperateEffect;
 import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityArmor;
@@ -18,13 +25,9 @@ import com.leomelonseeds.ultimaaddons.handlers.kingdom.KingdomsListener;
 import com.leomelonseeds.ultimaaddons.handlers.kingdom.UAUnclaimProcessor;
 import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 import com.leomelonseeds.ultimaaddons.utils.UAPlaceholders;
+
 import net.advancedplugins.ae.api.AEAPI;
-import org.bukkit.NamespacedKey;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.kingdoms.constants.metadata.KingdomMetadataHandler;
-import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
-import org.kingdoms.constants.namespace.Namespace;
+import net.advancedplugins.ae.impl.effects.effects.effects.AdvancedEffect;
 
 
 public class UltimaAddons extends JavaPlugin {
@@ -78,10 +81,10 @@ public class UltimaAddons extends JavaPlugin {
         itemManager = new ItemManager(this);
         UAUnclaimProcessor.register();
         new UAPlaceholders().register();
-        AEAPI.registerEffect(plugin, new CaptureEffect(plugin));
-        AEAPI.registerEffect(plugin, new RecuperateEffect(plugin));
-        AEAPI.registerEffect(plugin, new UAddDurabilityCurrentItem(plugin));
-        AEAPI.registerEffect(plugin, new UAddDurabilityArmor(plugin));
+        registerAE(new CaptureEffect(plugin));
+        registerAE(new RecuperateEffect(plugin));
+        registerAE(new UAddDurabilityCurrentItem(plugin));
+        registerAE(new UAddDurabilityArmor(plugin));
 
         // Register listener
         PluginManager pm = getServer().getPluginManager();
@@ -158,5 +161,14 @@ public class UltimaAddons extends JavaPlugin {
         getRegionsFile().reload();
         getSKLinker().clear();
         new Load();
+    }
+    
+    private void registerAE(AdvancedEffect ae) {
+        try {
+            AEAPI.registerEffect(plugin, ae);
+        } catch (RuntimeException e) {
+            // This happens if /reload or plugman is used.
+            // It is unsafe to use those on production.
+        }
     }
 }

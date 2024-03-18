@@ -110,6 +110,9 @@ capture-exclude:
   - ELDER_GUARDIAN
   - WARDEN
 staff-log:
+  - pt
+  - powertool
+  - coords
   - spawn
   - home
   - sethome
@@ -141,6 +144,9 @@ staff-log:
   - enchantment
   - xp
   - fly
+  - ept
+  - epowertool
+  - ecoords
   - espawn
   - ehome
   - esethome
@@ -292,6 +298,8 @@ items:
         - "&7Right-click to initiate a teleportation"
         - "&7to a set lodestone. Does not work if the"
         - "&7lodestone has been destroyed."
+      enchants:
+        VANISHING_CURSE: 1
     player:
       material: TOTEM_OF_UNDYING
       name: "&dTotem of Warping &b(Player)"
@@ -712,3 +720,19 @@ items:
     ability:
       name: "introbook"
       cooldown: 0
+  shopkeeperhire:
+    material: OAK_SIGN
+    name: "&6Rent the shop to hire me!"
+    lore:
+      - "&7I love capitalism"
+  exampleanytotem:
+    material: TOTEM_OF_UNDYING
+    name: "&dTotem of Warping &b(Any)"
+    glow: true
+    custom-model-data: 48747
+    update: 1
+    lore:
+      - "&7This recipe allows you to duplicate"
+      - "&7any of your existing totems."
+      
+    
