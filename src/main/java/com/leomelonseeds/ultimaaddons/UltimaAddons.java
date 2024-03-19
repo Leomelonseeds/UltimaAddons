@@ -16,13 +16,13 @@ import com.leomelonseeds.ultimaaddons.data.Load;
 import com.leomelonseeds.ultimaaddons.data.Save;
 import com.leomelonseeds.ultimaaddons.data.file.ConfigFile;
 import com.leomelonseeds.ultimaaddons.data.file.Data;
-import com.leomelonseeds.ultimaaddons.handlers.LinkManager;
 import com.leomelonseeds.ultimaaddons.handlers.MiscListener;
-import com.leomelonseeds.ultimaaddons.handlers.RegionManager;
-import com.leomelonseeds.ultimaaddons.handlers.ShopkeeperListener;
 import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
 import com.leomelonseeds.ultimaaddons.handlers.kingdom.KingdomsListener;
 import com.leomelonseeds.ultimaaddons.handlers.kingdom.UAUnclaimProcessor;
+import com.leomelonseeds.ultimaaddons.handlers.shopkeeper.LinkManager;
+import com.leomelonseeds.ultimaaddons.handlers.shopkeeper.RegionManager;
+import com.leomelonseeds.ultimaaddons.handlers.shopkeeper.ShopkeeperListener;
 import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 import com.leomelonseeds.ultimaaddons.utils.UAPlaceholders;
 

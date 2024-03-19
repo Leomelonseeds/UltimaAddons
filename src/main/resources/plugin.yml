@@ -10,6 +10,7 @@ depend:
 - PlaceholderAPI
 - AdvancedEnchantments
 - Shopkeepers
+- AdvancedRegionMarket
 commands: 
   uchallenge: {}
   recipes: {}

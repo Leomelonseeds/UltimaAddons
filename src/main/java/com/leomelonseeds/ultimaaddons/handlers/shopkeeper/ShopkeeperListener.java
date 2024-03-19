@@ -1,8 +1,9 @@
-package com.leomelonseeds.ultimaaddons.handlers;
+package com.leomelonseeds.ultimaaddons.handlers.shopkeeper;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -24,7 +25,9 @@ import org.bukkit.inventory.MerchantRecipe;
 import org.jetbrains.annotations.NotNull;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.skaddon.RotatingShopkeeper;
+import com.leomelonseeds.ultimaaddons.data.Save;
+import com.leomelonseeds.ultimaaddons.objects.RegionData;
+import com.leomelonseeds.ultimaaddons.objects.RotatingShopkeeper;
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 import com.leomelonseeds.ultimaaddons.utils.TimeParser;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
@@ -35,6 +38,9 @@ import com.nisovin.shopkeepers.api.events.ShopkeeperOpenUIEvent;
 import com.nisovin.shopkeepers.api.events.ShopkeeperTradeCompletedEvent;
 import com.nisovin.shopkeepers.api.events.ShopkeeperTradeEvent;
 import com.nisovin.shopkeepers.api.shopkeeper.ShopCreationData;
+import com.nisovin.shopkeepers.api.shopkeeper.ShopkeeperCreateException;
+import com.nisovin.shopkeepers.api.shopkeeper.player.PlayerShopCreationData;
+import com.nisovin.shopkeepers.api.shopkeeper.player.PlayerShopType;
 import com.nisovin.shopkeepers.api.shopkeeper.player.PlayerShopkeeper;
 import com.nisovin.shopkeepers.api.shopkeeper.player.trade.TradingPlayerShopkeeper;
 import com.nisovin.shopkeepers.api.ui.DefaultUITypes;
@@ -52,25 +58,44 @@ public class ShopkeeperListener implements Listener {
     
     @EventHandler
     public void onRegionPurchase(PreBuyEvent e) {
-        TradingPlayerShopkeeper sk = getRegionShopkeeper(e.getRegion());
+        Region r = e.getRegion();
+        TradingPlayerShopkeeper sk = getRegionShopkeeper(r);
         Player buyer = e.getBuyer();
         if (sk == null) {
             Utils.msg(buyer, "&cThis region does not have a shopkeeper! Please contact an admin to fix this.");
         }
         
         sk.setOwner(buyer);
+        sk.setForHire(null);
+        
+        RegionData data = new RegionData(sk, sk.getLocation());
+        String id = r.getRegion().getId();
+        plugin.getRegionLinker().addLink(id, data);
+        new Save(id, data);
+        plugin.getRegionsFile().save();
     }
     
     @EventHandler
     public void onRegionUnsell(UnsellRegionEvent e) {
-        TradingPlayerShopkeeper sk = getRegionShopkeeper(e.getRegion());
-        Player buyer = Bukkit.getPlayer(e.getRegion().getOwner());
+        Region r = e.getRegion();
+        TradingPlayerShopkeeper sk = getRegionShopkeeper(r);
+        Player buyer = Bukkit.getPlayer(r.getOwner());
         if (sk == null) {
             Utils.msg(buyer, "&cThis region does not have a shopkeeper! Please contact an admin to fix this.");
         }
         
-        sk.clearOffers();
-        sk.setForHire(UltimaAddons.getPlugin().getItems().getItem("shopkeeperhire"));
+        String id = r.getRegion().getId();
+        RegionData data = plugin.getRegionLinker().getShopkeeperFromRegion(id);
+        if (data == null) {
+            Bukkit.getLogger().warning("Could not find a shopkeeper for region " + id);
+            return;
+        }
+        
+        PlayerShopkeeper nsk = resetShopkeeper(sk, r, buyer);
+        if (nsk != null) {
+            nsk.setOwner(UUID.randomUUID(), "None");
+            nsk.setForHire(plugin.getItems().getItem("shopkeeperhire"));
+        }
     }
     
     @EventHandler
@@ -89,7 +114,35 @@ public class ShopkeeperListener implements Listener {
             Utils.msg(buyer, "&cThis region does not have a shopkeeper! Please contact an admin to fix this.");
         }
         
-        sk.clearOffers();
+        PlayerShopkeeper nsk = resetShopkeeper(sk, r, buyer);
+        if (nsk != null) {
+            nsk.setOwner(buyer);
+        }
+    }
+    
+    private PlayerShopkeeper resetShopkeeper(TradingPlayerShopkeeper sk, Region r, Player buyer) {
+        String id = r.getRegion().getId();
+        RegionData data = plugin.getRegionLinker().getShopkeeperFromRegion(id);
+        if (data == null) {
+            Bukkit.getLogger().warning("Could not find a shopkeeper for region " + id);
+            return null;
+        }
+        
+        // Save shop creation data
+        ShopCreationData scd = PlayerShopCreationData.create(buyer, (PlayerShopType<?>) sk.getType(), 
+                sk.getShopObject().getType(), data.getOrigin(), null, sk.getContainer());
+        
+        // Remove old shopkeeper
+        sk.delete();
+        
+        // Create new shopkeeper
+        try {
+            return (PlayerShopkeeper) ShopkeepersAPI.getShopkeeperRegistry().createShopkeeper(scd);
+        } catch (ShopkeeperCreateException err) {
+            Bukkit.getLogger().warning("Failed resetting shopkeeper in region " + id);
+            err.printStackTrace();
+            return null;
+        }
     }
     
     @EventHandler
@@ -106,7 +159,7 @@ public class ShopkeeperListener implements Listener {
         }
         
         e.setCancelled(true);
-        Utils.msg(creator, "&cYou cannot create a shop here!");
+        Utils.msg(creator, "&cYou cannot place a shopkeeper in this area.");
     }
     
     @EventHandler
@@ -122,7 +175,7 @@ public class ShopkeeperListener implements Listener {
         }
         
         e.setCancelled(true);
-        Utils.msg(p, "&cYou cannot delete shops here!");
+        Utils.msg(p, "&7You cannot delete shops in this area.");
     }
 
     @EventHandler

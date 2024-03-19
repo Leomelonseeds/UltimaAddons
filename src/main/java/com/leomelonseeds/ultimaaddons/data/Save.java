@@ -1,13 +1,14 @@
 package com.leomelonseeds.ultimaaddons.data;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.regionaddon.RegionData;
-import com.leomelonseeds.ultimaaddons.skaddon.RotatingShopkeeper;
-import org.bukkit.configuration.file.FileConfiguration;
-
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.bukkit.configuration.file.FileConfiguration;
+
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.objects.RegionData;
+import com.leomelonseeds.ultimaaddons.objects.RotatingShopkeeper;
 
 public class Save {
     public Save(int id, RotatingShopkeeper rsk) {
@@ -32,6 +33,6 @@ public class Save {
         config.set(region + ".regionData.z", regionData.getOrigin().getZ());
         config.set(region + ".regionData.yaw", regionData.getOrigin().getYaw());
         config.set(region + ".regionData.pitch", regionData.getOrigin().getPitch());
-        config.set(region + ".shopkeeper_uuid", regionData.getSk().getUniqueId());
+        config.set(region + ".shopkeeper_uuid", regionData.getSk().getUniqueId().toString());
     }
 }

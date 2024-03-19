@@ -1,11 +1,11 @@
-package com.leomelonseeds.ultimaaddons.handlers;
-
-import com.leomelonseeds.ultimaaddons.skaddon.RotatingShopkeeper;
+package com.leomelonseeds.ultimaaddons.handlers.shopkeeper;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import com.leomelonseeds.ultimaaddons.objects.RotatingShopkeeper;
 
 public class LinkManager {
     public static Map<Integer, RotatingShopkeeper> shopkeeperMap = new HashMap<>();

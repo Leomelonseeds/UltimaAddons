@@ -8,7 +8,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.handlers.TutorialQuiz;
+import com.leomelonseeds.ultimaaddons.objects.TutorialQuiz;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class IntroInv extends UAInventory {

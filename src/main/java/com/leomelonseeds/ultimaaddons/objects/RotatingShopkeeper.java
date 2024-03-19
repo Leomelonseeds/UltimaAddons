@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons.skaddon;
+package com.leomelonseeds.ultimaaddons.objects;
 
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 import com.nisovin.shopkeepers.api.ShopkeepersPlugin;

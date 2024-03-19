@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.leomelonseeds.ultimaaddons.commands.Argument;
 import com.leomelonseeds.ultimaaddons.commands.Command;
-import com.leomelonseeds.ultimaaddons.skaddon.RotatingShopkeeper;
+import com.leomelonseeds.ultimaaddons.objects.RotatingShopkeeper;
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 import com.leomelonseeds.ultimaaddons.utils.RandomCollection;
 import com.nisovin.shopkeepers.api.shopkeeper.admin.regular.RegularAdminShopkeeper;

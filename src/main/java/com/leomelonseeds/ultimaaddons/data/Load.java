@@ -1,8 +1,8 @@
 package com.leomelonseeds.ultimaaddons.data;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.regionaddon.RegionData;
-import com.leomelonseeds.ultimaaddons.skaddon.RotatingShopkeeper;
+import com.leomelonseeds.ultimaaddons.objects.RegionData;
+import com.leomelonseeds.ultimaaddons.objects.RotatingShopkeeper;
 import com.nisovin.shopkeepers.api.ShopkeepersPlugin;
 import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
 import org.bukkit.Bukkit;

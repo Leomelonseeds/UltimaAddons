@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons.skaddon;
+package com.leomelonseeds.ultimaaddons.objects;
 
 import java.util.List;
 import java.util.Map;

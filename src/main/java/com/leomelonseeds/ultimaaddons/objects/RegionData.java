@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons.regionaddon;
+package com.leomelonseeds.ultimaaddons.objects;
 
 import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
 import org.bukkit.Location;
