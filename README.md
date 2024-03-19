@@ -46,7 +46,8 @@ In addition to tracking player joining and leaving kingdoms as well as invasions
 
 ### Other
 - You cannot make additional claims beyond 1 claim if you do not have a nexus.
-- You cannot create outposts or challenge if you do not have a neuxs.
+- You cannot create outposts or challenge if you do not have a nexus.
+- Turrets can be destroyed by TNT explosions, even if the Kingdom has anti-explosion misc upgrade.
 
 ## Custom Enchantments
 The plugin also hooks into AdvancedEnchantments' API to provide the following custom effects:
@@ -81,6 +82,7 @@ The plugin replaces regular teleportation commands with item-based teleports. Af
 - Totem of Warping (Death): Crafted using a calibrated sculk sensor, right-click to initiate a teleportation to your last death location. Only works up to 5 minutes after your last death. The item is kept in inventory on death.
 - Totem of Warping (Lodestone): Crafted using a lodestone compass, right-click to initiate a teleportation to the lodestone set by the lodestone compass. Does not work if the lodestone has been destroyed.
 - Totem of Warping (Player): Crafting this item requires an original generation (non-copy) written book signed by another player. Right-click to request a teleportation to the player set by the book, if they are online.
+- Totem duplication: Combine any set totem with an unset totem in crafting to produce 2 of the set totem. The result is automatically unstacked on collection.
 
 ### Others
 - Diamond Chip: Like iron or gold nuggets, but for diamonds. Used for better economy integration, since Ultima uses a item-based economy with diamonds as its currency.
@@ -100,6 +102,15 @@ In addition, these shopkeepers have new parameters to further enhance supply/dem
 ### Parameters
 - Weights: Adds weights which affects an item's ability to appear in rotations.
 - Limits: Adds a buy & sell limit to a certain item.
+
+The plugin uses the AdvancedRegionMarket API alongside Shopkeepers to link rentable regions to shopkeepers, adding rentable shops: 
+### Region Markets
+- When a region is not rented, the associated shopkeeper will show as "For Hire".
+- Renting the region will set the renter as the owner, allowing them to customize the trades.
+- New shopkeepers cannot be created inside a shop region, so players can only use the provided shopkeeper.
+- Shopkeepers associated with a region cannot be deleted.
+- When a region is restored, the shopkeeper loses its trades and returns to its original position.
+- When a region in sold back to the server, the shopkeeper returns to its original position, ready for hiring again.
 
 ## Game Mechanics
 Finally, the plugin adds a few game mechanics to make the survival experience more balanced and enjoyable.
