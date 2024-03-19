@@ -98,13 +98,13 @@ The plugin also hooks onto Shopkeepers and creates two new types of shopkeepers 
 - Rotating Shopkeeper: Trades that rotate on a timely basis.
 - Auction Shopkeeper: Trades that require bidding.
 
-In addition, these shopkeepers have new parameters to further enhance supply/demand trading:
 ### Parameters
+These shopkeepers have new parameters to further enhance supply/demand trading:
 - Weights: Adds weights which affects an item's ability to appear in rotations.
 - Limits: Adds a buy & sell limit to a certain item.
 
-The plugin uses the AdvancedRegionMarket API alongside Shopkeepers to link rentable regions to shopkeepers, adding rentable shops: 
 ### Region Markets
+The plugin uses the AdvancedRegionMarket API alongside Shopkeepers to link rentable regions to shopkeepers, adding rentable shops: 
 - When a region is not rented, the associated shopkeeper will show as "For Hire".
 - Renting the region will set the renter as the owner, allowing them to customize the trades.
 - New shopkeepers cannot be created inside a shop region, so players can only use the provided shopkeeper.
