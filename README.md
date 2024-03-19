@@ -106,11 +106,11 @@ These shopkeepers have new parameters to further enhance supply/demand trading:
 ### Region Markets
 The plugin uses the AdvancedRegionMarket API alongside Shopkeepers to link rentable regions to shopkeepers, adding rentable shops: 
 - When a region is not rented, the associated shopkeeper will show as "For Hire".
-- Renting the region will set the renter as the owner, allowing them to customize the trades.
+- Renting the region will set the renter as the owner of the shopkeeper, allowing them to customize its trades.
 - New shopkeepers cannot be created inside a shop region, so players can only use the provided shopkeeper.
 - Shopkeepers associated with a region cannot be deleted.
 - When a region is restored, the shopkeeper loses its trades and returns to its original position.
-- When a region in sold back to the server, the shopkeeper returns to its original position, ready for hiring again.
+- When a region is sold back to the server, the shopkeeper returns to its original position, and is set to be ready for hiring again.
 
 ## Game Mechanics
 Finally, the plugin adds a few game mechanics to make the survival experience more balanced and enjoyable.
