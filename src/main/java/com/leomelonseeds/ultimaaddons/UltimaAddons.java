@@ -2,6 +2,7 @@ package com.leomelonseeds.ultimaaddons;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.kingdoms.constants.metadata.KingdomMetadataHandler;
 import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
@@ -28,6 +29,7 @@ import com.leomelonseeds.ultimaaddons.utils.UAPlaceholders;
 
 import net.advancedplugins.ae.api.AEAPI;
 import net.advancedplugins.ae.impl.effects.effects.effects.AdvancedEffect;
+import net.milkbowl.vault.economy.Economy;
 
 
 public class UltimaAddons extends JavaPlugin {
@@ -50,6 +52,7 @@ public class UltimaAddons extends JavaPlugin {
     private ConfigFile configFile;
     private Data tradesFile;
     private Data regionsFile;
+    private Economy econ;
 
 
     public static UltimaAddons getPlugin() {
@@ -73,6 +76,10 @@ public class UltimaAddons extends JavaPlugin {
         outpost_id = new StandardKingdomMetadataHandler(new Namespace("UltimaAddons", "OUTPOST_ID"));  // (long) id of outpost/outpost land
         itemKey = new NamespacedKey(plugin, "uaitem");
         duraKey = new NamespacedKey(plugin, "uadura");
+        
+        // Register economy
+        RegisteredServiceProvider<Economy> rspE = getServer().getServicesManager().getRegistration(Economy.class);
+        econ = rspE.getProvider();
 
         // Register managers and stuff
         linkManager = new LinkManager();
@@ -137,6 +144,10 @@ public class UltimaAddons extends JavaPlugin {
 
     public ConfigFile getConfigFile() {
         return configFile;
+    }
+    
+    public Economy getEconomy() {
+        return econ;
     }
 
     public void writeTradesFile() {

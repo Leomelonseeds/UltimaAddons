@@ -11,6 +11,7 @@ depend:
 - AdvancedEnchantments
 - Shopkeepers
 - AdvancedRegionMarket
+- Vault
 commands: 
   uchallenge: {}
   recipes: {}

@@ -38,6 +38,7 @@ import com.nisovin.shopkeepers.api.events.ShopkeeperOpenUIEvent;
 import com.nisovin.shopkeepers.api.events.ShopkeeperTradeCompletedEvent;
 import com.nisovin.shopkeepers.api.events.ShopkeeperTradeEvent;
 import com.nisovin.shopkeepers.api.shopkeeper.ShopCreationData;
+import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
 import com.nisovin.shopkeepers.api.shopkeeper.ShopkeeperCreateException;
 import com.nisovin.shopkeepers.api.shopkeeper.player.PlayerShopCreationData;
 import com.nisovin.shopkeepers.api.shopkeeper.player.PlayerShopType;
@@ -50,6 +51,7 @@ import net.alex9849.arm.events.PreBuyEvent;
 import net.alex9849.arm.events.RestoreRegionEvent;
 import net.alex9849.arm.events.UnsellRegionEvent;
 import net.alex9849.arm.regions.Region;
+import net.alex9849.arm.regions.RegionManager;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.trading.MerchantOffers;
 
@@ -58,9 +60,17 @@ public class ShopkeeperListener implements Listener {
     
     @EventHandler
     public void onRegionPurchase(PreBuyEvent e) {
+        if (!e.isPlayerInLimit()) {
+            return;
+        }
+
         Region r = e.getRegion();
-        TradingPlayerShopkeeper sk = getRegionShopkeeper(r);
         Player buyer = e.getBuyer();
+        if (plugin.getEconomy().getBalance(buyer) < r.getPricePerPeriod()) {
+            return;
+        }
+            
+        TradingPlayerShopkeeper sk = getRegionShopkeeper(r);
         if (sk == null) {
             Utils.msg(buyer, "&cThis region does not have a shopkeeper! Please contact an admin to fix this.");
         }
@@ -153,12 +163,22 @@ public class ShopkeeperListener implements Listener {
         }
         
         Location spawnLoc = cd.getSpawnLocation();
-        if (AdvancedRegionMarket.getInstance().getRegionManager().getRegionsByLocation(spawnLoc).isEmpty()) {
-            return;
+        RegionManager rm = AdvancedRegionMarket.getInstance().getRegionManager();
+        if (!rm.getRegionsByLocation(spawnLoc).isEmpty()) {
+            e.setCancelled(true);
+            Utils.msg(creator, "&cYou cannot place a shopkeeper in this area.");
         }
         
-        e.setCancelled(true);
-        Utils.msg(creator, "&cYou cannot place a shopkeeper in this area.");
+        // If we get here, player is attempting to create a shopkeeper somewhere in the world
+        // We add 1 to the limit for any shop that is already inside a region (since those don't count)
+        int extraLimit = e.getMaxShopsLimit();
+        for (Shopkeeper sk : ShopkeepersAPI.getShopkeeperRegistry().getPlayerShopkeepersByOwner(creator.getUniqueId())) {
+            if (!rm.getRegionsByLocation(sk.getLocation()).isEmpty()) {
+                extraLimit++;
+            }
+        }
+        
+        e.setMaxShopsLimit(extraLimit);
     }
     
     @EventHandler
