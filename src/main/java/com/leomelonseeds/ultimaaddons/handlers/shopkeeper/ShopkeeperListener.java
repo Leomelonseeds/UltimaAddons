@@ -78,24 +78,19 @@ public class ShopkeeperListener implements Listener {
     @EventHandler
     public void onRegionUnsell(UnsellRegionEvent e) {
         Region r = e.getRegion();
-        TradingPlayerShopkeeper sk = getRegionShopkeeper(r);
         Player buyer = Bukkit.getPlayer(r.getOwner());
-        if (sk == null) {
-            Utils.msg(buyer, "&cThis region does not have a shopkeeper! Please contact an admin to fix this.");
-        }
-        
         String id = r.getRegion().getId();
-        RegionData data = plugin.getRegionLinker().getShopkeeperFromRegion(id);
-        if (data == null) {
-            Bukkit.getLogger().warning("Could not find a shopkeeper for region " + id);
+        PlayerShopkeeper nsk = resetShopkeeper(id, buyer);
+        if (nsk == null) {
             return;
         }
         
-        PlayerShopkeeper nsk = resetShopkeeper(sk, r, buyer);
-        if (nsk != null) {
-            nsk.setOwner(UUID.randomUUID(), "None");
-            nsk.setForHire(plugin.getItems().getItem("shopkeeperhire"));
-        }
+        nsk.setOwner(UUID.randomUUID(), "None");
+        nsk.setForHire(plugin.getItems().getItem("shopkeeperhire"));
+        
+        plugin.getRegionLinker().deleteLink(id);
+        plugin.getRegionsFile().getConfig().set(id, null);
+        plugin.getRegionsFile().save();
     }
     
     @EventHandler
@@ -107,28 +102,31 @@ public class ShopkeeperListener implements Listener {
         if (!r.isSold()) {
             return;
         }
-        
-        TradingPlayerShopkeeper sk = getRegionShopkeeper(r);
+
+        String id = r.getRegion().getId();
         Player buyer = Bukkit.getPlayer(r.getOwner());
-        if (sk == null) {
-            Utils.msg(buyer, "&cThis region does not have a shopkeeper! Please contact an admin to fix this.");
+        PlayerShopkeeper nsk = resetShopkeeper(id, buyer);
+        if (nsk == null) {
+            return;
         }
         
-        PlayerShopkeeper nsk = resetShopkeeper(sk, r, buyer);
-        if (nsk != null) {
-            nsk.setOwner(buyer);
-        }
+        nsk.setOwner(buyer);
+        RegionData data = new RegionData(nsk, nsk.getLocation());
+        plugin.getRegionLinker().addLink(r.getRegion().getId(), data);
+        new Save(id, data);
+        plugin.getRegionsFile().save();
     }
     
-    private PlayerShopkeeper resetShopkeeper(TradingPlayerShopkeeper sk, Region r, Player buyer) {
-        String id = r.getRegion().getId();
+    private PlayerShopkeeper resetShopkeeper(String id, Player buyer) {
         RegionData data = plugin.getRegionLinker().getShopkeeperFromRegion(id);
         if (data == null) {
-            Bukkit.getLogger().warning("Could not find a shopkeeper for region " + id);
+            Bukkit.getLogger().warning("Could not find or load for region " + id);
+            Utils.msg(buyer, "&cAn error occured with this region! Please contact an admin to fix this.");
             return null;
         }
-        
+
         // Save shop creation data
+        PlayerShopkeeper sk = (PlayerShopkeeper) data.getSk();
         ShopCreationData scd = PlayerShopCreationData.create(buyer, (PlayerShopType<?>) sk.getType(), 
                 sk.getShopObject().getType(), data.getOrigin(), null, sk.getContainer());
         
@@ -139,7 +137,8 @@ public class ShopkeeperListener implements Listener {
         try {
             return (PlayerShopkeeper) ShopkeepersAPI.getShopkeeperRegistry().createShopkeeper(scd);
         } catch (ShopkeeperCreateException err) {
-            Bukkit.getLogger().warning("Failed resetting shopkeeper in region " + id);
+            Bukkit.getLogger().warning("Could not reset shopkeeper for region " + id);
+            Utils.msg(buyer, "&cCould not reset shopkeeper for this region! Please contact an admin to fix this.");
             err.printStackTrace();
             return null;
         }
