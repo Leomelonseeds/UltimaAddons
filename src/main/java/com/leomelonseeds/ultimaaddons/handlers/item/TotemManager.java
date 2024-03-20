@@ -138,7 +138,7 @@ public class TotemManager implements Listener {
                     }
                     
                     if (iteration == 2) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 0));
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 0, true, false));
                     } else if (iteration == 1) {
                         Utils.sendSound(Sound.ENTITY_ZOMBIE_VILLAGER_CONVERTED, 2F, 0.9F, from);
                     }
@@ -175,11 +175,10 @@ public class TotemManager implements Listener {
                 }
                 
                 msg(player, "&bTeleporting...");
-                Bukkit.getScheduler().runTask(plugin, () -> {
-                    player.teleport(curLoc);
-                    curLoc.getWorld().spawnParticle(Particle.DRAGON_BREATH, curLoc.clone().add(0, 1, 0), 50, 0, 0, 0, 0.1);
-                    Utils.sendSound(Sound.ITEM_TOTEM_USE, 0.8F, 2F, curLoc);
-                });
+                player.teleport(curLoc);
+                Utils.sendSound(Sound.ITEM_TOTEM_USE, 0.8F, 2F, curLoc);
+                Utils.schedule(1, () -> curLoc.getWorld().spawnParticle(
+                        Particle.DRAGON_BREATH, curLoc.clone().add(0, 1, 0), 150, 0, 0, 0, 0.3));
                 this.cancel();
                 removePlayer(player, null);
             }
@@ -313,7 +312,7 @@ public class TotemManager implements Listener {
                 return;
             }
             
-            initiateTeleportation(player, hand, totem, loc.toCenterLocation().add(0, 0.51, 0));
+            initiateTeleportation(player, hand, totem, loc.toCenterLocation().add(0, 0.5, 0));
             return;
         }
         

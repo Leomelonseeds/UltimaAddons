@@ -12,6 +12,7 @@ depend:
 - Shopkeepers
 - AdvancedRegionMarket
 - Vault
+- WorldEdit
 commands: 
   uchallenge: {}
   recipes: {}

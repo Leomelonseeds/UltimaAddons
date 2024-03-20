@@ -1,15 +1,12 @@
 package com.leomelonseeds.ultimaaddons.handlers;
 
-import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
-import com.sk89q.worldedit.IncompleteRegionException;
-import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.math.BlockVector3;
-import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
-import me.clip.placeholderapi.PlaceholderAPI;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -33,7 +30,16 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.*;
+import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.math.BlockVector3;
+
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
+import me.clip.placeholderapi.PlaceholderAPI;
 
 /**
  * Used for various game mechanics and staff logger
@@ -153,7 +159,8 @@ public class MiscListener implements Listener {
 
         // Get first arg
         String cmd = e.getMessage();
-        String base = cmd.split(" ")[0].replace("/", "");
+        String arg1 = cmd.split(" ")[0].substring(1);
+        String base = arg1.replace("/", "");
         if (base.isBlank()) {
             return;
         }
@@ -167,17 +174,20 @@ public class MiscListener implements Listener {
         String group = PlaceholderAPI.setPlaceholders(p, "%vault_group_capital%");
         Location loc = p.getLocation();
         String locStr = "[" + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + "]";
-        if (Objects.requireNonNull(Bukkit.getPluginCommand(cmd)).getPlugin().getName().equals("WorldEdit")) {
-            LocalSession playerSession = Objects.requireNonNull(WorldEdit.getInstance().getSessionManager().findByName(p.getName()));
-            try {
+        
+        try {
+            if (Objects.requireNonNull(Bukkit.getPluginCommand(arg1)).getPlugin().getName().equals("WorldEdit")) {
+                LocalSession playerSession = Objects.requireNonNull(WorldEdit.getInstance().getSessionManager().findByName(p.getName()));
                 BlockVector3 min = playerSession.getSelection(playerSession.getSelectionWorld()).getMinimumPoint();
                 BlockVector3 max = playerSession.getSelection(playerSession.getSelectionWorld()).getMaximumPoint();
                 locStr += " [selection: " + min.getBlockX() + ", " + min.getBlockY() + ", " + min.getBlockZ() + " to";
                 locStr += " " + max.getBlockX() + ", " + max.getBlockY() + ", " + max.getBlockZ() + "]";
-            } catch (IncompleteRegionException ex) {
                 locStr += " [selection: none]";
             }
+        } catch (Exception ex) {
+            // Do nothing
         }
+        
         String msg = "**" + p.getName() + "** (" + group + ") at " + locStr + " used command `" + cmd + "`";
         TextChannel logChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("staff-log");
         logChannel.sendMessage(msg).queue();
