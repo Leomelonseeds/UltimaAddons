@@ -49,6 +49,10 @@ import org.kingdoms.events.lands.ClaimLandEvent;
 import org.kingdoms.events.lands.NexusMoveEvent;
 import org.kingdoms.events.lands.UnclaimLandEvent;
 import org.kingdoms.events.members.KingdomLeaveEvent;
+import org.kingdoms.gui.GUIAccessor;
+import org.kingdoms.gui.InteractiveGUI;
+import org.kingdoms.gui.KingdomsGUI;
+import org.kingdoms.locale.KingdomsLang;
 import org.kingdoms.main.Kingdoms;
 import org.kingdoms.managers.invasions.Plunder;
 import org.kingdoms.managers.land.indicator.LandVisualizer;
@@ -64,6 +68,7 @@ import com.leomelonseeds.ultimaaddons.utils.Utils;
 public class KingdomsListener implements Listener {
 
     private static Set<Structure> justRemoved = new HashSet<>();
+    private static Set<Player> allowedClose = new HashSet<>();
     
     // -------------------------------------------------
     // ALLOW EXPLOSIONS TO DESTROY TURRETS
@@ -207,6 +212,34 @@ public class KingdomsListener implements Listener {
     public void onCreate(KingdomCreateEvent e) {
         Kingdom k = e.getKingdom();
         Utils.discord(":fleur_de_lis: **" + k.getName() + "** has been founded");
+        openSelectionGUI(k);
+    }
+
+    // Open custom creation GUI that only closes once an option is selected
+    private void openSelectionGUI(Kingdom k) {
+        KingdomPlayer kp = k.getKing();
+        Player player = kp.getPlayer();
+        InteractiveGUI gui = GUIAccessor.prepare(player, KingdomsGUI.KINGDOM$CREATE);
+        gui.push("pacifist", () -> {
+            k.setPacifist(true, kp, null);
+            KingdomsLang.COMMAND_CREATE_PACIFIST.sendMessage(player);
+            allowedClose.add(player);
+            player.closeInventory();
+            Utils.schedule(2, () -> allowedClose.remove(player));
+        }).push("aggressor", () -> {
+            k.setPacifist(false, kp, null);
+            KingdomsLang.COMMAND_CREATE_AGGRESSOR.sendMessage(player);
+            allowedClose.add(player);
+            player.closeInventory();
+            Utils.schedule(2, () -> allowedClose.remove(player));
+        });
+        
+        gui.onClose(() -> Utils.schedule(1, () -> {
+            if (!allowedClose.contains(player)) {
+                openSelectionGUI(k);
+            }
+        }));
+        gui.open();
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -214,7 +247,7 @@ public class KingdomsListener implements Listener {
         String k = e.getKingdom().getName();
         String inGame;
         if (e.isPacifist()) {
-            Utils.discord(":peace: **" + k + "** is a pacifist Kingdom");
+            Utils.discord(":peace: **" + k + "** is now a pacifist Kingdom");
             inGame = "&6" + k + " &2is a pacifist Kingdom.";
         } else {
             Utils.discord(":fire: **" + k + "** is now an aggressor Kingdom");
