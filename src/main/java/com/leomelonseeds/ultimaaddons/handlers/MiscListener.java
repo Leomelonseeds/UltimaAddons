@@ -1,11 +1,15 @@
 package com.leomelonseeds.ultimaaddons.handlers;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
+import com.sk89q.worldedit.IncompleteRegionException;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.math.BlockVector3;
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
+import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,22 +33,16 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
-
-import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
-import me.clip.placeholderapi.PlaceholderAPI;
+import java.util.*;
 
 /**
  * Used for various game mechanics and staff logger
  */
 public class MiscListener implements Listener {
-    
+
     private static Map<Player, String> msgs = new HashMap<>();
     private static Set<Player> elytraCancelling = new HashSet<>();
-    
+
     // Stop people from using normal fireworks
     @EventHandler
     public void onElytraBoost(PlayerElytraBoostEvent e) {
@@ -56,7 +54,7 @@ public class MiscListener implements Listener {
             msg(p, "&cYou need &dDragon Fireworks &cto elytra boost");
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1F, 1F);
         }
-        
+
         if (p.getWorld().getEnvironment() == Environment.THE_END) {
             Firework firework = e.getFirework();
             FireworkMeta fmeta = firework.getFireworkMeta();
@@ -64,28 +62,28 @@ public class MiscListener implements Listener {
             firework.setFireworkMeta(fmeta);
         }
     }
-    
+
     // Stop elytras while in the rain
     @EventHandler
     public void onElytra(EntityToggleGlideEvent e) {
         if (e.getEntityType() != EntityType.PLAYER) {
             return;
         }
-        
+
         if (!e.isGliding()) {
             return;
         }
-        
+
         Player p = (Player) e.getEntity();
         if (!p.isInRain()) {
             return;
         }
-        
+
         e.setCancelled(true);
         msg(p, "&cElytras cannot be used in the rain");
         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1F, 1F);
     }
-    
+
     // Warn players of elytra disabling while in the rain
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
@@ -94,11 +92,11 @@ public class MiscListener implements Listener {
         if (elytraCancelling.contains(p)) {
             return;
         }
-        
+
         if (!p.isInRain() || !p.isGliding()) {
             return;
         }
-        
+
         elytraCancelling.add(p);
         Bukkit.getScheduler().runTaskLater(pl, () -> {
             p.sendMessage(Utils.toComponent("&cYou feel your elytra weaken as the rain starts..."));
@@ -107,7 +105,7 @@ public class MiscListener implements Listener {
                 elytraCancelling.remove(p);
                 return;
             }
-            
+
             new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -122,7 +120,7 @@ public class MiscListener implements Listener {
             }.runTaskTimer(pl, 20, 20);
         }, 20);
     }
-    
+
     // Stop items with hide_enchant flag being used in grindstone
     @EventHandler
     public void onGrindstone(PrepareGrindstoneEvent e) {
@@ -130,12 +128,12 @@ public class MiscListener implements Listener {
         if (e.getResult() == null) {
             return;
         }
-        
-        for (ItemStack i : new ItemStack[] {gi.getUpperItem(), gi.getLowerItem()}) {
+
+        for (ItemStack i : new ItemStack[]{gi.getUpperItem(), gi.getLowerItem()}) {
             if (i == null || !i.hasItemMeta()) {
                 continue;
             }
-            
+
             ItemMeta meta = i.getItemMeta();
             if (meta.getItemFlags().contains(ItemFlag.HIDE_ENCHANTS)) {
                 e.setResult(null);
@@ -152,34 +150,45 @@ public class MiscListener implements Listener {
         if (!p.hasPermission("group.helper") && !p.hasPermission("group.builder")) {
             return;
         }
-        
+
         // Get first arg
         String cmd = e.getMessage();
         String base = cmd.split(" ")[0].replace("/", "");
         if (base.isBlank()) {
             return;
         }
-        
+
         // Check if is logged command
         List<String> logged = UltimaAddons.getPlugin().getConfig().getStringList("staff-log");
         if (!logged.contains(base)) {
             return;
         }
-        
+
         String group = PlaceholderAPI.setPlaceholders(p, "%vault_group_capital%");
-        Location loc = p.getLocation(); 
+        Location loc = p.getLocation();
         String locStr = "[" + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + "]";
+        if (Objects.requireNonNull(Bukkit.getPluginCommand(cmd)).getPlugin().getName().equals("WorldEdit")) {
+            LocalSession playerSession = Objects.requireNonNull(WorldEdit.getInstance().getSessionManager().findByName(p.getName()));
+            try {
+                BlockVector3 min = playerSession.getSelection(playerSession.getSelectionWorld()).getMinimumPoint();
+                BlockVector3 max = playerSession.getSelection(playerSession.getSelectionWorld()).getMaximumPoint();
+                locStr += " [selection: " + min.getBlockX() + ", " + min.getBlockY() + ", " + min.getBlockZ() + " to";
+                locStr += " " + max.getBlockX() + ", " + max.getBlockY() + ", " + max.getBlockZ() + "]";
+            } catch (IncompleteRegionException ex) {
+                locStr += " [selection: none]";
+            }
+        }
         String msg = "**" + p.getName() + "** (" + group + ") at " + locStr + " used command `" + cmd + "`";
         TextChannel logChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("staff-log");
         logChannel.sendMessage(msg).queue();
     }
-    
+
     private void msg(Player p, String msg) {
         String cur = msgs.get(p);
         if (cur != null && cur.equals(msg)) {
             return;
         }
-        
+
         msgs.put(p, msg);
         Bukkit.getScheduler().runTaskLater(UltimaAddons.getPlugin(), () -> msgs.remove(p), 100);
         p.sendMessage(Utils.toComponent(msg));

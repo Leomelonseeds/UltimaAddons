@@ -137,6 +137,10 @@
             <id>alex9849</id>
             <url>https://nexus.alex9849.net/repository/maven-releases/</url>
         </repository>
+        <repository>
+            <id>enginehub-maven</id>
+            <url>https://maven.enginehub.org/repo/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -205,6 +209,12 @@
             <version>1.20.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
             <classifier>remapped-mojang</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.sk89q.worldedit</groupId>
+            <artifactId>worldedit-bukkit</artifactId>
+            <version>7.2.9</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
