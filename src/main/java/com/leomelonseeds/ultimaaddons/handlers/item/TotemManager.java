@@ -340,7 +340,8 @@ public class TotemManager implements Listener {
             
             pendingAccept.add(player);
             msg(player, "&bSent a teleportation request to &f" + otherName + "&b...");
-            other.sendMessage(Utils.toComponent("&c&l[!] &f" + Utils.toPlain(player.displayName()) + " &7 has requested to teleport to you."));
+            String requesterName = Utils.toPlain(player.displayName());
+            other.sendMessage(Utils.toComponent("&c&l[!] &f" + requesterName + " &7 has requested to teleport to you."));
             other.sendMessage(Utils.toComponent("&c&l[!] &7To accept, type \"&aaccept&7\" in the chat within &f30 seconds&7."));
             other.sendMessage(Utils.toComponent("&c&l[!] &7To deny, type anything else in the chat."));
             new ChatConfirm(other, "accept", 30, "Teleportation request denied.", result -> {
@@ -357,9 +358,11 @@ public class TotemManager implements Listener {
                 ItemStack curItem = player.getInventory().getItem(hand);
                 if (!curItem.isSimilar(totem)) {
                     msg(player, "&cTeleportation cancelled because you changed items.");
+                    other.sendMessage(Utils.toComponent("&cTeleportation request accepted, but " + requesterName + " &cis no longer holding a totem."));
                     return;
                 }
-                
+
+                other.sendMessage(Utils.toComponent("&aTeleportation request from " + requesterName + " &aaccepted."));
                 initiateTeleportation(player, hand, curItem, null, other);
                 return;
             });
