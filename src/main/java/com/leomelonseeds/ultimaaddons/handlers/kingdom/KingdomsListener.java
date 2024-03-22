@@ -201,10 +201,13 @@ public class KingdomsListener implements Listener {
     public void onDisband(KingdomDisbandEvent e) {
         Kingdom k = e.getKingdom();
         k.getOnlineMembers().forEach(p -> Utils.closeInventory(p, "Challenge"));
+        String name = k.getName();
         if (e.getReason() == GroupDisband.Reason.INVASION) {
-            Utils.discord(":dart: **" + k.getName() + "** was disbanded because their nexus chunk was captured");
+            Utils.discord(":dart: **" + name + "** was disbanded because their nexus chunk was captured");
+        } else if (e.getReason() == GroupDisband.Reason.INACTIVITY) {
+            Utils.discord(":pencil: **" + name + "** was disbanded due to inactivity.");
         } else {
-            Utils.discord(":pencil: **" + k.getName() + "** has been disbanded");
+            Utils.discord(":pencil: **" + name + "** has been disbanded");
         }
     }
 
