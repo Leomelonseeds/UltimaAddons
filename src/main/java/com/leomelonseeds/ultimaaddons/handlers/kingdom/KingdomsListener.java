@@ -235,6 +235,11 @@ public class KingdomsListener implements Listener {
             allowedClose.add(player);
             player.closeInventory();
             Utils.schedule(2, () -> allowedClose.remove(player));
+            
+            // Add shield if aggressor
+            long shieldtime = k.getSince() + Utils.getNewbieTime();
+            k.activateShield(shieldtime - System.currentTimeMillis());
+            k.getMetadata().put(UltimaAddons.shield_time, new StandardKingdomMetadata(shieldtime));
         });
         
         gui.onClose(() -> Utils.schedule(1, () -> {
