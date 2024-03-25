@@ -18,6 +18,7 @@ import com.leomelonseeds.ultimaaddons.data.Save;
 import com.leomelonseeds.ultimaaddons.data.file.ConfigFile;
 import com.leomelonseeds.ultimaaddons.data.file.Data;
 import com.leomelonseeds.ultimaaddons.handlers.MiscListener;
+import com.leomelonseeds.ultimaaddons.handlers.ParryListener;
 import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
 import com.leomelonseeds.ultimaaddons.handlers.kingdom.KingdomsListener;
 import com.leomelonseeds.ultimaaddons.handlers.kingdom.UAUnclaimProcessor;
@@ -45,6 +46,7 @@ public class UltimaAddons extends JavaPlugin {
 
     private static UltimaAddons plugin;
 
+    private ParryListener parryListener;
     private LinkManager linkManager;
     private RegionManager regionManager;
     private InventoryManager invManager;
@@ -86,6 +88,7 @@ public class UltimaAddons extends JavaPlugin {
         regionManager = new RegionManager();
         invManager = new InventoryManager();
         itemManager = new ItemManager(this);
+        parryListener = new ParryListener();
         UAUnclaimProcessor.register();
         new UAPlaceholders().register();
         registerAE(new CaptureEffect(plugin));
@@ -104,6 +107,7 @@ public class UltimaAddons extends JavaPlugin {
         pm.registerEvents(itemManager.getTotems(), this);
         pm.registerEvents(new ShopkeeperListener(), this);
         pm.registerEvents(new MiscListener(), this);
+        pm.registerEvents(parryListener, this);
 
         // Register and Load Data Files
         tradesFile = new Data("trades.yml");
@@ -144,6 +148,10 @@ public class UltimaAddons extends JavaPlugin {
 
     public ConfigFile getConfigFile() {
         return configFile;
+    }
+    
+    public ParryListener getParry() {
+        return parryListener;
     }
     
     public Economy getEconomy() {

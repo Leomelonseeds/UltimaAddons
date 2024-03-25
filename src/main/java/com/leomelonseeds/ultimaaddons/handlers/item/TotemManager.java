@@ -188,8 +188,7 @@ public class TotemManager implements Listener {
                         curLoc.add(0, -1, 0);
                         ground = getGround(curLoc);
                     }
-                    break;
-                } while (true);
+                } while (false);
                 
                 // Cancel if player would be teleported to the void, or nether roof
                 // For nether roof, there are 5 layers of bedrock from 251 to 255, so any location

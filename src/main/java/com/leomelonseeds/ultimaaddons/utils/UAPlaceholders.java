@@ -1,10 +1,13 @@
 package com.leomelonseeds.ultimaaddons.utils;
 
-import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.player.KingdomPlayer;
+
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 
 public class UAPlaceholders extends PlaceholderExpansion {
 
@@ -33,6 +36,10 @@ public class UAPlaceholders extends PlaceholderExpansion {
 
     @Override
     public String onRequest(OfflinePlayer player, @NotNull String params) {
+        if (params.equals("canparry") && player.isOnline()) {
+            return UltimaAddons.getPlugin().getParry().canParry(player.getUniqueId()) + "";
+        }
+        
         Kingdom k = KingdomPlayer.getKingdomPlayer(player).getKingdom();
         if (k == null) {
             return null;

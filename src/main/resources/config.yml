@@ -14,6 +14,7 @@ challengegui:
     name: "&2In 3 days"
     slot: 15
     days: 3
+    
 introgui:
   kingdomshandbook:
     material: WRITTEN_BOOK
@@ -92,6 +93,7 @@ introgui:
 #    name: "&2In 1 min (TEST)"
 #    slot: 6
 #    days: 0.0008
+
 recipegui:
   next:
     material: ARROW
@@ -107,11 +109,7 @@ recipegui:
     name: "&cLocked"
     lore:
       - "&7You cannot use this recipe yet!"
-capture-exclude:
-  - ENDER_DRAGON
-  - WITHER
-  - ELDER_GUARDIAN
-  - WARDEN
+  
 staff-log:
   - pt
   - powertool
@@ -196,10 +194,25 @@ staff-log:
   - effect
   - sv
   - vanish
+  
 skaddon:
   limit_warn_start: 5
   # Time to count down to for restock | Must be "HH:mm:ss" format
   restock_time: "00:00:00"
+     
+# Mobs excluded from the capture enchantment 
+capture-exclude:
+  - ENDER_DRAGON
+  - WITHER
+  - ELDER_GUARDIAN
+  - WARDEN 
+
+# Time a player must have NOT shielded for before a parry can work in ticks
+parry-cooldown: 20
+
+# Time between when a player clicks and is attacked, that parry works on in ticks
+parry-duration: 2
+
 items:
   obsidianingot:
     material: NETHERITE_INGOT
