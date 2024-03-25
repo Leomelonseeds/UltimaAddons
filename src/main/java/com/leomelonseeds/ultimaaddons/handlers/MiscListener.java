@@ -82,12 +82,12 @@ public class MiscListener implements Listener {
             }
             
             ItemMeta meta = proj.getItemMeta();
-            if (!meta.hasDisplayName()) {
+            if (!meta.hasLore()) {
                 return;
             }
             
-            Component display = meta.displayName();
-            if (Utils.toPlain(display).contains("Creeper")) {
+            List<Component> lore = meta.lore();
+            if (Utils.toPlain(lore.get(0)).equals("creepershot")) {
                 creepershot = true;
                 break;
             }
@@ -133,6 +133,7 @@ public class MiscListener implements Listener {
         ItemStack creeper = new ItemStack(Material.FIREWORK_ROCKET);
         ItemMeta meta = creeper.getItemMeta();
         meta.displayName(Utils.toComponent("&fCreeper"));
+        meta.lore(List.of(new Component[] {Utils.toComponent("creepershot")}));
         creeper.setItemMeta(meta);
         
         // Load "creeper" into crossbow
