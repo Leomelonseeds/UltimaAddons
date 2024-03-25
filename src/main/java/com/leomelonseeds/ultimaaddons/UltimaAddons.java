@@ -9,6 +9,7 @@ import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
 import org.kingdoms.constants.namespace.Namespace;
 
 import com.leomelonseeds.ultimaaddons.ability.ae.CaptureEffect;
+import com.leomelonseeds.ultimaaddons.ability.ae.CooldownEffect;
 import com.leomelonseeds.ultimaaddons.ability.ae.RecuperateEffect;
 import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityArmor;
 import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityCurrentItem;
@@ -95,6 +96,7 @@ public class UltimaAddons extends JavaPlugin {
         registerAE(new RecuperateEffect(plugin));
         registerAE(new UAddDurabilityCurrentItem(plugin));
         registerAE(new UAddDurabilityArmor(plugin));
+        registerAE(new CooldownEffect(plugin));
 
         // Register listener
         PluginManager pm = getServer().getPluginManager();
