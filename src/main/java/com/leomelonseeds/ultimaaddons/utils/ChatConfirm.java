@@ -23,14 +23,31 @@ public class ChatConfirm implements Listener {
     private BukkitTask timeout;
     private Player player;
     private String req;
+    private String deny;
     private UltimaAddons plugin;
     private String cancelmsg;
     
     public ChatConfirm(Player player, String req, int time, String cancelmsg, ConfirmCallback callback) {
+        this(player, req, null, time, cancelmsg, callback);
+    }
+    
+    /**
+     * @param player
+     * @param req
+     * @param deny set to NULL or EMPTY to make any message deny
+     * @param time
+     * @param cancelmsg
+     * @param callback
+     */
+    public ChatConfirm(Player player, String req, String deny, int time, String cancelmsg, ConfirmCallback callback) {
         this.callback = callback;
         this.req = req;
         this.player = player;
         this.cancelmsg = cancelmsg;
+        
+        if (deny != null && !deny.isEmpty()) {
+            this.deny = deny;
+        }
         
         // Return if player already is in a chat window
         if (instances.containsKey(player)) {
@@ -55,7 +72,12 @@ public class ChatConfirm implements Listener {
             return;
         }
         
-        boolean success = e.getMessage().equalsIgnoreCase(req);
+        String msg = e.getMessage();
+        boolean success = msg.equalsIgnoreCase(req);
+        if (!success && !msg.equalsIgnoreCase(deny)) {
+            return;
+        }
+        
         this.timeout.cancel();
         e.setCancelled(true);
         stop();

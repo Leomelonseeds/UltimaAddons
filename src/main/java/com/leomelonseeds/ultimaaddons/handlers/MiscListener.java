@@ -184,7 +184,7 @@ public class MiscListener implements Listener {
 
         // Check if is logged command
         List<String> logged = UltimaAddons.getPlugin().getConfig().getStringList("staff-log");
-        if (!logged.contains(base)) {
+        if (!logged.contains(base) && !cmd.contains("/k admin")) {
             return;
         }
 

@@ -17,6 +17,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.Statistic;
 import org.bukkit.World;
+import org.bukkit.World.Environment;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -96,7 +97,7 @@ public class TotemManager implements Listener {
         
         pendingTP.remove(p).cancel();
         if (reason != null) {
-            msg(p, "&cTeleportation cancelled because you " + reason + ".");
+            msg(p, "&cTeleportation cancelled because " + reason + ".");
         }
     }
 
@@ -126,7 +127,7 @@ public class TotemManager implements Listener {
             public void run() {
                 ItemStack curItem = player.getInventory().getItem(hand);
                 if (!curItem.isSimilar(totem)) {
-                    removePlayer(player, "aren't holding the totem");
+                    removePlayer(player, "you aren't holding the totem");
                     return;
                 }
                 
@@ -161,15 +162,51 @@ public class TotemManager implements Listener {
                     removePlayer(player, null);
                 }
                 
-                // Only perform safe TP if we are NOT teleporting to another player.
                 Location curLoc = playertp ? other.getLocation() : loc;
-                if (!playertp) {
-                    while (curLoc.getBlock().getType() != Material.AIR || 
-                           curLoc.clone().add(0, 1, 0).getBlock().getType() != Material.AIR) {
+                do {
+                    // Only perform safe TP if we are NOT teleporting to another player.
+                    if (playertp) {
+                        break;
+                    }
+                    
+                    // If current location is non-air, move up until safe spot is found
+                    boolean moved = false;
+                    while (!curLoc.getBlock().getType().isAir() || 
+                           !curLoc.clone().add(0, 1, 0).getBlock().getType().isAir()) {
+                        moved = true;
                         curLoc.add(0, 1, 0);
                     } 
+                    
+                    // If we moved player, then a safe location was found
+                    if (moved) {
+                        break;
+                    }
+                    
+                    // If the player hasn't moved, check DOWNWARDS until solid ground is found
+                    Material ground = getGround(curLoc);
+                    while (ground == Material.CAVE_AIR || ground == Material.AIR) {
+                        curLoc.add(0, -1, 0);
+                        ground = getGround(curLoc);
+                    }
+                    break;
+                } while (true);
+                
+                // Cancel if player would be teleported to the void, or nether roof
+                // For nether roof, there are 5 layers of bedrock from 251 to 255, so any location
+                // at 252 or higher has a chance of trapping player in a bedrock box
+                if (curLoc.getBlock().getType() == Material.VOID_AIR ||
+                    curLoc.getWorld().getEnvironment() == Environment.NETHER && curLoc.getBlockY() >= 252) {
+                    this.cancel();
+                    removePlayer(player, "the destination is unsafe");
+                    return;
+                }
+                
+                // Give player 40s fire resistance if TPing to lava (like undying totem)
+                if (getGround(curLoc) == Material.LAVA) {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 800, 0));
                 }
 
+                // Do not consume item if player in creative mode
                 if (player.getGameMode() != GameMode.CREATIVE) {
                     curItem.setAmount(curItem.getAmount() - 1);
                 }
@@ -185,6 +222,10 @@ public class TotemManager implements Listener {
         }.runTaskTimer(plugin, 1, 20)); // Start 1 tick later to make sure its not immediately cancelled due to movement or something
     }
     
+    private Material getGround(Location location) {
+        return location.clone().add(0, -1, 0).getBlock().getType();
+    }
+    
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
         // Check pending tp set first for better performance
@@ -194,14 +235,14 @@ public class TotemManager implements Listener {
         }
         
         if (e.getFrom().distance(e.getTo()) > 0.1) {
-            removePlayer(e.getPlayer(), "moved");
+            removePlayer(e.getPlayer(), "you moved");
         }
     }
     
     // Keep death totems on death
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
-        removePlayer(e.getPlayer(), "died");
+        removePlayer(e.getPlayer(), "you died");
         List<ItemStack> drops = e.getDrops();
         for (ItemStack i : new ArrayList<>(drops)) {
             String id = Utils.getItemID(i, totemKey);
@@ -343,8 +384,8 @@ public class TotemManager implements Listener {
             String requesterName = Utils.toPlain(player.displayName());
             other.sendMessage(Utils.toComponent("&c&l[!] &f" + requesterName + " &7 has requested to teleport to you."));
             other.sendMessage(Utils.toComponent("&c&l[!] &7To accept, type \"&aaccept&7\" in the chat within &f30 seconds&7."));
-            other.sendMessage(Utils.toComponent("&c&l[!] &7To deny, type anything else in the chat."));
-            new ChatConfirm(other, "accept", 30, "Teleportation request denied.", result -> {
+            other.sendMessage(Utils.toComponent("&c&l[!] &7To deny, type \"&cdeny&7\"."));
+            new ChatConfirm(other, "accept", "deny", 30, "Teleportation request denied.", result -> {
                 pendingAccept.remove(player);
                 if (!player.isOnline()) {
                     return;
