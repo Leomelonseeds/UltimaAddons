@@ -1,5 +1,6 @@
 package com.leomelonseeds.ultimaaddons.handlers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,12 +13,15 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World.Environment;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -26,6 +30,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.GrindstoneInventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -41,7 +46,10 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
+import io.papermc.paper.event.entity.EntityLoadCrossbowEvent;
 import me.clip.placeholderapi.PlaceholderAPI;
+import net.advancedplugins.ae.api.AEAPI;
+import net.kyori.adventure.text.Component;
 
 /**
  * Used for various game mechanics and staff logger
@@ -50,6 +58,94 @@ public class MiscListener implements Listener {
 
     private static Map<Player, String> msgs = new HashMap<>();
     private static Set<Player> elytraCancelling = new HashSet<>();
+    
+    // CREEPERSHOT (from UMW)
+    @EventHandler
+    public void onBowShoot(EntityShootBowEvent event) {
+        if (event.getEntityType() != EntityType.PLAYER) {
+            return;
+        }
+        
+        if (event.getBow().getType() != Material.CROSSBOW) {
+            return;
+        }
+        
+        Player player = (Player) event.getEntity();
+        
+        // Check for creepershot
+        ItemStack crossbow = event.getBow();
+        CrossbowMeta cmeta = (CrossbowMeta) crossbow.getItemMeta();
+        boolean creepershot = false;
+        for (ItemStack proj : cmeta.getChargedProjectiles()) {
+            if (proj.getType() != Material.FIREWORK_ROCKET || !proj.hasItemMeta()) {
+                return;
+            }
+            
+            ItemMeta meta = proj.getItemMeta();
+            if (!meta.hasDisplayName()) {
+                return;
+            }
+            
+            Component display = meta.displayName();
+            if (Utils.toPlain(display).contains("Creeper")) {
+                creepershot = true;
+                break;
+            }
+        }
+        
+        if (!creepershot) {
+            return;
+        }
+        
+        Entity proj = event.getProjectile();
+        Location spawnLoc = proj.getLocation();
+        Creeper creeper = (Creeper) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.CREEPER);
+        creeper.customName(Utils.toComponent(Utils.toPlain(player.displayName()) + "&7's Creeper"));
+        creeper.setCustomNameVisible(true);
+        creeper.setVelocity(proj.getVelocity().multiply(2.5));
+        proj.remove();
+        
+        Utils.sendSound(Sound.ENTITY_CREEPER_DEATH, 2F, 2F, spawnLoc);
+        return;
+    }
+    
+    // Handle crossbow load cooldowns
+    @EventHandler
+    public void onCrossbowLoad(EntityLoadCrossbowEvent event) {
+        if (event.getEntityType() != EntityType.PLAYER) {
+            return;
+        }
+        
+        ItemStack crossbow = event.getCrossbow();
+        if (!AEAPI.hasCustomEnchant("creepershot", crossbow)) {
+            return;
+        }
+        
+        // Creepershot
+        Player player = (Player) event.getEntity();
+        ItemStack offhand = player.getInventory().getItemInOffHand();
+        if (offhand.getType() != Material.CREEPER_SPAWN_EGG) {
+            return;
+        }
+        
+        // Prepare fake creeper item
+        offhand.setAmount(offhand.getAmount() - 1);
+        ItemStack creeper = new ItemStack(Material.FIREWORK_ROCKET);
+        ItemMeta meta = creeper.getItemMeta();
+        meta.displayName(Utils.toComponent("&fCreeper"));
+        creeper.setItemMeta(meta);
+        
+        // Load "creeper" into crossbow
+        Utils.schedule(1, () -> {
+            CrossbowMeta cmeta = (CrossbowMeta) crossbow.getItemMeta();
+            List<ItemStack> newProjs = new ArrayList<>();
+            for (int i = 0; i < cmeta.getChargedProjectiles().size(); i++) {
+                newProjs.add(new ItemStack(creeper));
+            }
+            cmeta.setChargedProjectiles(newProjs);
+            crossbow.setItemMeta(cmeta);
+        });
+    }
     
     // Disable dragon firework right click block interaction
     @EventHandler

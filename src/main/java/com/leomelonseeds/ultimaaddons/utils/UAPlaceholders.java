@@ -1,6 +1,7 @@
 package com.leomelonseeds.ultimaaddons.utils;
 
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.player.KingdomPlayer;
@@ -36,9 +37,21 @@ public class UAPlaceholders extends PlaceholderExpansion {
 
     @Override
     public String onRequest(OfflinePlayer player, @NotNull String params) {
-        if (params.equals("canparry") && player.isOnline()) {
-            return UltimaAddons.getPlugin().getParry().canParry(player.getUniqueId()) + "";
-        }
+        // Extra online player placeholders
+        do {
+            if (!player.isOnline()) {
+                break;
+            }
+            
+            Player op = (Player) player;
+            if (params.equals("canparry")) {
+                return UltimaAddons.getPlugin().getParry().canParry(player.getUniqueId()) + "";
+            }
+            
+            if (params.equals("yspeed")) {
+                return op.getVelocity().getY() + "";
+            }
+        } while (false);
         
         Kingdom k = KingdomPlayer.getKingdomPlayer(player).getKingdom();
         if (k == null) {
