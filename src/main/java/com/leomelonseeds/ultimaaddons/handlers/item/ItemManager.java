@@ -26,6 +26,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Shulker;
 import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -417,7 +418,7 @@ public class ItemManager implements Listener {
     }
 
     // Handle custom item drops for blown up items
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onExplode(EntityExplodeEvent e) {
         Random random = new Random();
         Entity exploded = e.getEntity();
