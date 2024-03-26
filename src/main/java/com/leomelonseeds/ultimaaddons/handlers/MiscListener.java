@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World.Environment;
-import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
@@ -70,12 +70,9 @@ public class MiscListener implements Listener {
             return;
         }
         
-        Player player = (Player) event.getEntity();
-        
-        // Check for creepershot
         ItemStack crossbow = event.getBow();
         CrossbowMeta cmeta = (CrossbowMeta) crossbow.getItemMeta();
-        boolean creepershot = false;
+        EntityType type = null;
         for (ItemStack proj : cmeta.getChargedProjectiles()) {
             if (proj.getType() != Material.FIREWORK_ROCKET || !proj.hasItemMeta()) {
                 return;
@@ -87,29 +84,32 @@ public class MiscListener implements Listener {
             }
             
             List<Component> lore = meta.lore();
-            if (Utils.toPlain(lore.get(0)).equals("creepershot")) {
-                creepershot = true;
+            type = EntityType.fromName(Utils.toPlain(lore.get(0)));
+            if (type != null) {
                 break;
             }
         }
         
-        if (!creepershot) {
+        if (type == null) {
             return;
         }
         
         Entity proj = event.getProjectile();
         Location spawnLoc = proj.getLocation();
-        Creeper creeper = (Creeper) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.CREEPER);
-        creeper.customName(Utils.toComponent(Utils.toPlain(player.displayName()) + "&7's Creeper"));
-        creeper.setCustomNameVisible(true);
-        creeper.setVelocity(proj.getVelocity().multiply(2.5));
+        Entity mob = spawnLoc.getWorld().spawnEntity(spawnLoc, type);
+        mob.setVelocity(proj.getVelocity().multiply(2.5));
         proj.remove();
         
-        Utils.sendSound(Sound.ENTITY_CREEPER_DEATH, 2F, 2F, spawnLoc);
+        try {
+            Sound sound = Sound.valueOf("ENTITY_" + type + "_DEATH");
+            Utils.sendSound(sound, 2F, 2F, spawnLoc);
+        } catch (IllegalArgumentException e) {
+            // Do nothing
+        }
         return;
     }
     
-    // Handle crossbow load cooldowns
+    // Handle mobslinger
     @EventHandler
     public void onCrossbowLoad(EntityLoadCrossbowEvent event) {
         if (event.getEntityType() != EntityType.PLAYER) {
@@ -117,23 +117,25 @@ public class MiscListener implements Listener {
         }
         
         ItemStack crossbow = event.getCrossbow();
-        if (!AEAPI.hasCustomEnchant("creepershot", crossbow)) {
+        if (!AEAPI.hasCustomEnchant("mobslinger", crossbow)) {
             return;
         }
         
-        // Creepershot
         Player player = (Player) event.getEntity();
         ItemStack offhand = player.getInventory().getItemInOffHand();
-        if (offhand.getType() != Material.CREEPER_SPAWN_EGG) {
+        String mat = offhand.getType().toString();
+        if (!mat.contains("SPAWN_EGG")) {
             return;
         }
         
         // Prepare fake creeper item
+        String mobName = mat.replace("_SPAWN_EGG", "");
+        String displayName = WordUtils.capitalize(mobName.replace('_', ' ').toLowerCase());
         offhand.setAmount(offhand.getAmount() - 1);
         ItemStack creeper = new ItemStack(Material.FIREWORK_ROCKET);
         ItemMeta meta = creeper.getItemMeta();
-        meta.displayName(Utils.toComponent("&fCreeper"));
-        meta.lore(List.of(new Component[] {Utils.toComponent("creepershot")}));
+        meta.displayName(Utils.toComponent("&f" + displayName));
+        meta.lore(List.of(new Component[] {Utils.toComponent(mobName)}));
         creeper.setItemMeta(meta);
         
         // Load "creeper" into crossbow
