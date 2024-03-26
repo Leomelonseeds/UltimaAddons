@@ -48,6 +48,7 @@ In addition to tracking player joining and leaving kingdoms as well as invasions
 - You cannot make additional claims beyond 1 claim if you do not have a nexus.
 - You cannot create outposts or challenge if you do not have a nexus.
 - Turrets can be destroyed by TNT explosions, even if the Kingdom has anti-explosion misc upgrade.
+- Players are forced to select a pacifist/aggressor option on Kingdom creation, by making the GUI re-open if closed without selecting anything.
 
 ## Custom Enchantments
 The plugin also hooks into AdvancedEnchantments' API to provide the following custom effects:
@@ -56,6 +57,11 @@ The plugin also hooks into AdvancedEnchantments' API to provide the following cu
 - RECUPERATE: Reduces cooldown time for shields when they are disabled by an axe.
 - UADD_DURABILITY_CURRENT_ITEM: Adds/removes durability from an item, with consideration for unbreaking enchantment and custom durability items.
 - UADD_DURABILITY_ARMOR: Adds/removes durability from all worn armor, with consideration for unbreaking enchantment and custom durability items.
+
+Additionally, the plugin allows the following enchants to function properly by providing placeholders or helper methods:
+- Parry: Block your shield right as your opponent is about to hit you to perform a parry, dealing true damage and knocking them backwards.
+- Gardener: Critical hits do more damage the higher you fall from.
+- Mobslinger: Hold any mob's spawn egg in your offhand to load and shoot it from your crossbow.
 
 ## Custom Items
 The plugin also provides some custom items and recipes that add some fresh gameplay elements to the survival experience. All recipes can be found by using the `/recipes` command in-game. Most weapons with abilities have cooldowns that are not listed here, since they are subject to change. Several items have increased durability over their vanilla counterparts, such as the armorsets.
