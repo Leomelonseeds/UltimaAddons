@@ -27,6 +27,7 @@ import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.GrindstoneInventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -39,6 +40,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEdit;
@@ -58,6 +60,13 @@ public class MiscListener implements Listener {
 
     private static Map<Player, String> msgs = new HashMap<>();
     private static Set<Player> elytraCancelling = new HashSet<>();
+    
+    @EventHandler
+    public void onLoot(LootGenerateEvent e) {
+        ItemManager items = UltimaAddons.getPlugin().getItems();
+        // List<ItemStack> loot = e.getLoot();
+        // loot.add(items.getItem("commondust"));
+    }
     
     // CREEPERSHOT (from UMW)
     @EventHandler
