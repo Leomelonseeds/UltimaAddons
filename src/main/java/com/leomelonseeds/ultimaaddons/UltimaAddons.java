@@ -108,8 +108,8 @@ public class UltimaAddons extends JavaPlugin {
         pm.registerEvents(parryListener, this);
 
         // Register and Load Data Files
-        tradesFile = new Data("trades.yml");
-        regionsFile = new Data("regions.yml");
+        tradesFile = new Data("trades.yml", "data");
+        regionsFile = new Data("regions.yml", "data");
         new Load();
 
         // Register Aurelium Hook

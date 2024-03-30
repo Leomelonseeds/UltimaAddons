@@ -11,7 +11,7 @@ public class UASkills {
             .description("agility placeholder")
             .item(ItemContext.builder()
                     .material("feather")
-                    .pos("4,4")
+                    .pos("1,4")
                     .build())
             .build();
     public static final CustomSkill COMBAT = CustomSkill
@@ -19,8 +19,8 @@ public class UASkills {
             .displayName("Combat")
             .description("combat placeholder")
             .item(ItemContext.builder()
-                    .material("emerald")
-                    .pos("4,5")
+                    .material("diamond_sword")
+                    .pos("2,3")
                     .build())
             .build();
     public static final CustomSkill ENDURANCE = CustomSkill
@@ -28,8 +28,8 @@ public class UASkills {
             .displayName("Endurance")
             .description("endurance placeholder")
             .item(ItemContext.builder()
-                    .material("emerald")
-                    .pos("4,6")
+                    .material("shield")
+                    .pos("2,4")
                     .build())
             .build();
     public static final CustomSkill GATHERING = CustomSkill
@@ -37,8 +37,8 @@ public class UASkills {
             .displayName("Gathering")
             .description("gathering placeholder")
             .item(ItemContext.builder()
-                    .material("emerald")
-                    .pos("4,7")
+                    .material("diamond_pickaxe")
+                    .pos("2,5")
                     .build())
             .build();
     public static final CustomSkill SORCERY = CustomSkill
@@ -46,8 +46,8 @@ public class UASkills {
             .displayName("Sorcery")
             .description("sorcery placeholder")
             .item(ItemContext.builder()
-                    .material("emerald")
-                    .pos("4,8")
+                    .material("enchanting_table")
+                    .pos("3,4")
                     .build())
             .build();
 }

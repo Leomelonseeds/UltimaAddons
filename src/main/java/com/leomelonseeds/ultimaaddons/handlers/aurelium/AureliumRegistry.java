@@ -2,6 +2,7 @@ package com.leomelonseeds.ultimaaddons.handlers.aurelium;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.aurelium.UASkills;
+import com.leomelonseeds.ultimaaddons.data.file.Data;
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 import dev.aurelium.auraskills.api.AuraSkillsApi;
 import dev.aurelium.auraskills.api.registry.NamespacedRegistry;
@@ -48,20 +49,16 @@ public class AureliumRegistry {
     }
 
     public void generateFiles() {
-        String separator = FileSystems.getDefault().getSeparator();
-        String rewardsFolder = "aurelium" + separator + "rewards";
-        String sourcesFolder = "aurelium" + separator + "sources";
+        new Data("uaagility.yml", "aurelium/rewards");
+        new Data("uacombat.yml", "aurelium/rewards");
+        new Data("uaendurance.yml", "aurelium/rewards");
+        new Data("uagathering.yml", "aurelium/rewards");
+        new Data("uasorcery.yml", "aurelium/rewards");
 
-        UltimaAddons.getPlugin().saveResource(rewardsFolder + separator + "uaagility.yml", false);
-        UltimaAddons.getPlugin().saveResource(rewardsFolder + separator + "uacombat.yml", false);
-        UltimaAddons.getPlugin().saveResource(rewardsFolder + separator + "uaendurance.yml", false);
-        UltimaAddons.getPlugin().saveResource(rewardsFolder + separator + "uagathering.yml", false);
-        UltimaAddons.getPlugin().saveResource(rewardsFolder + separator + "uasorcery.yml", false);
-
-        UltimaAddons.getPlugin().saveResource(sourcesFolder + separator + "uaagility.yml", false);
-        UltimaAddons.getPlugin().saveResource(sourcesFolder + separator + "uacombat.yml", false);
-        UltimaAddons.getPlugin().saveResource(sourcesFolder + separator + "uaendurance.yml", false);
-        UltimaAddons.getPlugin().saveResource(sourcesFolder + separator + "uagathering.yml", false);
-        UltimaAddons.getPlugin().saveResource(sourcesFolder + separator + "uasorcery.yml", false);
+        new Data("uaagility.yml", "aurelium/sources");
+        new Data("uacombat.yml", "aurelium/sources");
+        new Data("uaendurance.yml", "aurelium/sources");
+        new Data("uagathering.yml", "aurelium/sources");
+        new Data("uasorcery.yml", "aurelium/sources");
     }
 }
