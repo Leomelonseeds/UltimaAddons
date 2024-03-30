@@ -1,14 +1,13 @@
 package com.leomelonseeds.ultimaaddons.commands.ua.uask.sub;
 
-import java.util.List;
-
+import com.leomelonseeds.ultimaaddons.commands.Argument;
+import com.leomelonseeds.ultimaaddons.commands.Command;
+import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-import com.leomelonseeds.ultimaaddons.commands.Argument;
-import com.leomelonseeds.ultimaaddons.commands.Command;
-import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+import java.util.List;
 
 public class UnsyncCommand extends Command {
     public UnsyncCommand(String name, List<String> aliases, String permission, String description, List<? extends Argument> arguments) {

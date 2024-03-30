@@ -1,25 +1,17 @@
 package com.leomelonseeds.ultimaaddons.commands.ua.uask;
 
+import com.leomelonseeds.ultimaaddons.commands.Argument;
+import com.leomelonseeds.ultimaaddons.commands.BaseCommand;
+import com.leomelonseeds.ultimaaddons.commands.Command;
+import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.*;
+import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.NotNull;
-
-import com.leomelonseeds.ultimaaddons.commands.Argument;
-import com.leomelonseeds.ultimaaddons.commands.BaseCommand;
-import com.leomelonseeds.ultimaaddons.commands.Command;
-import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.DebugCommand;
-import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.DiscountCommand;
-import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.HelpCommand;
-import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.InfoCommand;
-import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.LimitCommand;
-import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.RotateCommand;
-import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.SyncCommand;
-import com.leomelonseeds.ultimaaddons.commands.ua.uask.sub.UnsyncCommand;
-import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 
 public class UASk extends Command {
     private static final Map<String, Argument> argumentTypes = BaseCommand.argumentTypes;
@@ -90,8 +82,11 @@ public class UASk extends Command {
                 : subcommands.get(args[0]);
         if (!subCmd.hasPermission(sender))
             CommandUtils.sendErrorMsg(sender, "You do not have permission to run this subcommand");
-        else if (!subCmd.hasInvalidArgs(sender, args))
-            subCmd.execute(sender, cmd, name, args.length != 0 ? Arrays.copyOfRange(args, 1, args.length) : args);
+
+        // Get rid of base sk command and subcommand and only pass in args if we can
+        String[] truncArgs = args.length > 0 ? Arrays.copyOfRange(args, 1, args.length) : args;
+        if (!subCmd.hasInvalidArgs(sender, truncArgs))
+            subCmd.execute(sender, cmd, name, truncArgs);
     }
 
     @Override
