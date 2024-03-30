@@ -45,7 +45,7 @@ public class Load {
     }
 
     private void loadRegionsFile() {
-        FileConfiguration config = UltimaAddons.getPlugin().getTradesFile().getConfig();
+        FileConfiguration config = UltimaAddons.getPlugin().getRegionsFile().getConfig();
         for (String region : config.getKeys(false)) {
             String stringedUUID = Objects.requireNonNull(config.getString(region + ".shopkeeper_uuid"));
             Shopkeeper sk = ShopkeepersPlugin.getInstance().getShopkeeperRegistry().getShopkeeperByUniqueId(UUID.fromString(stringedUUID));

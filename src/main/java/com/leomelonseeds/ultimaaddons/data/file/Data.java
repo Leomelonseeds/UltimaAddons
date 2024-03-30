@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.util.logging.Level;
 
 public class Data {
@@ -31,9 +32,10 @@ public class Data {
     }
 
     public void reload() {
-        file = new File(UltimaAddons.getPlugin().getDataFolder(), name);
+        String separator = FileSystems.getDefault().getSeparator();
+        file = new File(UltimaAddons.getPlugin().getDataFolder().getPath() + separator + "data", name);
         if (!file.exists()) {
-            UltimaAddons.getPlugin().saveResource(name, false);
+            UltimaAddons.getPlugin().saveResource("data" + separator + name, false);
         }
 
         config = YamlConfiguration.loadConfiguration(file);
