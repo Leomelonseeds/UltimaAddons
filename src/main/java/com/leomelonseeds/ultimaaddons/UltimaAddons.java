@@ -1,18 +1,6 @@
 package com.leomelonseeds.ultimaaddons;
 
-import org.bukkit.NamespacedKey;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.kingdoms.constants.metadata.KingdomMetadataHandler;
-import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
-import org.kingdoms.constants.namespace.Namespace;
-
-import com.leomelonseeds.ultimaaddons.ability.ae.CaptureEffect;
-import com.leomelonseeds.ultimaaddons.ability.ae.CooldownEffect;
-import com.leomelonseeds.ultimaaddons.ability.ae.RecuperateEffect;
-import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityArmor;
-import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityCurrentItem;
+import com.leomelonseeds.ultimaaddons.ability.ae.*;
 import com.leomelonseeds.ultimaaddons.commands.BaseCommand;
 import com.leomelonseeds.ultimaaddons.data.Load;
 import com.leomelonseeds.ultimaaddons.data.Save;
@@ -20,6 +8,7 @@ import com.leomelonseeds.ultimaaddons.data.file.ConfigFile;
 import com.leomelonseeds.ultimaaddons.data.file.Data;
 import com.leomelonseeds.ultimaaddons.handlers.MiscListener;
 import com.leomelonseeds.ultimaaddons.handlers.ParryListener;
+import com.leomelonseeds.ultimaaddons.handlers.aurelium.AureliumRegistry;
 import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
 import com.leomelonseeds.ultimaaddons.handlers.kingdom.KingdomsListener;
 import com.leomelonseeds.ultimaaddons.handlers.kingdom.UAUnclaimProcessor;
@@ -28,10 +17,16 @@ import com.leomelonseeds.ultimaaddons.handlers.shopkeeper.RegionManager;
 import com.leomelonseeds.ultimaaddons.handlers.shopkeeper.ShopkeeperListener;
 import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 import com.leomelonseeds.ultimaaddons.utils.UAPlaceholders;
-
 import net.advancedplugins.ae.api.AEAPI;
 import net.advancedplugins.ae.impl.effects.effects.effects.AdvancedEffect;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.NamespacedKey;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.kingdoms.constants.metadata.KingdomMetadataHandler;
+import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
+import org.kingdoms.constants.namespace.Namespace;
 
 
 public class UltimaAddons extends JavaPlugin {
@@ -56,6 +51,7 @@ public class UltimaAddons extends JavaPlugin {
     private Data tradesFile;
     private Data regionsFile;
     private Economy econ;
+    private AureliumRegistry aureliumRegistry;
 
 
     public static UltimaAddons getPlugin() {
@@ -79,7 +75,7 @@ public class UltimaAddons extends JavaPlugin {
         outpost_id = new StandardKingdomMetadataHandler(new Namespace("UltimaAddons", "OUTPOST_ID"));  // (long) id of outpost/outpost land
         itemKey = new NamespacedKey(plugin, "uaitem");
         duraKey = new NamespacedKey(plugin, "uadura");
-        
+
         // Register economy
         RegisteredServiceProvider<Economy> rspE = getServer().getServicesManager().getRegistration(Economy.class);
         econ = rspE.getProvider();
@@ -115,6 +111,9 @@ public class UltimaAddons extends JavaPlugin {
         tradesFile = new Data("trades.yml");
         regionsFile = new Data("regions.yml");
         new Load();
+
+        // Register Aurelium Hook
+        aureliumRegistry = new AureliumRegistry();
     }
 
     @Override
@@ -151,13 +150,17 @@ public class UltimaAddons extends JavaPlugin {
     public ConfigFile getConfigFile() {
         return configFile;
     }
-    
+
     public ParryListener getParry() {
         return parryListener;
     }
-    
+
     public Economy getEconomy() {
         return econ;
+    }
+
+    public AureliumRegistry getAureliumRegistry() {
+        return aureliumRegistry;
     }
 
     public void writeTradesFile() {
@@ -183,7 +186,7 @@ public class UltimaAddons extends JavaPlugin {
         getSKLinker().clear();
         new Load();
     }
-    
+
     private void registerAE(AdvancedEffect ae) {
         try {
             AEAPI.registerEffect(plugin, ae);

@@ -5,18 +5,19 @@ api-version: 1.20
 author: M310N
 description: Extra features for Ultima
 depend:
-- Kingdoms
-- DiscordSRV
-- PlaceholderAPI
-- AdvancedEnchantments
-- Shopkeepers
-- AdvancedRegionMarket
-- Vault
-- WorldEdit
-commands: 
-  uchallenge: {}
-  recipes: {}
-  uintro: {}
+  - Kingdoms
+  - DiscordSRV
+  - PlaceholderAPI
+  - AdvancedEnchantments
+  - Shopkeepers
+  - AdvancedRegionMarket
+  - Vault
+  - WorldEdit
+  - AuraSkills
+commands:
+  uchallenge: { }
+  recipes: { }
+  uintro: { }
   ugive:
     default: op
   ureload:
@@ -24,4 +25,4 @@ commands:
   usk:
     default: op
 permissions:
-  ua.admin: {}
+  ua.admin: { }
