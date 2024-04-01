@@ -19,7 +19,7 @@ public class InfoCommand extends Command {
     public boolean hasInvalidArgs(@NotNull CommandSender sender, @NotNull String[] args) {
         // Check for valid number of arguments
         if (args.length < 1) {
-            CommandUtils.sendErrorMsg(sender, "Usage: /uask rotate [shopkeeper id]");
+            CommandUtils.sendErrorMsg(sender, "Usage: /uask info [shopkeeper id]");
             return true;
         }
         if (super.hasInvalidArgs(sender, args)) return true;

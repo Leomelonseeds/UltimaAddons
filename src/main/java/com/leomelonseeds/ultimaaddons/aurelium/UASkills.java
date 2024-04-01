@@ -11,7 +11,7 @@ public class UASkills {
             .description("agility placeholder")
             .item(ItemContext.builder()
                     .material("feather")
-                    .pos("1,4")
+                    .pos("2,2")
                     .build())
             .build();
     public static final CustomSkill COMBAT = CustomSkill
@@ -47,7 +47,7 @@ public class UASkills {
             .description("sorcery placeholder")
             .item(ItemContext.builder()
                     .material("enchanting_table")
-                    .pos("3,4")
+                    .pos("2,6")
                     .build())
             .build();
 }
