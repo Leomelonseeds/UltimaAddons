@@ -8,6 +8,7 @@ import com.leomelonseeds.ultimaaddons.utils.Utils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -40,7 +41,10 @@ public class UAGive extends Command {
         if (args.length == 3)
             i.setAmount(NumberUtils.toInt(args[2], 1));
         // Add item to inventory, drop if anything is returned
-        p.getInventory().addItem(i).forEach((index, item) -> p.getWorld().dropItem(p.getLocation(), item));
+        p.getInventory().addItem(i).forEach((index, item) -> {
+            Item ownedItem = p.getWorld().dropItem(p.getLocation(), item);
+            ownedItem.setOwner(p.getUniqueId());
+        });
 
         String iname = i.getType().toString();
         ItemMeta meta = i.getItemMeta();
