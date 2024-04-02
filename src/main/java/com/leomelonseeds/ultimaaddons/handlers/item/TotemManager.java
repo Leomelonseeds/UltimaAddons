@@ -1,22 +1,10 @@
 package com.leomelonseeds.ultimaaddons.handlers.item;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.utils.ChatConfirm;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
-import org.bukkit.Statistic;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.World.Environment;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
@@ -50,21 +38,19 @@ import org.bukkit.scheduler.BukkitTask;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.server.location.ImmutableLocation;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.utils.ChatConfirm;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
+import java.util.*;
 
 public class TotemManager implements Listener {
 
     public static final String TOTEM_INDICATOR = "totemofwarping";
-    private static NamespacedKey totemKey;
-    
+    public static NamespacedKey totemKey;
+
     private UltimaAddons plugin;
     private ItemManager im;
     private ConfigurationSection totemSec;
     private Map<Player, BukkitTask> pendingTP;
     private Set<Player> pendingAccept;
-    
+
     public TotemManager(ItemManager im, UltimaAddons plugin) {
         this.im = im;
         this.plugin = plugin;
@@ -75,26 +61,30 @@ public class TotemManager implements Listener {
         }
     }
 
+    public ConfigurationSection getTotemSec() {
+        return totemSec;
+    }
+
     public Map<String, ItemStack> createTotems(ConfigurationSection sec) {
         this.totemSec = sec;
         Map<String, ItemStack> res = new HashMap<>();
         for (String key : sec.getKeys(false)) {
             String mapkey = sec.getName() + "." + key;
-            ItemStack cur = Utils.createItem(sec.getConfigurationSection(key),mapkey);
+            ItemStack cur = Utils.createItem(sec.getConfigurationSection(key), mapkey);
             ItemMeta cmeta = cur.getItemMeta();
             cmeta.getPersistentDataContainer().set(totemKey, PersistentDataType.STRING, key);
             cur.setItemMeta(cmeta);
             res.put(mapkey, cur);
         }
-        
+
         return res;
     }
-    
+
     private void removePlayer(Player p, String reason) {
         if (!pendingTP.containsKey(p)) {
             return;
         }
-        
+
         pendingTP.remove(p).cancel();
         if (reason != null) {
             msg(p, "&cTeleportation cancelled because " + reason + ".");
@@ -104,25 +94,25 @@ public class TotemManager implements Listener {
     private void initiateTeleportation(Player player, EquipmentSlot hand, ItemStack totem, Location loc) {
         initiateTeleportation(player, hand, totem, loc, null);
     }
-    
+
     /**
      * Start a teleportation. Loc cannot be null.
-     * 
+     *
      * @param player
      * @param loc
-     * @param safe if true, searches upwards from loc until safe airblocks found.
+     * @param safe   if true, searches upwards from loc until safe airblocks found.
      */
     private void initiateTeleportation(Player player, EquipmentSlot hand, ItemStack totem, Location loc, Player other) {
         if (pendingTP.containsKey(player)) {
             return;
         }
-        
+
         Location from = player.getLocation().clone().add(0, 1, 0);
         final int TIME = 5;
         pendingTP.put(player, new BukkitRunnable() {
-            
+
             int iteration = TIME;
-            
+
             @Override
             public void run() {
                 ItemStack curItem = player.getInventory().getItem(hand);
@@ -130,20 +120,20 @@ public class TotemManager implements Listener {
                     removePlayer(player, "you aren't holding the totem");
                     return;
                 }
-                
+
                 if (iteration > 0) {
                     if (iteration == TIME) {
                         Utils.sendSound(Sound.BLOCK_BEACON_POWER_SELECT, 2F, 2F, from);
                     } else {
                         player.playSound(from, Sound.BLOCK_NOTE_BLOCK_HARP, 1F, 1F);
                     }
-                    
+
                     if (iteration == 2) {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 0, true, false));
                     } else if (iteration == 1) {
                         Utils.sendSound(Sound.ENTITY_ZOMBIE_VILLAGER_CONVERTED, 2F, 0.9F, from);
                     }
-                    
+
                     int since = TIME - iteration;
                     if (iteration > 1) {
                         from.getWorld().spawnParticle(Particle.PORTAL, from, 50 + since * 50, 0.1, 0.1, 0.1, 0.7 + since * 0.1);
@@ -153,7 +143,7 @@ public class TotemManager implements Listener {
                     iteration--;
                     return;
                 }
-                
+
                 // Stop other player tp if they are no longer online
                 boolean playertp = other != null; // TRUE if we tp to another player
                 if (playertp && !other.isOnline()) {
@@ -161,27 +151,27 @@ public class TotemManager implements Listener {
                     this.cancel();
                     removePlayer(player, null);
                 }
-                
+
                 Location curLoc = playertp ? other.getLocation() : loc;
                 do {
                     // Only perform safe TP if we are NOT teleporting to another player.
                     if (playertp) {
                         break;
                     }
-                    
+
                     // If current location is non-air, move up until safe spot is found
                     boolean moved = false;
-                    while (!curLoc.getBlock().getType().isAir() || 
-                           !curLoc.clone().add(0, 1, 0).getBlock().getType().isAir()) {
+                    while (!curLoc.getBlock().getType().isAir() ||
+                            !curLoc.clone().add(0, 1, 0).getBlock().getType().isAir()) {
                         moved = true;
                         curLoc.add(0, 1, 0);
-                    } 
-                    
+                    }
+
                     // If we moved player, then a safe location was found
                     if (moved) {
                         break;
                     }
-                    
+
                     // If the player hasn't moved, check DOWNWARDS until solid ground is found
                     Material ground = getGround(curLoc);
                     while (ground == Material.CAVE_AIR || ground == Material.AIR) {
@@ -189,17 +179,17 @@ public class TotemManager implements Listener {
                         ground = getGround(curLoc);
                     }
                 } while (false);
-                
+
                 // Cancel if player would be teleported to the void, or nether roof
                 // For nether roof, there are 5 layers of bedrock from 251 to 255, so any location
                 // at 252 or higher has a chance of trapping player in a bedrock box
                 if (curLoc.getBlock().getType() == Material.VOID_AIR ||
-                    curLoc.getWorld().getEnvironment() == Environment.NETHER && curLoc.getBlockY() >= 252) {
+                        curLoc.getWorld().getEnvironment() == Environment.NETHER && curLoc.getBlockY() >= 252) {
                     this.cancel();
                     removePlayer(player, "the destination is unsafe");
                     return;
                 }
-                
+
                 // Give player 40s fire resistance if TPing to lava (like undying totem)
                 if (getGround(curLoc) == Material.LAVA) {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 800, 0));
@@ -209,7 +199,7 @@ public class TotemManager implements Listener {
                 if (player.getGameMode() != GameMode.CREATIVE) {
                     curItem.setAmount(curItem.getAmount() - 1);
                 }
-                
+
                 msg(player, "&bTeleporting...");
                 player.teleport(curLoc);
                 Utils.sendSound(Sound.ITEM_TOTEM_USE, 0.8F, 2F, curLoc);
@@ -220,11 +210,11 @@ public class TotemManager implements Listener {
             }
         }.runTaskTimer(plugin, 1, 20)); // Start 1 tick later to make sure its not immediately cancelled due to movement or something
     }
-    
+
     private Material getGround(Location location) {
         return location.clone().add(0, -1, 0).getBlock().getType();
     }
-    
+
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
         // Check pending tp set first for better performance
@@ -232,12 +222,12 @@ public class TotemManager implements Listener {
         if (!pendingTP.containsKey(p)) {
             return;
         }
-        
+
         if (e.getFrom().distance(e.getTo()) > 0.1) {
             removePlayer(e.getPlayer(), "you moved");
         }
     }
-    
+
     // Keep death totems on death
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
@@ -248,33 +238,33 @@ public class TotemManager implements Listener {
             if (id == null) {
                 continue;
             }
-            
+
             if (isType(id, TotemType.DEATH)) {
                 drops.remove(i);
                 e.getItemsToKeep().add(i);
             }
         }
     }
-    
+
     // Do not allow totems to resurrect players
     @EventHandler(ignoreCancelled = true)
     public void onTotem(EntityResurrectEvent e) {
         if (e.getEntityType() != EntityType.PLAYER) {
             return;
         }
-        
+
         EquipmentSlot hand = e.getHand();
         if (hand == null) {
             return;
         }
-        
+
         Player p = (Player) e.getEntity();
         ItemStack tot = p.getInventory().getItem(hand);
         if (Utils.getItemID(tot, totemKey) != null) {
             e.setCancelled(true);
         }
     }
-    
+
     // Handle totem right-clicks and teleportations
     @EventHandler
     public void onClick(PlayerInteractEvent e) {
@@ -287,7 +277,7 @@ public class TotemManager implements Listener {
         if (totid == null || isType(totid, TotemType.UNSET)) {
             return;
         }
-        
+
         // KINGDOM HOME TELEPORT
         Player player = e.getPlayer();
         EquipmentSlot hand = e.getHand();
@@ -297,19 +287,19 @@ public class TotemManager implements Listener {
                 msg(player, "&cYou do not have a Kingdom!");
                 return;
             }
-            
+
             ImmutableLocation loc = kp.getKingdom().getHome();
             if (loc == null) {
                 msg(player, "&cYour kingdom does not have a valid home!");
                 return;
             }
-            
+
             World w = Bukkit.getWorld(loc.getWorld().getName());
             Location tpLoc = new Location(w, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
             initiateTeleportation(player, hand, totem, tpLoc);
             return;
         }
-        
+
         // REGULAR HOME TELEPORT
         if (isType(totid, TotemType.HOME)) {
             Location loc = player.getRespawnLocation();
@@ -317,11 +307,11 @@ public class TotemManager implements Listener {
                 msg(player, "&cYou do not have a valid respawn location!");
                 return;
             }
-            
+
             initiateTeleportation(player, hand, totem, loc);
             return;
         }
-        
+
         // LAST DEATH TELEPORT
         if (isType(totid, TotemType.DEATH)) {
             int deathTimeout = 20 * 300; // 5 minutes in ticks
@@ -331,7 +321,7 @@ public class TotemManager implements Listener {
                 msg(player, "&cYou have not died within the last 5 minutes!");
                 return;
             }
-            
+
             initiateTeleportation(player, hand, totem, loc);
             return;
         }
@@ -342,7 +332,7 @@ public class TotemManager implements Listener {
             Bukkit.getLogger().warning("Invalid totem detected. Item: " + totem);
             return;
         }
-        
+
         // LODESTONE TELEPORT
         if (isType(args[0], TotemType.LODESTONE)) {
             // Reset totem to unset if lodestone no longer exists.
@@ -351,11 +341,11 @@ public class TotemManager implements Listener {
                 msg(player, "&cThat lodestone no longer exists :(");
                 return;
             }
-            
+
             initiateTeleportation(player, hand, totem, loc.toCenterLocation().add(0, 0.5, 0));
             return;
         }
-        
+
         // PLAYER TELEPORT
         if (isType(args[0], TotemType.PLAYER)) {
             Player other = Bukkit.getPlayer(args[1]);
@@ -363,21 +353,21 @@ public class TotemManager implements Listener {
                 msg(player, "&cThat player is not online!");
                 return;
             }
-            
+
             if (other.equals(player)) {
                 return;
             }
-            
+
             if (pendingTP.containsKey(player)) {
                 return;
             }
-            
+
             String otherName = Utils.toPlain(other.displayName());
             if (pendingAccept.contains(player)) {
                 msg(player, "&bRequest to &f" + otherName + " &bstill pending...");
                 return;
             }
-            
+
             pendingAccept.add(player);
             msg(player, "&bSent a teleportation request to &f" + otherName + "&b...");
             String requesterName = Utils.toPlain(player.displayName());
@@ -389,12 +379,12 @@ public class TotemManager implements Listener {
                 if (!player.isOnline()) {
                     return;
                 }
-                
+
                 if (result == null || !result) {
                     msg(player, "&cYour request was not accepted.");
                     return;
                 }
-                
+
                 ItemStack curItem = player.getInventory().getItem(hand);
                 if (!curItem.isSimilar(totem)) {
                     msg(player, "&cTeleportation cancelled because you changed items.");
@@ -408,16 +398,16 @@ public class TotemManager implements Listener {
             });
             return;
         }
-        
+
         msg(player, "&cYour totem is invalid! Please contact an administrator.");
         Bukkit.getLogger().warning("Invalid totem detected. Item: " + totem);
     }
-    
+
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
         removePlayer(e.getPlayer(), null);
     }
-    
+
     // Handle shapeless totem recipes. The recipes added to RecipeManager are only for display in /recipes,
     // the actual recipes are handled here for different bed types, compass/book meta, and creating totems
     // from any other totem.
@@ -425,19 +415,19 @@ public class TotemManager implements Listener {
     public void onCraft(PrepareItemCraftEvent e) {
         CraftingInventory ci = e.getInventory();
         List<ItemStack> curItems = new ArrayList<>();
-        
+
         // Add all non-null items in grid to a list to use for later.
         for (ItemStack item : ci.getMatrix()) {
             if (item != null) {
                 curItems.add(item);
             }
         }
-        
+
         // Must only have 2 ingredients
         if (curItems.size() != 2) {
             return;
         }
-        
+
         // Must have a totem and another item
         ItemStack other = null;
         ItemStack curTotem = null;
@@ -448,12 +438,12 @@ public class TotemManager implements Listener {
                 curTotem = item;
             }
         }
-        
+
         // curTotem being null means no totem was found
         if (curTotem == null) {
             return;
         }
-        
+
         // If other is still null, we have combined two valid totems.
         // Check for totem duplication recipe
         if (other == null) {
@@ -469,36 +459,36 @@ public class TotemManager implements Listener {
                     toDupe = tot;
                 }
             }
-            
+
             if (toDupe == null || other == null) {
                 return;
             }
-            
+
             ItemStack result = toDupe.clone();
             result.setAmount(2);
             ci.setResult(result);
             return;
         }
-        
+
         String mat = other.getType().toString();
         if (mat.contains("_BED")) {
             setResult(ci, curTotem, getTotem(TotemType.KHOME));
             return;
         }
-        
+
         if (mat.equals("COMPASS")) {
             CompassMeta cmeta = (CompassMeta) other.getItemMeta();
             if (!cmeta.hasLodestone()) {
                 setResult(ci, curTotem, getTotem(TotemType.HOME));
                 return;
             }
-            
+
             Location lodestone = cmeta.getLodestone();
             if (lodestone == null) {
                 ci.setResult(null);
                 return;
             }
-            
+
             ItemStack ltot = getTotem(TotemType.LODESTONE);
             String lodeloc = locToString(lodestone);
             String totname = totemSec.getString("lodestone.set-name").replace("%location%", lodeloc);
@@ -509,12 +499,12 @@ public class TotemManager implements Listener {
             setResult(ci, curTotem, ltot);
             return;
         }
-        
+
         if (mat.equals("CALIBRATED_SCULK_SENSOR")) {
             setResult(ci, curTotem, getTotem(TotemType.DEATH));
             return;
         }
-        
+
         if (mat.equals("WRITTEN_BOOK")) {
             // Apparently if a book meta does NOT have generation, then it must be original
             BookMeta bmeta = (BookMeta) other.getItemMeta();
@@ -522,7 +512,7 @@ public class TotemManager implements Listener {
                 ci.setResult(null);
                 return;
             }
-            
+
             String player = bmeta.getAuthor();
             ItemStack btot = getTotem(TotemType.PLAYER);
             ItemMeta tmeta = btot.getItemMeta();
@@ -534,7 +524,7 @@ public class TotemManager implements Listener {
             return;
         }
     }
-    
+
     // Unstack stacked totems from duplication
     @EventHandler
     public void onClick(InventoryClickEvent e) {
@@ -543,19 +533,19 @@ public class TotemManager implements Listener {
         if (inv == null) {
             return;
         }
-        
+
         if (!(inv.getType() == InventoryType.WORKBENCH || inv.getType() == InventoryType.CRAFTING)) {
             return;
         }
-        
+
         if (e.getSlotType() != SlotType.RESULT) {
             return;
         }
-        
+
         if (e.getCurrentItem() == null) {
             return;
         }
-        
+
         ItemStack i = e.getCurrentItem().clone();
         if (i.getType() != Material.TOTEM_OF_UNDYING || i.getAmount() <= 1) {
             return;
@@ -563,7 +553,7 @@ public class TotemManager implements Listener {
 
         InventoryAction action = e.getAction();
         if (!(action == InventoryAction.HOTBAR_MOVE_AND_READD || action == InventoryAction.MOVE_TO_OTHER_INVENTORY ||
-              action == InventoryAction.HOTBAR_SWAP)) {
+                action == InventoryAction.HOTBAR_SWAP)) {
             return;
         }
 
@@ -573,13 +563,13 @@ public class TotemManager implements Listener {
                 if (item == null || !item.equals(i)) {
                     continue;
                 }
-                
+
                 addOrDropItem(item, p);
                 return;
             }
         });
     }
-    
+
     // Unstack stacked totems on pickup
     @EventHandler
     public void onPickup(EntityPickupItemEvent e) {
@@ -587,15 +577,15 @@ public class TotemManager implements Listener {
         if (i.getType() != Material.TOTEM_OF_UNDYING || i.getAmount() <= 1) {
             return;
         }
-        
+
         if (e.getEntityType() != EntityType.PLAYER) {
             return;
         }
-        
+
         addOrDropItem(i, (Player) e.getEntity());
         e.getItem().setItemStack(i);
     }
-    
+
     // Sets the crafting inventory result to the specified item, unless the given
     // curTotem is already the same as the result. Requires that curTotem and nTotem
     // both have a totem tag
@@ -606,14 +596,14 @@ public class TotemManager implements Listener {
             ci.setResult(nTotem);
         }
     }
-    
+
     // Add a totem to inventory, dropping if full
     private void addOrDropItem(ItemStack totem, Player p) {
         // Set initial stack size to 1
         ItemStack extra = totem.clone();
         extra.setAmount(extra.getAmount() - 1);
         totem.setAmount(1);
-        
+
         // Add extras as singular stacks back to inv
         List<ItemStack> extras = new ArrayList<>();
         for (int i = 0; i < extra.getAmount(); i++) {
@@ -622,36 +612,36 @@ public class TotemManager implements Listener {
             Map<Integer, ItemStack> notFit = p.getInventory().addItem(cur);
             extras.addAll(notFit.values());
         }
-        
+
         if (extras.isEmpty()) {
             return;
         }
-        
+
         // Leftovers are dropped
         extras.forEach(i -> p.getWorld().dropItem(p.getLocation(), i));
     }
-    
+
     private boolean isType(String s, TotemType type) {
         return s.equals(type.toString());
     }
-    
+
     private ItemStack getTotem(TotemType type) {
         return im.getItem(TOTEM_INDICATOR + "." + type);
     }
-    
+
     // Requires a non-null location
     private String locToString(Location loc) {
-        return loc.getWorld().getName() + ", " + loc.getBlockX() + ", " + 
+        return loc.getWorld().getName() + ", " + loc.getBlockX() + ", " +
                 loc.getBlockY() + ", " + loc.getBlockZ();
     }
-    
+
     // Requires that s be a valid string produced from locToString
     private Location stringToLoc(String s) {
         String[] args = s.split(", ");
-        return new Location(Bukkit.getWorld(args[0]), NumberUtils.toInt(args[1]), 
+        return new Location(Bukkit.getWorld(args[0]), NumberUtils.toInt(args[1]),
                 NumberUtils.toInt(args[2]), NumberUtils.toInt(args[3]));
     }
-    
+
     private void msg(Player p, String s) {
         if (s.indexOf("&c") == 0) {
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1F, 1F);

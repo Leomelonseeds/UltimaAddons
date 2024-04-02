@@ -1,12 +1,25 @@
 patterns:
   - type: stat
-    stat: wisdom
-    value: 1
-    pattern:
-      interval: 1
-  - type: stat
-    stat: luck
+    stat: health
     value: 1
     pattern:
       interval: 2
+  - type: stat
+    stat: speed
+    value: 1
+    pattern:
+      start: 5
+      interval: 5
 levels:
+  40:
+    - type: command
+      executor: console
+      command: say tag unlock here
+  35:
+    - type: command
+      executor: console
+      command: say particle unlock here
+  25:
+    - type: command
+      executor: console
+      command: say permission unlock for recipe here
