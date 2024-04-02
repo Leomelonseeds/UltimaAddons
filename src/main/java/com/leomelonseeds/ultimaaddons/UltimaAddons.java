@@ -1,7 +1,8 @@
 package com.leomelonseeds.ultimaaddons;
 
+import co.aikar.commands.PaperCommandManager;
 import com.leomelonseeds.ultimaaddons.ability.ae.*;
-import com.leomelonseeds.ultimaaddons.commands.BaseCommand;
+import com.leomelonseeds.ultimaaddons.commands.CommandManager;
 import com.leomelonseeds.ultimaaddons.data.Load;
 import com.leomelonseeds.ultimaaddons.data.Save;
 import com.leomelonseeds.ultimaaddons.data.file.ConfigFile;
@@ -41,7 +42,7 @@ public class UltimaAddons extends JavaPlugin {
     public static NamespacedKey duraKey;
 
     private static UltimaAddons plugin;
-
+    private PaperCommandManager cmdManager;
     private ParryListener parryListener;
     private LinkManager linkManager;
     private RegionManager regionManager;
@@ -67,7 +68,8 @@ public class UltimaAddons extends JavaPlugin {
         configFile = new ConfigFile();
 
         // Register commands
-        new BaseCommand();
+        cmdManager = new PaperCommandManager(this);
+        new CommandManager();
 
         // Define kingdoms namespaces
         lckh = new StandardKingdomMetadataHandler(new Namespace("UltimaAddons", "LCK")); // Last challenged kingdom, Last challenged date
@@ -129,6 +131,10 @@ public class UltimaAddons extends JavaPlugin {
 
     public ItemManager getItems() {
         return itemManager;
+    }
+
+    public PaperCommandManager getCommandManager() {
+        return cmdManager;
     }
 
     public LinkManager getSKLinker() {

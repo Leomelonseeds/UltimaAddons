@@ -1,75 +1,67 @@
-package com.leomelonseeds.ultimaaddons.commands.ua;
+package com.leomelonseeds.ultimaaddons.commands;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import org.bukkit.command.CommandSender;
+import co.aikar.commands.BaseCommand;
+import co.aikar.commands.annotation.*;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.invs.ChallengeInv;
+import com.leomelonseeds.ultimaaddons.utils.ChatConfirm;
+import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.group.model.relationships.KingdomRelation;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.constants.player.StandardKingdomPermission;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.commands.Argument;
-import com.leomelonseeds.ultimaaddons.commands.Command;
-import com.leomelonseeds.ultimaaddons.invs.ChallengeInv;
-import com.leomelonseeds.ultimaaddons.utils.ChatConfirm;
-import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
+import java.util.Map;
+import java.util.UUID;
 
-public class UAChallenge extends Command {
-    public UAChallenge(String name, List<String> aliases, String permission, String description, List<? extends Argument> arguments) {
-        super(name, aliases, permission, description, arguments);
+@CommandAlias("uchallenge")
+public class UAChallenge extends BaseCommand {
+    private final UltimaAddons plugin;
+
+    public UAChallenge(UltimaAddons plugin) {
+        this.plugin = plugin;
     }
 
-    @Override
-    public boolean hasInvalidArgs(@NotNull CommandSender sender, @NotNull String[] args) {
-        if (args.length != 1) {
-            CommandUtils.sendErrorMsg(sender, "");
-            return true;
-        }
-
-        if (!(sender instanceof Player player)) {
-            CommandUtils.sendErrorMsg(sender, "Bruh stop tryna use player commands in the console smhsmh");
-            return true;
-        }
-
+    @Default
+    @CommandPermission("ua.challenge")
+    @Description("Challenge another Kingdom to war")
+    @Syntax("Usage: /uchallenge <kingdom>")
+    public void onChallenge(Player player, String targetKingdom) {
         // Challenger must have a kingdom
         KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(player);
         Kingdom attacker = kp.getKingdom();
         if (attacker == null) {
-            CommandUtils.sendErrorMsg(sender, "You must be in a kingdom to use this!");
-            return true;
+            CommandUtils.sendErrorMsg(player, "You must be in a kingdom to use this!");
+            return;
         }
 
         // Cannot be pacifist
         if (attacker.isPacifist()) {
-            CommandUtils.sendErrorMsg(sender, "Your kingdom is pacifist, and cannot attack other kingdoms!");
-            return true;
+            CommandUtils.sendErrorMsg(player, "Your kingdom is pacifist, and cannot attack other kingdoms!");
+            return;
         }
 
         if (!kp.hasPermission(StandardKingdomPermission.INVADE)) {
-            CommandUtils.sendErrorMsg(sender, "Your kingdom rank does not allow you to invade other kingdoms!");
-            return true;
+            CommandUtils.sendErrorMsg(player, "Your kingdom rank does not allow you to invade other kingdoms!");
+            return;
         }
 
         // Attacker cannot be new
         long date = System.currentTimeMillis();
         if (Utils.isNew(attacker)) {
-            CommandUtils.sendErrorMsg(sender, "Your kingdom is new! You will have to wait &e" + Utils.timeUntilNotNew(attacker) +
+            CommandUtils.sendErrorMsg(player, "Your kingdom is new! You will have to wait &e" + Utils.timeUntilNotNew(attacker) +
                     " &7before you can challenge another kingdom.");
-            return true;
+            return;
         }
 
         // Attacker must have a nexus
         if (attacker.getNexus() == null) {
-            CommandUtils.sendErrorMsg(sender, "You must place your nexus using &a/k nexus &cbefore you can declare war!");
-            return true;
+            CommandUtils.sendErrorMsg(player, "You must place your nexus using &a/k nexus &cbefore you can declare war!");
+            return;
         }
-        
+
         // Kingdom must not already have challenged a kingdom
         String lastChallenge = Utils.getLastChallenge(attacker);
         if (lastChallenge != null) {
@@ -80,55 +72,56 @@ public class UAChallenge extends Command {
 
             // A challenge is pending
             if (cur != null && lcd > date) {
-                CommandUtils.sendErrorMsg(sender, "Your kingdom has already challenged &e" + cur.getName() +
+                CommandUtils.sendErrorMsg(player, "Your kingdom has already challenged &e" + cur.getName() +
                         "&7! War starts in &e" + Utils.formatDate(lcd - date));
-                return true;
+                return;
             }
 
             // After invasion cooldown
             if (cooldown > date) {
-                CommandUtils.sendErrorMsg(sender, "You must wait &e" + Utils.formatDate(cooldown - date) +
+                CommandUtils.sendErrorMsg(player, "You must wait &e" + Utils.formatDate(cooldown - date) +
                         " &7before you can challenge again.");
-                return true;
+                return;
             }
         }
 
-        // Challenged kingdom must exist (handled by KingdomArgument)
-        if (super.hasInvalidArgs(sender, args))
-            return true;
-        Kingdom target = Kingdom.getKingdom(args[0]);
+        Kingdom target = Kingdom.getKingdom(targetKingdom);
+        if (target == null) {
+            CommandUtils.sendErrorMsg(player, "The kingdom you challenged does not exist!");
+            return;
+        }
 
         // Must be a different kingdom
         if (target.getId().equals(attacker.getId())) {
-            CommandUtils.sendErrorMsg(sender, "Bruh you can't start a civil war here...");
-            return true;
+            CommandUtils.sendErrorMsg(player, "Bruh you can't start a civil war here...");
+            return;
         }
 
         // Cannot be pacifist
         if (target.isPacifist()) {
-            CommandUtils.sendErrorMsg(sender, "You cannot attack pacifist kingdoms!");
-            return true;
+            CommandUtils.sendErrorMsg(player, "You cannot attack pacifist kingdoms!");
+            return;
         }
 
         // Attacker cannot be new
         if (Utils.isNew(target)) {
-            CommandUtils.sendErrorMsg(sender, "That kingdom is new! You will have to wait &e" + Utils.timeUntilNotNew(target) +
+            CommandUtils.sendErrorMsg(player, "That kingdom is new! You will have to wait &e" + Utils.timeUntilNotNew(target) +
                     " &7before you can challenge them.");
-            return true;
+            return;
         }
 
         // Must not be allies or truced
         KingdomRelation relation = attacker.getRelationWith(target);
         if (relation == KingdomRelation.ALLY || relation == KingdomRelation.TRUCE) {
-            CommandUtils.sendErrorMsg(sender, "You cannot attack allied or truced kingdoms!");
-            return true;
+            CommandUtils.sendErrorMsg(player, "You cannot attack allied or truced kingdoms!");
+            return;
         }
 
         // Cannot have a shield
         if (target.hasShield()) {
-            CommandUtils.sendErrorMsg(sender, "The kingdom you are trying to attack is shielded for &e" +
+            CommandUtils.sendErrorMsg(player, "The kingdom you are trying to attack is shielded for &e" +
                     Utils.formatDate(target.getShieldTimeLeft()));
-            return true;
+            return;
         }
 
         // Challenger kingdom must not have been challenged by the target kingdom already
@@ -136,20 +129,20 @@ public class UAChallenge extends Command {
         if (challenges.containsKey(target.getId())) {
             long time = challenges.get(target.getId());
             if (time > date) {
-                CommandUtils.sendErrorMsg(sender, "&e" + target.getName() + " &7has already challenged your kingdom! " +
+                CommandUtils.sendErrorMsg(player, "&e" + target.getName() + " &7has already challenged your kingdom! " +
                         "War starts in &e" + Utils.formatDate(time - date));
-                return true;
+                return;
             }
 
             if (time + Utils.getWarTime() > date) {
-                CommandUtils.sendErrorMsg(sender, "Your war with &e" + target.getName() + " &7is still ongoing!");
-                return true;
+                CommandUtils.sendErrorMsg(player, "Your war with &e" + target.getName() + " &7is still ongoing!");
+                return;
             }
         }
 
         // Remove kingdom shield if they have one
         if (attacker.hasShield()) {
-            CommandUtils.sendMsg(sender, "&cYour kingdom is shielded for &e" + Utils.formatDate(attacker.getShieldTimeLeft()) +
+            CommandUtils.sendMsg(player, "&cYour kingdom is shielded for &e" + Utils.formatDate(attacker.getShieldTimeLeft()) +
                     "&c. Challenging another kingdom will remove this shield, and you will have to wait &e" +
                     Utils.formatDate(Utils.getNextShield(attacker) - date) + " &cbefore you can buy another one. " +
                     "Please type 'confirm' in the chat within 30 seconds to continue.");
@@ -160,32 +153,26 @@ public class UAChallenge extends Command {
                 attacker.deactivateShield();
             });
         }
-        return attacker.hasShield();
-    }
 
-    @Override
-    public void execute(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command cmd, @NotNull String name, @NotNull String[] args) {
-        Player player = (Player) sender;
-        KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(player);
-        Kingdom attacker = kp.getKingdom();
-        Kingdom target = Kingdom.getKingdom(args[0]);
+        if (attacker.hasShield())
+            return;
 
         CommandUtils.sendMsg(player, "");
         CommandUtils.sendMsg(player, "&cYou are sending a declaration of war to &e" + target.getName() + "&c. After a chosen amount of time, "
                 + "both you and the enemy will have &62 hours &cto invade each other's lands. You can only challenge 1 Kingdom at a time, "
                 + "and after the war you will need to wait &61 day &cbefore challenging another Kingdom.");
-        
+
         Utils.schedule(40, () -> {
             CommandUtils.sendMsg(player, "");
             CommandUtils.sendMsg(player, "&cAdditionally, invading each enemy chunk will cost resource points depending on how many lands you have. "
                     + "Currently, it is estimated that each invasion will cost &e" + attacker.getLands().size() + " &cresource points.");
         });
-        
+
         Utils.schedule(80, () -> {
             CommandUtils.sendMsg(player, "");
             CommandUtils.sendMsg(player, "&cFinally, both Kingdoms &4cannot &cclaim/unclaim lands or move their nexus during the preparation period.");
         });
-        
+
         Utils.schedule(120, () -> {
             CommandUtils.sendMsg(player, "");
             CommandUtils.sendMsg(player, "&cPlease type 'confirm' in the chat within 1 minute to continue.");
