@@ -1,7 +1,10 @@
 package com.leomelonseeds.ultimaaddons.commands.ua;
 
-import java.util.List;
-
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.commands.Argument;
+import com.leomelonseeds.ultimaaddons.commands.Command;
+import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -10,11 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.commands.Argument;
-import com.leomelonseeds.ultimaaddons.commands.Command;
-import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
+import java.util.List;
 
 public class UAGive extends Command {
 
@@ -40,8 +39,9 @@ public class UAGive extends Command {
         assert i != null;
         if (args.length == 3)
             i.setAmount(NumberUtils.toInt(args[2], 1));
-        p.getInventory().addItem(i);
-        
+        // Add item to inventory, drop if anything is returned
+        p.getInventory().addItem(i).forEach((index, item) -> p.getWorld().dropItem(p.getLocation(), item));
+
         String iname = i.getType().toString();
         ItemMeta meta = i.getItemMeta();
         if (meta != null && meta.hasDisplayName()) {
