@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -89,7 +90,7 @@ public class UAGive extends BaseCommand {
     }
 
     private String[] checkCoordinates(CommandSender sender, String coordinates) {
-        List<String> split = Arrays.asList(coordinates.split(",", 4));
+        List<String> split = new ArrayList<>(Arrays.asList(coordinates.split(",", 4)));
         World world;
         if (sender instanceof Player && split.size() == 3) {
             world = ((Player) sender).getWorld();
