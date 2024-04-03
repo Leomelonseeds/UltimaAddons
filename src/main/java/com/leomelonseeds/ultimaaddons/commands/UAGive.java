@@ -47,13 +47,13 @@ public class UAGive extends BaseCommand {
         ItemMeta meta = i.getItemMeta();
         // Check additional args for player & lodestone totems
         String id = Utils.getItemID(i, TotemManager.totemKey);
-        if (id.equals(TotemType.PLAYER.toString()) && context != null) {
+        if (id != null && id.equals(TotemType.PLAYER.toString()) && context != null) {
                 ConfigurationSection totemSec = UltimaAddons.getPlugin().getItems().getTotems().getTotemSec();
                 String totemName = Objects.requireNonNull(totemSec.getString("player.set-name")).replace("%player%", context);
                 meta.displayName(Utils.toComponent(totemName));
                 meta.getPersistentDataContainer().set(TotemManager.totemKey, PersistentDataType.STRING, "player:" + context);
                 i.setItemMeta(meta);
-        } else if (id.equals(TotemType.LODESTONE.toString()) && context != null) {
+        } else if (id != null && id.equals(TotemType.LODESTONE.toString()) && context != null) {
             String[] coordinates = checkCoordinates(sender, context);
             if (coordinates != null) {
                 World world = plugin.getServer().getWorld(coordinates[0]);
