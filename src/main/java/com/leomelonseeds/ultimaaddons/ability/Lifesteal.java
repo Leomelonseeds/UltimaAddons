@@ -1,6 +1,5 @@
 package com.leomelonseeds.ultimaaddons.ability;
 
-import com.leomelonseeds.ultimaaddons.utils.Utils;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
@@ -9,6 +8,8 @@ import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class Lifesteal extends Ability {
 
@@ -25,11 +26,11 @@ public class Lifesteal extends Ability {
             return false;
         }
 
-        if (!(e instanceof EntityDamageByEntityEvent)) {
+        if (!(e instanceof EntityDamageByEntityEvent edee)) {
             return false;
         }
 
-        if (!((EntityDamageByEntityEvent) e).isCritical()) {
+        if (!edee.isCritical()) {
             return false;
         }
 

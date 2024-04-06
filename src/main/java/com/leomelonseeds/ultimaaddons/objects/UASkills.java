@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons.aurelium;
+package com.leomelonseeds.ultimaaddons.objects;
 
 import dev.aurelium.auraskills.api.item.ItemContext;
 import dev.aurelium.auraskills.api.registry.NamespacedId;

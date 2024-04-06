@@ -1,15 +1,16 @@
 package com.leomelonseeds.ultimaaddons.handlers.aurelium;
 
+import java.io.File;
+import java.nio.file.FileSystems;
+
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.aurelium.UASkills;
 import com.leomelonseeds.ultimaaddons.data.file.Data;
+import com.leomelonseeds.ultimaaddons.objects.UASkills;
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+
 import dev.aurelium.auraskills.api.AuraSkillsApi;
 import dev.aurelium.auraskills.api.registry.NamespacedRegistry;
 import dev.aurelium.auraskills.api.skill.CustomSkill;
-
-import java.io.File;
-import java.nio.file.FileSystems;
 
 public class AureliumRegistry {
     private File aureliumFolder;
