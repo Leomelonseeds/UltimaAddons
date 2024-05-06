@@ -1,12 +1,24 @@
 package com.leomelonseeds.ultimaaddons;
 
-import co.aikar.commands.PaperCommandManager;
-import com.leomelonseeds.ultimaaddons.ability.ae.*;
+import org.bukkit.NamespacedKey;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.kingdoms.constants.metadata.KingdomMetadataHandler;
+import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
+import org.kingdoms.constants.namespace.Namespace;
+
+import com.leomelonseeds.ultimaaddons.ability.ae.CaptureEffect;
+import com.leomelonseeds.ultimaaddons.ability.ae.CooldownEffect;
+import com.leomelonseeds.ultimaaddons.ability.ae.RecuperateEffect;
+import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityArmor;
+import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityCurrentItem;
 import com.leomelonseeds.ultimaaddons.commands.CommandManager;
 import com.leomelonseeds.ultimaaddons.data.Load;
 import com.leomelonseeds.ultimaaddons.data.Save;
 import com.leomelonseeds.ultimaaddons.data.file.ConfigFile;
 import com.leomelonseeds.ultimaaddons.data.file.Data;
+import com.leomelonseeds.ultimaaddons.handlers.LootHandler;
 import com.leomelonseeds.ultimaaddons.handlers.MiscListener;
 import com.leomelonseeds.ultimaaddons.handlers.ParryListener;
 import com.leomelonseeds.ultimaaddons.handlers.aurelium.AureliumRegistry;
@@ -18,16 +30,11 @@ import com.leomelonseeds.ultimaaddons.handlers.shopkeeper.RegionManager;
 import com.leomelonseeds.ultimaaddons.handlers.shopkeeper.ShopkeeperListener;
 import com.leomelonseeds.ultimaaddons.invs.InventoryManager;
 import com.leomelonseeds.ultimaaddons.utils.UAPlaceholders;
+
+import co.aikar.commands.PaperCommandManager;
 import net.advancedplugins.ae.api.AEAPI;
 import net.advancedplugins.ae.impl.effects.effects.effects.AdvancedEffect;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.NamespacedKey;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.kingdoms.constants.metadata.KingdomMetadataHandler;
-import org.kingdoms.constants.metadata.StandardKingdomMetadataHandler;
-import org.kingdoms.constants.namespace.Namespace;
 
 
 public class UltimaAddons extends JavaPlugin {
@@ -107,6 +114,7 @@ public class UltimaAddons extends JavaPlugin {
         pm.registerEvents(itemManager.getTotems(), this);
         pm.registerEvents(new ShopkeeperListener(), this);
         pm.registerEvents(new MiscListener(), this);
+        pm.registerEvents(new LootHandler(), this);
         pm.registerEvents(parryListener, this);
 
         // Register and Load Data Files

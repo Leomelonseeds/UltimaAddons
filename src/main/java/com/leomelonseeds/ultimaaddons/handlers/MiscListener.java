@@ -21,28 +21,24 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.GrindstoneInventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.loot.Lootable;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEdit;
@@ -62,37 +58,6 @@ public class MiscListener implements Listener {
 
     private static Map<Player, String> msgs = new HashMap<>();
     private static Set<Player> elytraCancelling = new HashSet<>();
-    private static Set<Player> canBreak = new HashSet<>();
-    
-    @EventHandler
-    public void onLoot(LootGenerateEvent e) {
-        ItemManager items = UltimaAddons.getPlugin().getItems();
-        // List<ItemStack> loot = e.getLoot();
-        // loot.add(items.getItem("commondust"));
-    }
-    
-    // Stop players from breaking blocks with loot 
-    @EventHandler
-    public void onBreak(BlockBreakEvent e) {
-        if (!(e.getBlock().getState() instanceof Lootable lootable)) {
-            return;
-        }
-        
-        if (!lootable.hasLootTable()) {
-            return;
-        }
-        
-        Player player = e.getPlayer();
-        if (canBreak.remove(player)) {
-            return;
-        }
-        
-        e.setCancelled(true);
-        msg(player, "&cThis chest will regenerate its loot in the future! Please break it again if you are sure you want to do so.");
-        player.playSound(player, Sound.BLOCK_NOTE_BLOCK_BASS, 1F, 1F);
-        canBreak.add(player);
-        Utils.schedule(30 * 20, () -> canBreak.remove(player));
-    }
     
     // CREEPERSHOT (from UMW)
     @EventHandler
