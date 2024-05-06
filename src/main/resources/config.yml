@@ -15,6 +15,28 @@ challengegui:
     slot: 15
     days: 3
     
+loot:
+  common:
+    distance: 4096   # Max distance this loot will generate at
+    chance: 10       # Chance that any loot will generate at all
+    maxdust: 5       # Max amount of this rarity dust that will generate
+  uncommon:
+    distance: 5120
+    chance: 50       # Chance that the lower tier will turn into this tier (total chance = lower tier * this)
+    maxdust: 4
+  rare:
+    distance: 6144
+    chance: 50
+    maxdust: 3
+  epic:
+    distance: 7168
+    chance: 50
+    maxdust: 2
+  legendary:
+    distance: 8192
+    chance: 50
+    maxdust: 2
+    
 introgui:
   kingdomshandbook:
     material: WRITTEN_BOOK
@@ -211,7 +233,7 @@ capture-exclude:
 parry-cooldown: 20
 
 # Time between when a player clicks and is attacked, that parry works on in ticks
-parry-duration: 2
+parry-duration: 3
 
 items:
   obsidianingot:
@@ -717,7 +739,7 @@ items:
       - "&7The only firework capable of"
       - "&7boosting elytra flight. Boost"
       - "&7is tripled while in the end."
-    custom-mode-ldata: 48753
+    custom-model-data: 48753
     glow: true
     update: 1
   introbook:
@@ -752,5 +774,30 @@ items:
     lore:
       - "&7This recipe allows you to duplicate"
       - "&7any of your existing totems."
-      
+  commondust:
+    material: LIGHT_GRAY_DYE
+    name: "&7Common Enchanted Dust"
+    glow: true
+    custom-model-data: 48754
+  uncommondust:
+    material: LIME_DYE
+    name: "&aUncommon Enchanted Dust"
+    glow: true
+    custom-model-data: 48755
+  raredust:
+    material: BLUE_DYE
+    name: "&9Rare Enchanted Dust"
+    glow: true
+    custom-model-data: 48756
+  epicdust:
+    material: PURPLE_DYE
+    name: "&5Epic Enchanted Dust"
+    glow: true
+    custom-model-data: 48757
+  legendarydust:
+    material: ORANGE_DYE
+    name: "&6Legendary Enchanted Dust"
+    glow: true
+    custom-model-data: 48758
+    
     

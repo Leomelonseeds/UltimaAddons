@@ -1,14 +1,16 @@
 package com.leomelonseeds.ultimaaddons.commands;
 
-import co.aikar.commands.PaperCommandManager;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
+
 import com.google.common.collect.ImmutableList;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.objects.RotatingShopkeeper;
 import com.nisovin.shopkeepers.api.ShopkeepersPlugin;
 import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
 import com.nisovin.shopkeepers.api.shopkeeper.admin.regular.RegularAdminShopkeeper;
-import org.bukkit.Location;
-import org.bukkit.block.Block;
+
+import co.aikar.commands.PaperCommandManager;
 
 public class CommandManager {
     private UltimaAddons plugin = UltimaAddons.getPlugin();
@@ -36,8 +38,8 @@ public class CommandManager {
         cmdManager.registerCommand(new UAReload(plugin));
         cmdManager.registerCommand(new UAGive(plugin));
         cmdManager.registerCommand(new UARecipes(plugin));
-        cmdManager.registerCommand(new UAIntro(plugin));
-        cmdManager.registerCommand(new UAChallenge(plugin));
+        cmdManager.registerCommand(new UAIntro());
+        cmdManager.registerCommand(new UAChallenge());
         cmdManager.registerCommand(new UASk(plugin));
     }
 }

@@ -48,8 +48,8 @@ public class UAPlaceholders extends PlaceholderExpansion {
                 return UltimaAddons.getPlugin().getParry().canParry(player.getUniqueId()) + "";
             }
             
-            if (params.equals("yspeed")) {
-                return op.getVelocity().getY() + "";
+            if (params.equals("falldistance")) {
+                return op.getFallDistance() + "";
             }
         } while (false);
         
