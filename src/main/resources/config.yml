@@ -15,15 +15,17 @@ challengegui:
     slot: 15
     days: 3
     
+# Do not change the order of this section
+# However the section titles don't matter
 loot:
   common:
     distance: 4096   # Max distance this loot will generate at
-    chance: 10       # Chance that any loot will generate at all
-    maxdust: 5       # Max amount of this rarity dust that will generate
+    chance: 10       # Chance for each dust to generate
+    maxdust: 1       # Max amount of any dust that will generate
   uncommon:
     distance: 5120
     chance: 50       # Chance that the lower tier will turn into this tier (total chance = lower tier * this)
-    maxdust: 4
+    maxdust: 2
   rare:
     distance: 6144
     chance: 50
@@ -31,11 +33,11 @@ loot:
   epic:
     distance: 7168
     chance: 50
-    maxdust: 2
+    maxdust: 4
   legendary:
-    distance: 8192
+    distance: 10000
     chance: 50
-    maxdust: 2
+    maxdust: 5
     
 introgui:
   kingdomshandbook:

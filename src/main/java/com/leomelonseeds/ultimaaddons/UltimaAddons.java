@@ -60,6 +60,7 @@ public class UltimaAddons extends JavaPlugin {
     private Data regionsFile;
     private Economy econ;
     private AureliumRegistry aureliumRegistry;
+    private LootHandler lootHandler;
 
 
     public static UltimaAddons getPlugin() {
@@ -94,6 +95,7 @@ public class UltimaAddons extends JavaPlugin {
         regionManager = new RegionManager();
         invManager = new InventoryManager();
         itemManager = new ItemManager(this);
+        lootHandler = new LootHandler(this);
         parryListener = new ParryListener();
         UAUnclaimProcessor.register();
         new UAPlaceholders().register();
@@ -114,7 +116,7 @@ public class UltimaAddons extends JavaPlugin {
         pm.registerEvents(itemManager.getTotems(), this);
         pm.registerEvents(new ShopkeeperListener(), this);
         pm.registerEvents(new MiscListener(), this);
-        pm.registerEvents(new LootHandler(), this);
+        pm.registerEvents(lootHandler, this);
         pm.registerEvents(parryListener, this);
 
         // Register and Load Data Files
@@ -198,6 +200,7 @@ public class UltimaAddons extends JavaPlugin {
         getTradesFile().reload();
         getRegionsFile().reload();
         getSKLinker().clear();
+        lootHandler.reload();
         new Load();
     }
 

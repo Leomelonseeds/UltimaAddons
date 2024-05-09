@@ -8,7 +8,11 @@ import java.util.Random;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.World.Environment;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,18 +29,26 @@ import net.advancedplugins.ae.api.AEAPI;
 
 public class LootHandler implements Listener {
     
+    private UltimaAddons plugin;
+    private ConfigurationSection lootConfig;
     private Map<Integer, String> groups;
     private Set<Player> canBreak;
     
-    public LootHandler() {
-        this.canBreak = new HashSet<>();
+    public LootHandler(UltimaAddons plugin) {
         this.groups = Map.of(
-            1, "common",
-            2, "uncommon",
-            3, "rare",
-            4, "epic",
-            5, "legendary"
-        );
+                1, "common",
+                2, "uncommon",
+                3, "rare",
+                4, "epic",
+                5, "legendary"
+            );
+        this.canBreak = new HashSet<>();
+        this.plugin = plugin;
+        reload();
+    }
+    
+    public void reload() {
+        this.lootConfig = plugin.getConfig().getConfigurationSection("loot");
     }
     
     // Stop players from breaking blocks with loot 
@@ -66,34 +78,122 @@ public class LootHandler implements Listener {
     @EventHandler
     public void onLoot(LootGenerateEvent e) {
         ItemManager items = UltimaAddons.getPlugin().getItems();
-        // List<ItemStack> loot = e.getLoot();
-        // loot.add(items.getItem("commondust"));
+        List<ItemStack> loot = e.getLoot();
+        
+        // Make sure we are in overworld
+        Location loc = e.getLootContext().getLocation();
+        if (loc.getWorld().getEnvironment() != Environment.NORMAL) {
+            return;
+        }
+        
+        // Find location and get corresponding group
+        int dist = Math.max(Math.abs(loc.getBlockX()), Math.abs(loc.getBlockZ()));
+        int group = 1;
+        for (String key : lootConfig.getKeys(false)) {
+            if (!groups.containsKey(group)) {
+                Bukkit.getLogger().warning("No loot group was found for distance " + dist);
+                return;
+            }
+            
+            // Find first group such that the location is within bounds
+            if (dist < lootConfig.getInt(key + ".distance")) {
+                break;
+            }
+            
+            group++;
+        }
+        
+        Bukkit.getLogger().info("Determined group: " + group);
+        
+        // Generate dusts
+        String tier = groups.get(group);
+        int amt = new Random().nextInt(lootConfig.getInt(tier + ".maxdust") + 1);
+        for (int i = 0; i < amt; i++) {
+            int dustLvl = getMaxLevel(group);
+            if (dustLvl > 0) {
+                loot.add(items.getItem(groups.get(dustLvl) + "dust"));
+            }
+        }
+        
+        // Randomly enchant gear
+        if (group <= 1) {
+            return;
+        }
+        
+        for (ItemStack gear : loot) {
+            if (gear.getType().getMaxStackSize() > 1) {
+                continue;
+            }
+            
+            int enchLvl = getMaxLevel(group);
+            for (int i = enchLvl; i > 1; i--) {
+                if (randomlyEnchant(gear, i)) {
+                    break;
+                }
+            }
+        }
+    }
+    
+    /**
+     * Iterate through percentage chances and determine what level
+     * for a loot to generate at
+     * 
+     * @param max minimum 1
+     * @return
+     */
+    private int getMaxLevel(int max) {
+        Random rand = new Random();
+        int lvl = 0;
+        while (lvl < max) {
+            lvl++;
+            double chance = lootConfig.getInt(groups.get(lvl) + ".chance") / 100.0;
+            
+            // Keep going if RNG succeeds. Otherwise, return prev level
+            if (rand.nextDouble() < chance) {
+                continue;
+            }
+            
+            return lvl - 1;
+        }
+        
+        return lvl;
     }
     
     /**
      * Puts a random compatible enchantment of the rarity on the item.
-     * If no compatible enchantments are found, nothing happens
+     * If no compatible enchantments are found, nothing happens.
+     * If the item is an enchanted book, replaces with a random ench book of this group.
      * 
      * @param item
      * @param group
+     * @return true if item got enchanted
      */
-    private void randomlyEnchant(ItemStack item, int group) {
+    private boolean randomlyEnchant(ItemStack item, int group) {
+        Random rand = new Random();
+        List<String> available = AEAPI.getEnchantmentsByGroup(groups.get(group));
+        if (item.getType() == Material.ENCHANTED_BOOK) {
+            String enchant = available.get(rand.nextInt(available.size()));
+            int lvl = rand.nextInt(AEAPI.getHighestEnchantmentLevel(enchant)) + 1;
+            ItemStack book = AEAPI.createEnchantmentBook(enchant, lvl, 100, 0, null);
+            item.setItemMeta(book.getItemMeta());
+            return true;
+        }
+        
         List<String> compatible = new ArrayList<>();
-        for (String enchant : AEAPI.getEnchantmentsByGroup(groups.get(group))) {
+        for (String enchant : available) {
             if (AEAPI.getMaterialsForEnchantment(enchant).contains(item.getType().toString())) {
                 compatible.add(enchant);
             }
         }
         
-        Bukkit.getLogger().info("Compatible enchants found: " + compatible);
         if (compatible.isEmpty()) {
-            return;
+            return false;
         }
         
-        Random rand = new Random();
         String enchant = compatible.get(rand.nextInt(compatible.size()));
         int lvl = rand.nextInt(AEAPI.getHighestEnchantmentLevel(enchant)) + 1;
         AEAPI.applyEnchant(enchant, lvl, item);
+        return true;
     }
 
 }
