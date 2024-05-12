@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -79,31 +78,25 @@ public class LootHandler implements Listener {
     public void onLoot(LootGenerateEvent e) {
         ItemManager items = UltimaAddons.getPlugin().getItems();
         List<ItemStack> loot = e.getLoot();
-        
-        // Make sure we are in overworld
-        Location loc = e.getLootContext().getLocation();
-        if (loc.getWorld().getEnvironment() != Environment.NORMAL) {
-            return;
-        }
-        
+
         // Find location and get corresponding group
+        Location loc = e.getLootContext().getLocation();
         int dist = Math.max(Math.abs(loc.getBlockX()), Math.abs(loc.getBlockZ()));
+        int multiplier = loc.getWorld().getEnvironment() == Environment.NETHER ? 2 : 1;
         int group = 1;
         for (String key : lootConfig.getKeys(false)) {
             if (!groups.containsKey(group)) {
-                Bukkit.getLogger().warning("No loot group was found for distance " + dist);
                 return;
             }
             
             // Find first group such that the location is within bounds
-            if (dist < lootConfig.getInt(key + ".distance")) {
+            // If in nether, multiply coord by 2 to correspond to overworld
+            if (dist * multiplier < lootConfig.getInt(key + ".distance")) {
                 break;
             }
             
             group++;
         }
-        
-        Bukkit.getLogger().info("Determined group: " + group);
         
         // Generate dusts
         String tier = groups.get(group);
