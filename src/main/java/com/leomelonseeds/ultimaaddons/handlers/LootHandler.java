@@ -12,8 +12,10 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World.Environment;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.world.LootGenerateEvent;
@@ -24,6 +26,9 @@ import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
+import dev.aurelium.auraskills.api.AuraSkillsApi;
+import dev.aurelium.auraskills.api.trait.Traits;
+import dev.aurelium.auraskills.api.user.SkillsUser;
 import net.advancedplugins.ae.api.AEAPI;
 
 public class LootHandler implements Listener {
@@ -74,33 +79,72 @@ public class LootHandler implements Listener {
         Utils.schedule(30 * 20, () -> canBreak.remove(player));
     }
     
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void lootOres(BlockBreakEvent e) {
+        String type = e.getBlock().getType().toString();
+        if (!type.contains("ORE") || e.getExpToDrop() <= 0) {
+            return;
+        }
+        
+        double base;
+        String fullpath = "ores.chance." + type;
+        if (lootConfig.contains(fullpath)) {
+            base = lootConfig.getDouble(fullpath);
+        } else if (type.contains("DEEPSLATE_")) {
+            fullpath = fullpath.replace("DEEPSLATE_", "");
+            base = lootConfig.getDouble(fullpath, 0);
+        } else {
+            return;
+        }
+        
+        if (base <= 0) {
+            return;
+        }
+        
+        Location loc = e.getBlock().getLocation();
+        int group = getGroup(loc);
+        if (group == -1) {
+            return;
+        }
+
+
+        // Apply fortune buff
+        Player player = e.getPlayer();
+        ItemStack tool = player.getInventory().getItemInMainHand();
+        double fadd = lootConfig.getDouble("ores.fortune-add");
+        base += fadd * tool.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS);
+        
+        // Apply aurelium mining luck buff
+        AuraSkillsApi auraSkills = AuraSkillsApi.get();
+        SkillsUser user = auraSkills.getUser(player.getUniqueId());
+        double ladd = lootConfig.getDouble("ores.luck-add");
+        base += ladd * user.getEffectiveTraitLevel(Traits.MINING_LUCK);
+        
+        // Get final dust level and drop item
+        int dustLvl = getMaxLevel(group, base);
+        if (dustLvl <= 0) {
+            return;
+        }
+        
+        ItemManager items = UltimaAddons.getPlugin().getItems();
+        ItemStack toDrop = items.getItem(groups.get(dustLvl) + "dust");
+        loc.getWorld().dropItemNaturally(loc, toDrop);
+    }
+    
     @EventHandler
     public void onLoot(LootGenerateEvent e) {
         ItemManager items = UltimaAddons.getPlugin().getItems();
         List<ItemStack> loot = e.getLoot();
 
         // Find location and get corresponding group
-        Location loc = e.getLootContext().getLocation();
-        int dist = Math.max(Math.abs(loc.getBlockX()), Math.abs(loc.getBlockZ()));
-        int multiplier = loc.getWorld().getEnvironment() == Environment.NETHER ? 2 : 1;
-        int group = 1;
-        for (String key : lootConfig.getKeys(false)) {
-            if (!groups.containsKey(group)) {
-                return;
-            }
-            
-            // Find first group such that the location is within bounds
-            // If in nether, multiply coord by 2 to correspond to overworld
-            if (dist * multiplier < lootConfig.getInt(key + ".distance")) {
-                break;
-            }
-            
-            group++;
+        int group = getGroup(e.getLootContext().getLocation());
+        if (group == -1) {
+            return;
         }
         
         // Generate dusts
         String tier = groups.get(group);
-        int amt = new Random().nextInt(lootConfig.getInt(tier + ".maxdust") + 1);
+        int amt = new Random().nextInt(lootConfig.getInt("main." + tier + ".maxdust") + 1);
         for (int i = 0; i < amt; i++) {
             int dustLvl = getMaxLevel(group);
             if (dustLvl > 0) {
@@ -128,18 +172,57 @@ public class LootHandler implements Listener {
     }
     
     /**
+     * Given a location, check which rarity group it corresponds to
+     * 
+     * @param loc
+     * @return -1 if group not found
+     */
+    private int getGroup(Location loc) {
+        int dist = Math.max(Math.abs(loc.getBlockX()), Math.abs(loc.getBlockZ()));
+        int multiplier = loc.getWorld().getEnvironment() == Environment.NETHER ? 2 : 1;
+        ConfigurationSection groupConfig = lootConfig.getConfigurationSection("main");
+        int group = 1;
+        for (String key : groupConfig.getKeys(false)) {
+            if (!groups.containsKey(group)) {
+                return -1;
+            }
+            
+            // Find first group such that the location is within bounds
+            // If in nether, multiply coord by 2 to correspond to overworld
+            if (dist * multiplier < groupConfig.getInt(key + ".distance")) {
+                break;
+            }
+            
+            group++;
+        }
+        
+        return group;
+    }
+    
+    private int getMaxLevel(int max) {
+        return getMaxLevel(max, 0);
+    }
+    
+    /**
      * Iterate through percentage chances and determine what level
      * for a loot to generate at
      * 
      * @param max minimum 1
+     * @param the base chance. Set to 0 to use common base chance
      * @return
      */
-    private int getMaxLevel(int max) {
+    private int getMaxLevel(int max, double base) {
         Random rand = new Random();
         int lvl = 0;
         while (lvl < max) {
             lvl++;
-            double chance = lootConfig.getInt(groups.get(lvl) + ".chance") / 100.0;
+            
+            double chance;
+            if (lvl == 1 && base != 0) {
+                chance = base / 100.0;
+            } else {
+                chance = lootConfig.getInt("main." + groups.get(lvl) + ".chance") / 100.0;
+            }
             
             // Keep going if RNG succeeds. Otherwise, return prev level
             if (rand.nextDouble() < chance) {

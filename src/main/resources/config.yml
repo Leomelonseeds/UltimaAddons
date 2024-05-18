@@ -15,29 +15,47 @@ challengegui:
     slot: 15
     days: 3
     
-# Do not change the order of this section
-# However the section titles don't matter
+# Configuration for chest/ore drops for loot
 loot:
-  common:
-    distance: 4096   # Max distance this loot will generate at
-    chance: 10       # Chance for each dust to generate
-    maxdust: 1       # Max amount of any dust that will generate
-  uncommon:
-    distance: 5120
-    chance: 50       # Chance that the lower tier will turn into this tier (total chance = lower tier * this)
-    maxdust: 2
-  rare:
-    distance: 6144
-    chance: 50
-    maxdust: 3
-  epic:
-    distance: 7168
-    chance: 50
-    maxdust: 4
-  legendary:
-    distance: 10000
-    chance: 50
-    maxdust: 5
+  main:
+    common:
+      distance: 4096   # Max distance this loot will generate at
+      chance: 10       # Chance that the chest will generate loot at all
+      maxdust: 1       # Max amount of any dust that will generate
+    uncommon:
+      distance: 5120
+      chance: 50       # Chance that the lower tier will turn into this tier (total chance = lower tier * this)
+      maxdust: 2
+    rare:
+      distance: 6144
+      chance: 50
+      maxdust: 3
+    epic:
+      distance: 7168
+      chance: 50
+      maxdust: 4
+    legendary:
+      distance: 10000
+      chance: 50
+      maxdust: 5
+  ores:
+    # Replaces main.common.chance for ores
+    # If a deepslate variant is not detected, it will
+    # automatically use non-deepslate chance
+    chance:  
+      COAL_ORE: 0.5
+      DEEPSLATE_COAL_ORE: 50
+      NETHER_GOLD_ORE: 1
+      NETHER_QUARTZ_ORE: 0.5
+      DIAMOND_ORE: 5
+      EMERALD_ORE: 20
+      DEEPSLATE_EMERALD_ORE: 100
+      LAPIS_LAZULI_ORE: 2
+      REDSTONE_ORE: 1
+    # Add to the final result for each fortune level
+    fortune-add: 1
+    # Add to the final result for each mining luck auraskills level
+    luck-add: 0.25
     
 introgui:
   kingdomshandbook:
