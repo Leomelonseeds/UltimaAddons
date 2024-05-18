@@ -65,10 +65,57 @@ import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.invs.ConfirmAction;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
+import dev.aurelium.auraskills.api.event.skill.DamageXpGainEvent;
+import dev.aurelium.auraskills.api.event.skill.EntityXpGainEvent;
+
 public class KingdomsListener implements Listener {
 
     private static Set<Structure> justRemoved = new HashSet<>();
     private static Set<Player> allowedClose = new HashSet<>();
+    
+
+    // -------------------------------------------------
+    // NO SKILL XP GAIN IF SAME KINGDOM
+    // -------------------------------------------------
+    
+    @EventHandler
+    public void onEntityXPGain(EntityXpGainEvent e) {
+        if (!(e.getAttacked() instanceof Player damaged)) {
+            return;
+        }
+        
+        KingdomPlayer attacker = KingdomPlayer.getKingdomPlayer(e.getPlayer());
+        KingdomPlayer victim = KingdomPlayer.getKingdomPlayer(damaged);
+        if (!canGainXp(attacker, victim)) {
+            e.setCancelled(true);
+        }
+    }
+    
+    @EventHandler
+    public void onDamageXpGain(DamageXpGainEvent e) {
+        if (!(e.getDamager() instanceof Player damager)) {
+            return;
+        }
+        
+        KingdomPlayer attacker = KingdomPlayer.getKingdomPlayer(damager);
+        KingdomPlayer victim = KingdomPlayer.getKingdomPlayer(e.getPlayer());
+        if (!canGainXp(attacker, victim)) {
+            e.setCancelled(true);
+        }
+    }
+    
+    private boolean canGainXp(KingdomPlayer attacker, KingdomPlayer victim) {
+        if (!attacker.hasKingdom() || !victim.hasKingdom()) {
+            return false;
+        }
+        
+        // At this point both players must be in a kingdom
+        if (attacker.getKingdomId().equals(victim.getKingdomId())) {
+            return false;
+        }
+        
+        return true;
+    }
     
     // -------------------------------------------------
     // ALLOW EXPLOSIONS TO DESTROY TURRETS
