@@ -383,15 +383,15 @@ public class KingdomsListener implements Listener {
         });
     }
 
-
-    // -------------------------------------------------
-    // CUSTOM OUTPOST HANDLERS
-    // -------------------------------------------------
-
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInvasionStart(KingdomInvadeEvent e) {
         new InvasionHandler(e.getInvasion());
     }
+
+
+    // -------------------------------------------------
+    // CUSTOM OUTPOST HANDLERS
+    // -------------------------------------------------
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onOutpostBreak(KingdomItemBreakEvent<Structure> e) {
