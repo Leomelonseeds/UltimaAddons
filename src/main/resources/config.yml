@@ -709,7 +709,8 @@ items:
       - "&eImbue yourself with the healing"
       - "&epowers of amethyst. Each piece of"
       - "&ethis set, when worn, gives &6+0.1 &emax"
-      - "&ehealth per level of &bMining &eabove 25."
+      - "&ehealth per level of &bGathering"
+      - "&eabove 25."
     scaled-attribute:
       skill: MINING
       type: GENERIC_MAX_HEALTH
@@ -819,5 +820,17 @@ items:
     name: "&6Legendary Enchanted Dust"
     glow: true
     custom-model-data: 48758
+  nitinoltube:
+    material: ECHO_SHARD
+    name: "&1Nitinol Tube"
+    glow: true
+    custom-model-data: 48759
+    update: 1
+    lore:
+      - "&7A tough, yet super elastic material"
+      - "&7formed by the strongest guardians"
+      - "&7of the deep. You gain a spring in"
+      - "&7your step as you hold it in your"
+      - "&7palms."
     
     

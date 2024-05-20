@@ -27,12 +27,20 @@ import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class AbilityManager implements Listener {
     
+    private static Map<String, PotionEffectType> materials;
     private Map<String, Ability> abilities;
     private Map<Player, BukkitTask> tasks;
     
     public AbilityManager() {
         abilities = new HashMap<>();
         tasks = new HashMap<>();
+        materials = Map.of(
+            "radiantshard", PotionEffectType.REGENERATION,
+            "obsidianingot", PotionEffectType.DAMAGE_RESISTANCE,
+            "infusedingot", PotionEffectType.INCREASE_DAMAGE,
+            "mithrilingot", PotionEffectType.SPEED,
+            "nitinoltube", PotionEffectType.JUMP
+        );
     }
     
     /**
@@ -124,33 +132,18 @@ public class AbilityManager implements Listener {
                         continue;
                     }
                     
-                    if (d.equals("radiantshard")) {
-                        // Regen only heals when its a multiple of 50, add another proper regen
-                        // This method runs once every 2 ticks, so for healing time of once every
-                        // x ticks, check if iteration * 2 % x == 0 
-                        int dur = (iteration * 2) % 80 == 0 ? 51 : 25;
-                        Bukkit.getScheduler().runTask(plugin, () -> p.addPotionEffect(
-                                new PotionEffect(PotionEffectType.REGENERATION, dur, 0)));
-                        break;
+                    PotionEffectType effect = materials.get(d);
+                    if (effect == null) {
+                        return;
                     }
                     
-                    if (d.equals("obsidianingot")) {
-                        Bukkit.getScheduler().runTask(plugin, () -> p.addPotionEffect(
-                                new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 25, 0)));
-                        break;
+                    int duration = 25;
+                    if (effect == PotionEffectType.REGENERATION) {
+                        duration = (iteration * 2) % 80 == 0 ? 51 : 25;
                     }
+                    int fdur = duration;
                     
-                    if (d.equals("infusedingot")) {
-                        Bukkit.getScheduler().runTask(plugin, () -> p.addPotionEffect(
-                                new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 25, 0)));
-                        break;
-                    }
-                    
-                    if (d.equals("mithrilingot")) {
-                        Bukkit.getScheduler().runTask(plugin, () -> p.addPotionEffect(
-                                new PotionEffect(PotionEffectType.SPEED, 25, 0)));
-                        break;
-                    }
+                    Bukkit.getScheduler().runTask(plugin, () -> p.addPotionEffect(new PotionEffect(effect, fdur, 0)));
                 }
                 
                 // Clear existing actionbar if no item present
