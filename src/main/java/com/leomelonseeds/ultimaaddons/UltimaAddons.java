@@ -178,6 +178,10 @@ public class UltimaAddons extends JavaPlugin {
     public AureliumRegistry getAureliumRegistry() {
         return aureliumRegistry;
     }
+    
+    public LootHandler getLootHandler() {
+        return lootHandler;
+    }
 
     public void writeTradesFile() {
         for (Integer id : linkManager.keySet()) {
@@ -200,7 +204,7 @@ public class UltimaAddons extends JavaPlugin {
         getTradesFile().reload();
         getRegionsFile().reload();
         getSKLinker().clear();
-        lootHandler.reload();
+        getLootHandler().reload();
         new Load();
     }
 

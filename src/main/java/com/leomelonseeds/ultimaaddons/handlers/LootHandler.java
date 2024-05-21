@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import org.apache.commons.lang3.EnumUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -32,20 +33,21 @@ import dev.aurelium.auraskills.api.user.SkillsUser;
 import net.advancedplugins.ae.api.AEAPI;
 
 public class LootHandler implements Listener {
-    
+
     private UltimaAddons plugin;
-    private ConfigurationSection lootConfig;
     private Map<Integer, String> groups;
+    private Random rand;
+    private ConfigurationSection lootConfig;
     private Set<Player> canBreak;
     
     public LootHandler(UltimaAddons plugin) {
         this.groups = Map.of(
-                1, "common",
-                2, "uncommon",
-                3, "rare",
-                4, "epic",
-                5, "legendary"
-            );
+            1, "common",
+            2, "uncommon",
+            3, "rare",
+            4, "epic",
+            5, "legendary"
+        );
         this.canBreak = new HashSet<>();
         this.plugin = plugin;
         reload();
@@ -53,6 +55,43 @@ public class LootHandler implements Listener {
     
     public void reload() {
         this.lootConfig = plugin.getConfig().getConfigurationSection("loot");
+        this.rand = new Random();
+    }
+    
+    /**
+     * Generates a random piece of gear of type.
+     * Group should not be 1 if type is a melee weapon.
+     * 
+     * @param ring
+     * @param type
+     * @return
+     */
+    public ItemStack randomGear(int ring, String type) {
+        // TODO: Check for upgrade chance
+        
+        // Group = ring + 1 (1st ring = uncommon) 
+        int tier = ring + 1;
+        String group = groups.get(tier);
+        if (group == null) {
+            return null;
+        }
+        
+        // Determine exact gear material to use
+        String matName = type;
+        if (type.equalsIgnoreCase("sword") || type.equalsIgnoreCase("axe")) {
+            matName = lootConfig.getString("main." + group + ".weapon") + "_" + matName;
+        } else if (!type.equalsIgnoreCase("bow")) {
+            matName = lootConfig.getString("main." + group + ".armor") + "_" + matName;
+        }
+        matName = matName.toUpperCase();
+        
+        if (!EnumUtils.isValidEnum(Material.class, matName)) {
+            return null;
+        }
+        
+        // TODO: Assign vanilla enchants using Server.getItemFactory()
+        // TODO: Assign custom enchants using getMaxLevel
+        return null;
     }
     
     // Stop players from breaking blocks with loot 
@@ -144,7 +183,7 @@ public class LootHandler implements Listener {
         
         // Generate dusts
         String tier = groups.get(group);
-        int amt = new Random().nextInt(lootConfig.getInt("main." + tier + ".maxdust") + 1);
+        int amt = rand.nextInt(lootConfig.getInt("main." + tier + ".maxdust") + 1);
         for (int i = 0; i < amt; i++) {
             int dustLvl = getMaxLevel(group);
             if (dustLvl > 0) {
@@ -212,7 +251,6 @@ public class LootHandler implements Listener {
      * @return
      */
     private int getMaxLevel(int max, double base) {
-        Random rand = new Random();
         int lvl = 0;
         while (lvl < max) {
             lvl++;
@@ -245,7 +283,6 @@ public class LootHandler implements Listener {
      * @return true if item got enchanted
      */
     private boolean randomlyEnchant(ItemStack item, int group) {
-        Random rand = new Random();
         List<String> available = AEAPI.getEnchantmentsByGroup(groups.get(group));
         if (item.getType() == Material.ENCHANTED_BOOK) {
             String enchant = available.get(rand.nextInt(available.size()));

@@ -19,25 +19,53 @@ challengegui:
 loot:
   main:
     common:
-      distance: 4096   # Max distance this loot will generate at
-      chance: 10       # Chance that the chest will generate loot at all
-      maxdust: 1       # Max amount of any dust that will generate
+      distance: 4096    # Max distance this loot will generate at
+      chance: 10        # Chance that the chest will generate loot at all, or if gear will have custom enchant
+      maxdust: 1        # Max amount of any dust that will generate
     uncommon:
       distance: 5120
-      chance: 50       # Chance that the lower tier will turn into this tier (total chance = lower tier * this)
+      chance: 50        # Chance that the lower tier will turn into this tier (total chance = lower tier * this)
       maxdust: 2
+      armor: "leather"  # The armor type this tier may have
+      weapon: ""        # The weapon type this tier may have
+      enchant:          # Armor enchanted as through ench table with min-max levels
+        min: 1
+        max: 10
+        chance: 50
+      up-chance: 30     # Chance that gear values from the next tier will be used (non-recursive)
     rare:
       distance: 6144
       chance: 50
       maxdust: 3
+      armor: "golden"
+      weapon: "wooden"
+      enchant:
+        min: 5
+        max: 15
+        chance: 50
+      up-chance: 20
     epic:
       distance: 7168
       chance: 50
       maxdust: 4
+      armor: "golden"
+      weapon: "stone"
+      enchant:
+        min: 10
+        max: 20
+        chance: 50
+      up-chance: 60
     legendary:
       distance: 10000
       chance: 50
       maxdust: 5
+      armor: "iron"
+      weapon: "iron"
+      enchant:
+        min: 15
+        max: 30
+        chance: 50
+      up-chance: 10   # This simply upgrades armor/weapon to diamond
   ores:
     # Replaces main.common.chance for ores
     # If a deepslate variant is not detected, it will
