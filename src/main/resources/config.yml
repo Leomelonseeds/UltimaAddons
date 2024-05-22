@@ -17,55 +17,58 @@ challengegui:
     
 # Configuration for chest/ore drops for loot
 loot:
+  # Because of code jank, the armor/weapon/enchant stats are actually for the tier above
   main:
     common:
       distance: 4096    # Max distance this loot will generate at
       chance: 10        # Chance that the chest will generate loot at all, or if gear will have custom enchant
       maxdust: 1        # Max amount of any dust that will generate
-    uncommon:
-      distance: 5120
-      chance: 50        # Chance that the lower tier will turn into this tier (total chance = lower tier * this)
-      maxdust: 2
-      armor: "leather"  # The armor type this tier may have
-      weapon: ""        # The weapon type this tier may have
+      armor: "leather"  # The armor type the NEXT tier may have
+      weapon: ""        # The weapon type the NEXT tier may have
       enchant:          # Armor enchanted as through ench table with min-max levels
         min: 1
         max: 10
         chance: 50
-      up-chance: 30     # Chance that gear values from the next tier will be used (non-recursive)
-    rare:
-      distance: 6144
-      chance: 50
-      maxdust: 3
+    uncommon:
+      distance: 5120
+      chance: 50        # Chance that the lower tier will turn into this tier (total chance = lower tier * this)
+      maxdust: 2
       armor: "golden"
       weapon: "wooden"
       enchant:
         min: 5
         max: 15
         chance: 50
-      up-chance: 20
-    epic:
-      distance: 7168
+    rare:
+      distance: 6144
       chance: 50
-      maxdust: 4
+      maxdust: 3
       armor: "golden"
       weapon: "stone"
       enchant:
         min: 10
         max: 20
         chance: 50
-      up-chance: 60
-    legendary:
-      distance: 10000
+    epic:
+      distance: 7168
       chance: 50
-      maxdust: 5
+      maxdust: 4
       armor: "iron"
       weapon: "iron"
       enchant:
         min: 15
         max: 30
         chance: 50
-      up-chance: 10   # This simply upgrades armor/weapon to diamond
+    legendary:
+      distance: 10000
+      chance: 50
+      maxdust: 5
+      armor: "diamond"
+      weapon: "diamond"
+      enchant:
+        min: 15
+        max: 30
+        chance: 50
   ores:
     # Replaces main.common.chance for ores
     # If a deepslate variant is not detected, it will
@@ -84,6 +87,10 @@ loot:
     fortune-add: 1
     # Add to the final result for each mining luck auraskills level
     luck-add: 0.25
+  mobs:
+    # Chance that any equipment will drop
+    drop-chance: 1 
+    looting-add: 1
     
 introgui:
   kingdomshandbook:

@@ -8,20 +8,28 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.lang3.EnumUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.World.Environment;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.world.LootGenerateEvent;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.loot.Lootable;
+import org.bukkit.persistence.PersistentDataType;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
@@ -39,6 +47,7 @@ public class LootHandler implements Listener {
     private Random rand;
     private ConfigurationSection lootConfig;
     private Set<Player> canBreak;
+    private NamespacedKey ugear;
     
     public LootHandler(UltimaAddons plugin) {
         this.groups = Map.of(
@@ -50,6 +59,7 @@ public class LootHandler implements Listener {
         );
         this.canBreak = new HashSet<>();
         this.plugin = plugin;
+        this.ugear = new NamespacedKey(plugin, "ugear");
         reload();
     }
     
@@ -62,15 +72,22 @@ public class LootHandler implements Listener {
      * Generates a random piece of gear of type.
      * Group should not be 1 if type is a melee weapon.
      * 
-     * @param ring
+     * @param ring btwn 1-4 inclusive
      * @param type
      * @return
      */
     public ItemStack randomGear(int ring, String type) {
-        // TODO: Check for upgrade chance
+        // Get tier of the random gear.
+        // Always give 30% chance to upgrade to the next tier
+        // Unless we're already at max tier, then lower chance
+        // for diamond tier
+        int tier = getMaxLevel(ring, 100);
+        if (tier < 4 && rand.nextDouble() < 0.3) {
+            tier++;
+        } else if (tier == 4 && rand.nextDouble() < 0.1) {
+            tier = 5;
+        }
         
-        // Group = ring + 1 (1st ring = uncommon) 
-        int tier = ring + 1;
         String group = groups.get(tier);
         if (group == null) {
             return null;
@@ -78,20 +95,90 @@ public class LootHandler implements Listener {
         
         // Determine exact gear material to use
         String matName = type;
+        ConfigurationSection sec = lootConfig.getConfigurationSection("main." + group);
         if (type.equalsIgnoreCase("sword") || type.equalsIgnoreCase("axe")) {
-            matName = lootConfig.getString("main." + group + ".weapon") + "_" + matName;
+            matName = sec.getString("weapon") + "_" + matName;
         } else if (!type.equalsIgnoreCase("bow")) {
-            matName = lootConfig.getString("main." + group + ".armor") + "_" + matName;
+            matName = sec.getString("armor") + "_" + matName;
         }
-        matName = matName.toUpperCase();
         
+        matName = matName.toUpperCase();
         if (!EnumUtils.isValidEnum(Material.class, matName)) {
             return null;
         }
         
-        // TODO: Assign vanilla enchants using Server.getItemFactory()
-        // TODO: Assign custom enchants using getMaxLevel
-        return null;
+        // Apply some random damage and add PDC for loot ID
+        Material mat = Material.valueOf(matName);
+        ItemStack gear = new ItemStack(mat);
+        int dur = mat.getMaxDurability();
+        Damageable dmeta = (Damageable) gear.getItemMeta();
+        double dmgPercent = rand.nextDouble(0.6, 0.95);
+        dmeta.setDamage((int) (dur * dmgPercent));
+        dmeta.getPersistentDataContainer().set(ugear, PersistentDataType.BOOLEAN, true);
+        gear.setItemMeta(dmeta);
+        
+        // Check for possible enchants
+        if (rand.nextDouble() > sec.getDouble("enchant.chance") / 100.0) {
+            return gear;
+        }
+        
+        // Otherwise apply ench table enchant and attempt to custom enchant as well
+        int levels = rand.nextInt(sec.getInt("enchant.min"), sec.getInt("enchant.max") + 1);
+        gear = Bukkit.getItemFactory().enchantWithLevels(gear, levels, false, rand);
+        int custom = getMaxLevel(ring + 1);
+        if (custom > 1) {
+            for (int i = custom; i > 1; i--) {
+                if (randomlyEnchant(gear, i)) {
+                    break;
+                }
+            }
+        }
+        
+        return gear;
+    }
+    
+    // Custom handler for mob loot
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityDeath(EntityDeathEvent e) {
+        LivingEntity ent = e.getEntity();
+        Player player = ent.getKiller();
+        if (player == null) {
+            return;
+        }
+        
+        // Gather entity equipment
+        EntityEquipment equipped = ent.getEquipment();
+        Set<ItemStack> contents = new HashSet<>();
+        contents.add(equipped.getItemInMainHand());
+        contents.add(equipped.getItemInOffHand());
+        for (ItemStack item : equipped.getArmorContents()) {
+            contents.add(item);
+        }
+        
+        // Apply looting buffs
+        ItemStack weapon = player.getInventory().getItemInMainHand();
+        double chance = lootConfig.getDouble("mobs.drop-chance");
+        double ladd = lootConfig.getDouble("mobs.looting-add");
+        chance += ladd * weapon.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
+        
+        // Final checks before dropping
+        for (ItemStack item : contents) {
+            if (item == null || !item.hasItemMeta()) {
+                continue;
+            }
+            
+            // If has persistent data container, then regular drop chance
+            // has already been set to 0!
+            ItemMeta meta = item.getItemMeta();
+            if (!meta.getPersistentDataContainer().has(ugear)) {
+                continue;
+            }
+            
+            meta.getPersistentDataContainer().remove(ugear);
+            if (rand.nextDouble() < chance / 100.0) {
+                ent.getWorld().dropItem(ent.getLocation(), item);
+            }
+        }
     }
     
     // Stop players from breaking blocks with loot 
@@ -145,7 +232,6 @@ public class LootHandler implements Listener {
         if (group == -1) {
             return;
         }
-
 
         // Apply fortune buff
         Player player = e.getPlayer();
