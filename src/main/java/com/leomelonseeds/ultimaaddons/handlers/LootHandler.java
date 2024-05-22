@@ -98,7 +98,7 @@ public class LootHandler implements Listener {
         ConfigurationSection sec = lootConfig.getConfigurationSection("main." + group);
         if (type.equalsIgnoreCase("sword") || type.equalsIgnoreCase("axe")) {
             matName = sec.getString("weapon") + "_" + matName;
-        } else if (!type.equalsIgnoreCase("bow")) {
+        } else if (!type.contains("bow")) {
             matName = sec.getString("armor") + "_" + matName;
         }
         
