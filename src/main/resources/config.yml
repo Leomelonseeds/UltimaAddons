@@ -15,83 +15,6 @@ challengegui:
     slot: 15
     days: 3
     
-# Configuration for chest/ore drops for loot
-loot:
-  # Because of code jank, the armor/weapon/enchant stats are actually for the tier above
-  main:
-    common:
-      distance: 4096    # Max distance this loot will generate at
-      chance: 10        # Chance that the chest will generate loot at all, or if gear will have custom enchant
-      maxdust: 1        # Max amount of any dust that will generate
-      armor: "leather"  # The armor type the NEXT tier may have
-      weapon: ""        # The weapon type the NEXT tier may have
-      enchant:          # Armor enchanted as through ench table with min-max levels
-        min: 1
-        max: 10
-        chance: 50
-    uncommon:
-      distance: 5120
-      chance: 50        # Chance that the lower tier will turn into this tier (total chance = lower tier * this)
-      maxdust: 2
-      armor: "golden"
-      weapon: "wooden"
-      enchant:
-        min: 5
-        max: 15
-        chance: 50
-    rare:
-      distance: 6144
-      chance: 50
-      maxdust: 3
-      armor: "golden"
-      weapon: "stone"
-      enchant:
-        min: 10
-        max: 20
-        chance: 50
-    epic:
-      distance: 7168
-      chance: 50
-      maxdust: 4
-      armor: "iron"
-      weapon: "iron"
-      enchant:
-        min: 15
-        max: 30
-        chance: 50
-    legendary:
-      distance: 10000
-      chance: 50
-      maxdust: 5
-      armor: "diamond"
-      weapon: "diamond"
-      enchant:
-        min: 15
-        max: 30
-        chance: 50
-  ores:
-    # Replaces main.common.chance for ores
-    # If a deepslate variant is not detected, it will
-    # automatically use non-deepslate chance
-    chance:  
-      COAL_ORE: 0.5
-      DEEPSLATE_COAL_ORE: 50
-      NETHER_GOLD_ORE: 1
-      NETHER_QUARTZ_ORE: 0.5
-      DIAMOND_ORE: 5
-      EMERALD_ORE: 20
-      DEEPSLATE_EMERALD_ORE: 100
-      LAPIS_LAZULI_ORE: 2
-      REDSTONE_ORE: 1
-    # Add to the final result for each fortune level
-    fortune-add: 1
-    # Add to the final result for each mining luck auraskills level
-    luck-add: 0.25
-  mobs:
-    # Chance that any equipment will drop
-    drop-chance: 1 
-    looting-add: 1
-    
 introgui:
   kingdomshandbook:
     material: WRITTEN_BOOK
@@ -186,6 +109,94 @@ recipegui:
     name: "&cLocked"
     lore:
       - "&7You cannot use this recipe yet!"
+    
+# Configuration for chest/ore drops for loot
+loot:
+  # Because of code jank, the armor/weapon/enchant stats are actually for the tier above
+  main:
+    common:
+      distance: 4096    # Max distance this loot will generate at
+      chance: 10        # Chance that the chest will generate loot at all, or if gear will have custom enchant
+      maxdust: 1        # Max amount of any dust that will generate
+      armor: "leather"  # The armor type the NEXT tier may have
+      weapon: ""        # The weapon type the NEXT tier may have
+      enchant:          # Armor enchanted as through ench table with min-max levels
+        min: 1
+        max: 10
+        chance: 50
+    uncommon:
+      distance: 5120
+      chance: 50        # Chance that the lower tier will turn into this tier (total chance = lower tier * this)
+      maxdust: 2
+      armor: "golden"
+      weapon: "wooden"
+      enchant:
+        min: 5
+        max: 15
+        chance: 50
+    rare:
+      distance: 6144
+      chance: 50
+      maxdust: 3
+      armor: "golden"
+      weapon: "stone"
+      enchant:
+        min: 10
+        max: 20
+        chance: 50
+    epic:
+      distance: 7168
+      chance: 50
+      maxdust: 4
+      armor: "iron"
+      weapon: "iron"
+      enchant:
+        min: 15
+        max: 30
+        chance: 50
+    legendary:
+      distance: 10000
+      chance: 25
+      maxdust: 5
+      armor: "diamond"
+      weapon: "diamond"
+      enchant:
+        min: 15
+        max: 30
+        chance: 50
+  ores:
+    # Replaces main.common.chance for ores
+    # If a deepslate variant is not detected, it will
+    # automatically use non-deepslate chance
+    chance:  
+      COAL_ORE: 0.5
+      DEEPSLATE_COAL_ORE: 50
+      NETHER_GOLD_ORE: 1
+      NETHER_QUARTZ_ORE: 0.5
+      DIAMOND_ORE: 5
+      EMERALD_ORE: 20
+      DEEPSLATE_EMERALD_ORE: 100
+      LAPIS_LAZULI_ORE: 2
+      REDSTONE_ORE: 1
+    # Add to the final result for each fortune level
+    fortune-add: 1
+    # Add to the final result for each mining luck auraskills level
+    luck-add: 0.25
+  mobs:
+    # Chance that any equipment will drop
+    drop-chance: 2 
+    looting-add: 1
+  # Disenchanting -> Enchanted Dust config
+  # Total amount of dust dropped = chance % 100 + remainder chance for 1 additional.
+  # Aurelium Disenchanter ability bonus is added to the final chance for both custom/vanilla
+  grindstone:
+    # Chance to add for each modified enchantment level on the item
+    # Check https://minecraft.wiki/w/Enchanting/Levels
+    vanilla-chance: 1
+    # Each custom enchant has a 100% chance of dropping 1 dust.
+    # Additional dust has a lvl/maxlvl * multiplier chance of dropping.
+    # Additional dust drops are determined with the same formula as vanilla.
+    custom-multiplier: 1
   
 staff-log:
   - pt

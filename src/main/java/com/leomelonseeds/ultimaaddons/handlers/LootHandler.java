@@ -1,13 +1,16 @@
 package com.leomelonseeds.ultimaaddons.handlers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -18,13 +21,19 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -36,6 +45,9 @@ import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 import dev.aurelium.auraskills.api.AuraSkillsApi;
+import dev.aurelium.auraskills.api.ability.Abilities;
+import dev.aurelium.auraskills.api.ability.Ability;
+import dev.aurelium.auraskills.api.registry.NamespacedId;
 import dev.aurelium.auraskills.api.trait.Traits;
 import dev.aurelium.auraskills.api.user.SkillsUser;
 import net.advancedplugins.ae.api.AEAPI;
@@ -178,6 +190,141 @@ public class LootHandler implements Listener {
             if (rand.nextDouble() < chance / 100.0) {
                 ent.getWorld().dropItem(ent.getLocation(), item);
             }
+        }
+    }
+    
+    // Drops random amounts of enchanted dust on grindstone disenchant
+    // Thanks https://github.com/Archy-X/AuraSkills/blob/1bf7845c347c60bab6da67f58c383017dcf5aa6a/bukkit/src/main/java/dev/aurelium/auraskills/bukkit/skills/forging/ForgingAbilities.java#L42
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onDisenchant(InventoryClickEvent e) {
+        // Check if a valid item is being
+        if (!(e.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        
+        Inventory inv = e.getClickedInventory();
+        if (inv == null) {
+            return;
+        }
+
+        ClickType click = e.getClick();
+        if (click != ClickType.LEFT && click != ClickType.RIGHT && Utils.isInventoryFull(player)) return;
+        if (e.getResult() != Result.ALLOW) return;
+
+        // Only give if item was picked up
+        InventoryAction action = e.getAction();
+        if (action != InventoryAction.PICKUP_ALL && action != InventoryAction.MOVE_TO_OTHER_INVENTORY &&
+            action != InventoryAction.PICKUP_HALF && action != InventoryAction.DROP_ALL_SLOT &&
+            action != InventoryAction.DROP_ONE_SLOT && action != InventoryAction.HOTBAR_SWAP) {
+            return;
+        }
+        
+        if (e.getClickedInventory().getType() != InventoryType.GRINDSTONE) {
+            return;
+        }
+
+        if (e.getSlotType() != InventoryType.SlotType.RESULT) {
+            return;
+        }
+        
+        Location location = inv.getLocation();
+        if (location == null) return;
+
+        ItemStack first = inv.getItem(0);
+        ItemStack second = inv.getItem(1);
+        if (first != null && second != null) { // If two items, make sure items are the same type
+            if (first.getType() != second.getType()) {
+                return;
+            }
+        }
+        
+        List<Pair<Enchantment, Integer>> vanilla = new ArrayList<>();
+        List<Pair<String, Integer>> custom = new ArrayList<>();
+        for (ItemStack item : new ItemStack[] {first, second}) {
+            if (item == null) {
+                continue;
+            }
+            
+            for (Entry<Enchantment, Integer> ench : item.getEnchantments().entrySet()) {
+                Enchantment ve = ench.getKey();
+                if (ve.equals(Enchantment.BINDING_CURSE) || ve.equals(Enchantment.VANISHING_CURSE)) {
+                    continue;
+                }
+                
+                vanilla.add(Pair.of(ve, ench.getValue()));
+            }
+            
+            for (Entry<String, Integer> ench : AEAPI.getEnchantmentsOnItem(item).entrySet()) {
+                custom.add(Pair.of(ench.getKey(), ench.getValue()));
+            }
+            
+            if (AEAPI.isCustomEnchantBook(item)) {
+                custom.add(Pair.of(AEAPI.getBookEnchantment(item), AEAPI.getBookEnchantmentLevel(item)));
+            }
+        }
+        
+        if (vanilla.isEmpty() && custom.isEmpty()) {
+            return;
+        }
+        
+        // Stores the chance sums of each tier
+        Map<String, Double> sums = new HashMap<>();
+        
+        if (!vanilla.isEmpty()) {
+            sums.put("common", 0.0);
+            double mult = lootConfig.getDouble("grindstone.vanilla-chance");
+            for (Pair<Enchantment, Integer> ev : vanilla) {
+                int lvl = ev.getRight();
+                int minChance = ev.getLeft().getMinModifiedCost(lvl);
+                int maxChance = ev.getLeft().getMaxModifiedCost(lvl);
+                double addedChance = rand.nextInt(minChance, maxChance + 1) * mult;
+                sums.put("common", sums.get("common") + addedChance);
+            }  
+        }
+        
+        if (!custom.isEmpty()) {
+            double mult = lootConfig.getDouble("grindstone.custom-multiplier");
+            for (Pair<String, Integer> ev : custom) {
+                String cench = ev.getLeft();
+                String group = AEAPI.getGroup(cench).toLowerCase();
+                double addedChance = 100 * ev.getRight() * mult / AEAPI.getHighestEnchantmentLevel(cench);
+                sums.putIfAbsent(group, 0.0);
+                sums.put(group, sums.get(group) + 100 + addedChance);
+            }  
+        }
+
+        // Get AuraSkills Disenchanter bonus
+        AuraSkillsApi auraSkills = AuraSkillsApi.get();
+        SkillsUser user = auraSkills.getUser(player.getUniqueId());
+        int disenchanterLvl = user.getAbilityLevel(Abilities.DISENCHANTER);
+        double extra = 0;
+        if (disenchanterLvl > 0) {
+            Ability disenchanter = auraSkills.getGlobalRegistry().getAbility(NamespacedId.fromDefault("disenchanter"));
+            extra = disenchanter.getValue(disenchanterLvl);
+        }
+
+        Bukkit.getLogger().info("Aurelium Disenchanter value: " + extra);
+        Bukkit.getLogger().info("Final values: " + sums);
+        for (Entry<String, Double> sum : sums.entrySet()) {
+            ItemStack dust = plugin.getItems().getItem(sum.getKey() + "dust");
+            if (dust == null) {
+                continue;
+            }
+            
+            double finalChance = sum.getValue() + extra;
+            int amt = (int) Math.floor(finalChance / 100);
+            double remainder = finalChance - (amt * 100);
+            if (rand.nextDouble() < remainder / 100) {
+                amt++;
+            }
+            
+            dust.setAmount(amt);
+            player.getWorld().dropItem(location.toCenterLocation(), dust);
+        }
+        
+        // Temp fix for advancedenchantments grindstone names not being removed
+        if (AEAPI.isCustomEnchantBook(first) || AEAPI.isCustomEnchantBook(second)) {
+            e.getCurrentItem().setItemMeta(null);
         }
     }
     

@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
@@ -290,6 +291,15 @@ public class Utils {
     public static void discord(String s) {
         TextChannel warChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("war");
         warChannel.sendMessage(s).queue();
+    }
+    
+    public static boolean isInventoryFull(Player player) {
+        for (ItemStack item : player.getInventory().getStorageContents()) {
+            if (item == null || item.getType() == Material.AIR) {
+                return false;
+            }
+        }
+        return true;
     }
     
     /**
