@@ -302,9 +302,7 @@ public class LootHandler implements Listener {
             Ability disenchanter = auraSkills.getGlobalRegistry().getAbility(NamespacedId.fromDefault("disenchanter"));
             extra = disenchanter.getValue(disenchanterLvl);
         }
-
-        Bukkit.getLogger().info("Aurelium Disenchanter value: " + extra);
-        Bukkit.getLogger().info("Final values: " + sums);
+        
         for (Entry<String, Double> sum : sums.entrySet()) {
             ItemStack dust = plugin.getItems().getItem(sum.getKey() + "dust");
             if (dust == null) {
