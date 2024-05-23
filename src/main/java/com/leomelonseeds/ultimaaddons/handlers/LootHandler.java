@@ -319,11 +319,6 @@ public class LootHandler implements Listener {
             dust.setAmount(amt);
             player.getWorld().dropItem(location.toCenterLocation(), dust);
         }
-        
-        // Temp fix for advancedenchantments grindstone names not being removed
-        if (AEAPI.isCustomEnchantBook(first) || AEAPI.isCustomEnchantBook(second)) {
-            e.getCurrentItem().setItemMeta(null);
-        }
     }
     
     // Stop players from breaking blocks with loot 

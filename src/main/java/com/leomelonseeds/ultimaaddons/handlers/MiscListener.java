@@ -244,6 +244,7 @@ public class MiscListener implements Listener {
     }
 
     // Stop items with hide_enchant flag being used in grindstone
+    // Also has temp fix for AE disenchanted custom books still keeping name
     @EventHandler
     public void onGrindstone(PrepareGrindstoneEvent e) {
         GrindstoneInventory gi = e.getInventory();
@@ -254,6 +255,11 @@ public class MiscListener implements Listener {
         for (ItemStack i : new ItemStack[]{gi.getUpperItem(), gi.getLowerItem()}) {
             if (i == null || !i.hasItemMeta()) {
                 continue;
+            }
+            
+            if (AEAPI.isCustomEnchantBook(i)) {
+                e.getResult().setItemMeta(null);
+                return;
             }
 
             ItemMeta meta = i.getItemMeta();
