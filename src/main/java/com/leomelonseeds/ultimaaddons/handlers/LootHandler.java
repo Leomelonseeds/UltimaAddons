@@ -42,6 +42,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
+import com.leomelonseeds.ultimaaddons.objects.UASkills;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 import dev.aurelium.auraskills.api.AuraSkillsApi;
@@ -52,6 +53,9 @@ import dev.aurelium.auraskills.api.trait.Traits;
 import dev.aurelium.auraskills.api.user.SkillsUser;
 import net.advancedplugins.ae.api.AEAPI;
 
+/**
+ * Everything to do with dropping enchanted dust, and mob gear
+ */
 public class LootHandler implements Listener {
 
     private UltimaAddons plugin;
@@ -167,11 +171,23 @@ public class LootHandler implements Listener {
             contents.add(item);
         }
         
+        if (contents.isEmpty()) {
+            return;
+        }
+        
         // Apply looting buffs
         ItemStack weapon = player.getInventory().getItemInMainHand();
         double chance = lootConfig.getDouble("mobs.drop-chance");
         double ladd = lootConfig.getDouble("mobs.looting-add");
         chance += ladd * weapon.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
+        
+        // Apply AuraSkills buffs
+        AuraSkillsApi auraSkills = AuraSkillsApi.get();
+        SkillsUser user = auraSkills.getUser(player.getUniqueId());
+        int burglar = user.getAbilityLevel(UASkills.BURGLAR);
+        if (burglar > 0) {
+            chance += UASkills.BURGLAR.getValue(burglar);
+        }
         
         // Final checks before dropping
         for (ItemStack item : contents) {

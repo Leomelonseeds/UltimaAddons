@@ -1,10 +1,22 @@
 package com.leomelonseeds.ultimaaddons.handlers.item;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.utils.ChatConfirm;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.math.NumberUtils;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.Statistic;
+import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
@@ -38,7 +50,9 @@ import org.bukkit.scheduler.BukkitTask;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.server.location.ImmutableLocation;
 
-import java.util.*;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.utils.ChatConfirm;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class TotemManager implements Listener {
 
@@ -229,7 +243,8 @@ public class TotemManager implements Listener {
     }
 
     // Keep death totems on death
-    @EventHandler
+    // HIGH priority to run after Abiding skill check
+    @EventHandler(priority = EventPriority.HIGH)
     public void onDeath(PlayerDeathEvent e) {
         removePlayer(e.getPlayer(), "you died");
         List<ItemStack> drops = e.getDrops();

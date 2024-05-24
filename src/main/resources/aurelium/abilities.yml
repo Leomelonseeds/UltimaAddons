@@ -1,0 +1,15 @@
+abilities:
+  ua/abiding:
+    enabled: true
+    base_value: 5
+    value_per_level: 5
+    unlock: 1
+    level_up: 5
+    max_level: 0
+  ua/burglar:
+    enabled: true
+    base_value: 1
+    value_per_level: 1
+    unlock: 25
+    level_up: 5
+    max_level: 0

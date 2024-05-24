@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.lang.WordUtils;
@@ -23,6 +24,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -39,11 +41,14 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.objects.UASkills;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 
+import dev.aurelium.auraskills.api.AuraSkillsApi;
+import dev.aurelium.auraskills.api.user.SkillsUser;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import io.papermc.paper.event.entity.EntityLoadCrossbowEvent;
@@ -58,6 +63,29 @@ public class MiscListener implements Listener {
 
     private static Map<Player, String> msgs = new HashMap<>();
     private static Set<Player> elytraCancelling = new HashSet<>();
+    
+    // Abiding skill application
+    @EventHandler
+    public void onDeath(PlayerDeathEvent e) {
+        AuraSkillsApi auraSkills = AuraSkillsApi.get();
+        SkillsUser user = auraSkills.getUser(e.getPlayer().getUniqueId());
+        int abiding = user.getAbilityLevel(UASkills.ABIDING);
+        if (abiding <= 0) {
+            return;
+        }
+        
+        Random random = new Random();
+        List<ItemStack> drops = e.getDrops();
+        double chance = UASkills.ABIDING.getValue(abiding) / 100.0;
+        for (ItemStack drop : new ArrayList<>(drops)) {
+            if (random.nextDouble() > chance) {
+                continue;
+            }
+            
+            drops.remove(drop);
+            e.getItemsToKeep().add(drop);
+        }
+    }
     
     // CREEPERSHOT (from UMW)
     @EventHandler

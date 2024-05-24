@@ -9,6 +9,7 @@ import com.leomelonseeds.ultimaaddons.objects.UASkills;
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 
 import dev.aurelium.auraskills.api.AuraSkillsApi;
+import dev.aurelium.auraskills.api.ability.CustomAbility;
 import dev.aurelium.auraskills.api.registry.NamespacedRegistry;
 import dev.aurelium.auraskills.api.skill.CustomSkill;
 
@@ -33,6 +34,9 @@ public class AureliumRegistry {
 
         // Now register our skills
         registerSkills(UASkills.AGILITY, UASkills.COMBAT, UASkills.ENDURANCE, UASkills.GATHERING, UASkills.SORCERY);
+        
+        // And the abilities
+        registerAbilities(UASkills.ABIDING, UASkills.BURGLAR);
     }
 
     public File getAureliumFolder() {
@@ -49,7 +53,15 @@ public class AureliumRegistry {
         }
     }
 
+    public void registerAbilities(CustomAbility... abilities) {
+        for (CustomAbility ability : abilities) {
+            registry.registerAbility(ability);
+        }
+    }
+
     public void generateFiles() {
+        new Data("abilities.yml", "aurelium");
+        
         new Data("uaagility.yml", "aurelium/rewards");
         new Data("uacombat.yml", "aurelium/rewards");
         new Data("uaendurance.yml", "aurelium/rewards");
