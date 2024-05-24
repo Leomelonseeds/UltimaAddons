@@ -329,6 +329,17 @@ public class Utils {
     }
     
     /**
+     * Gets the square distance from 0,0 of this location,
+     * i.e. distance along the greatest axis
+     * 
+     * @param loc
+     * @return
+     */
+    public static double getDistanceFromSpawn(Location loc) {
+        return Math.max(Math.abs(loc.getX()), Math.abs(loc.getZ()));
+    }
+    
+    /**
      * Component to plain text, keeping section color codes!
      * 
      * @param component

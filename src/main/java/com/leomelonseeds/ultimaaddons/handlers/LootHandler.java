@@ -459,7 +459,7 @@ public class LootHandler implements Listener {
      * @return -1 if group not found
      */
     private int getGroup(Location loc) {
-        int dist = Math.max(Math.abs(loc.getBlockX()), Math.abs(loc.getBlockZ()));
+        int dist = (int) Utils.getDistanceFromSpawn(loc);
         int multiplier = loc.getWorld().getEnvironment() == Environment.NETHER ? 2 : 1;
         ConfigurationSection groupConfig = lootConfig.getConfigurationSection("main");
         int group = 1;

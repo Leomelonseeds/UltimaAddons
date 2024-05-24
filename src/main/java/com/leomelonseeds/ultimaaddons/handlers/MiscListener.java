@@ -64,6 +64,26 @@ public class MiscListener implements Listener {
     private static Map<Player, String> msgs = new HashMap<>();
     private static Set<Player> elytraCancelling = new HashSet<>();
     
+    // Cave noise when moving between safe/mob scaled zones
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+        Location fromLoc = e.getFrom();
+        int border = fromLoc.getWorld().getEnvironment() == Environment.NETHER ? 2048 : 4096;
+        double from = Utils.getDistanceFromSpawn(fromLoc);
+        double to = Utils.getDistanceFromSpawn(e.getTo());
+        if (from < border && to > border) {
+            Player player = e.getPlayer();
+            player.playSound(player, Sound.AMBIENT_CAVE, 1F, 1F);
+            msg(player, "&cYou crossed the halfway point of this world. Mobs and loot will get stronger from here. Good luck.");
+            return;
+        } 
+        
+        if (from > border && to < border) {
+            msg(e.getPlayer(), "&aEntering world center. Mobs and loot are now vanilla strength.");
+            return;
+        }
+    }
+    
     // Abiding skill application
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
@@ -236,7 +256,7 @@ public class MiscListener implements Listener {
 
     // Warn players of elytra disabling while in the rain
     @EventHandler
-    public void onMove(PlayerMoveEvent e) {
+    public void onGlide(PlayerMoveEvent e) {
         UltimaAddons pl = UltimaAddons.getPlugin();
         Player p = e.getPlayer();
         if (elytraCancelling.contains(p)) {
