@@ -1,7 +1,14 @@
 package com.leomelonseeds.ultimaaddons.commands;
 
-import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+
+import org.bukkit.command.CommandSender;
+
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.data.Save;
 import com.leomelonseeds.ultimaaddons.objects.RotatingShopkeeper;
@@ -12,9 +19,15 @@ import com.nisovin.shopkeepers.api.ShopkeepersPlugin;
 import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
 import com.nisovin.shopkeepers.api.shopkeeper.admin.regular.RegularAdminShopkeeper;
 import com.nisovin.shopkeepers.api.shopkeeper.offers.TradeOffer;
-import org.bukkit.command.CommandSender;
 
-import java.util.*;
+import co.aikar.commands.BaseCommand;
+import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Default;
+import co.aikar.commands.annotation.Description;
+import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.Syntax;
 
 @CommandAlias("usk")
 public class UASk extends BaseCommand {
@@ -63,7 +76,7 @@ public class UASk extends BaseCommand {
     @CommandPermission("ua.sk.info")
     @CommandCompletion("@ua_sk")
     @Description("Get the parent SK of a child SK")
-    @Syntax("Usage: /usk info <child id>")
+    @Syntax("<child id>")
     public void onInfo(CommandSender sender, int childID) {
         if (!this.plugin.getSKLinker().hasShopkeeper(childID)) {
             CommandUtils.sendErrorMsg(sender, "Not a RSK (no link)");
@@ -93,7 +106,7 @@ public class UASk extends BaseCommand {
     @CommandPermission("ua.sk.rotate")
     @CommandCompletion("@ua_sk|all")
     @Description("Rotate the trades of a shopkeeper")
-    @Syntax("Usage: /usk rotate <shopkeeper id>")
+    @Syntax("<shopkeeper id>")
     public void onRotate(CommandSender sender, int skID) {
         if (!this.plugin.getSKLinker().hasShopkeeper(skID)) {
             CommandUtils.sendErrorMsg(sender, "Not a linked child RSK");
@@ -137,7 +150,7 @@ public class UASk extends BaseCommand {
     @CommandPermission("ua.sk.syncing")
     @CommandCompletion("@sk @sk")
     @Description("Sync a parent to a child")
-    @Syntax("Usage: /usk sync <parent shopkeeper id> <child shopkeeper id>")
+    @Syntax("<parent shopkeeper id> <child shopkeeper id>")
     public void onSync(CommandSender sender, int parentID, int childID) {
         // See if either are already linked
         if (this.plugin.getSKLinker().hasShopkeeper(childID)) {
@@ -171,7 +184,7 @@ public class UASk extends BaseCommand {
     @CommandPermission("ua.sk.syncing")
     @CommandCompletion("@ua_sk")
     @Description("Unsync a child from its parent")
-    @Syntax("Usage: /usk unsync <shopkeeper id>")
+    @Syntax("<shopkeeper id>")
     public void onUnsync(CommandSender sender, int childID) {
         if (!this.plugin.getSKLinker().hasShopkeeper(childID)) {
             CommandUtils.sendErrorMsg(sender, "Not a linked child RSK");

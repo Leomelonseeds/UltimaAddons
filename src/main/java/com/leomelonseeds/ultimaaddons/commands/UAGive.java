@@ -1,12 +1,10 @@
 package com.leomelonseeds.ultimaaddons.commands;
 
-import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.*;
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.handlers.item.TotemManager;
-import com.leomelonseeds.ultimaaddons.handlers.item.TotemType;
-import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
 import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,10 +18,21 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.handlers.item.TotemManager;
+import com.leomelonseeds.ultimaaddons.handlers.item.TotemType;
+import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
+
+import co.aikar.commands.BaseCommand;
+import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Default;
+import co.aikar.commands.annotation.Description;
+import co.aikar.commands.annotation.Flags;
+import co.aikar.commands.annotation.Optional;
+import co.aikar.commands.annotation.Syntax;
 
 @CommandAlias("ugive")
 public class UAGive extends BaseCommand {
@@ -37,7 +46,7 @@ public class UAGive extends BaseCommand {
     @CommandPermission("ua.give")
     @CommandCompletion("@players @ua_item @nothing @players|@ua_coordinates")
     @Description("Give an UltimaAddons item to a player")
-    @Syntax("Usage: /ugive <player> <item> [<amount>] [<player>|[<world>],<x>,<y>,<z>]")
+    @Syntax("<player> <item> [<amount>] [<player>|[<world>],<x>,<y>,<z>]")
     public void onGive(CommandSender sender, @Flags("other") Player target, String uaItem, @Default("1") int amount, @Optional String context) {
         ItemStack i = UltimaAddons.getPlugin().getItems().getItem(uaItem);
         if (i == null) {

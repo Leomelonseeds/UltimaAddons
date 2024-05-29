@@ -1,3 +1,61 @@
+enchantgui:
+  gear:
+    material: DIAMOND_SWORD
+    name: "&b&lGear Slot"
+    lore:
+      - "&7Only items that do not have"
+      - "&7enchants of the enchanted dust's"
+      - "&7tier can be enchanted. Books"
+      - "&7can only be enchanted once."
+      - "&b|"
+      - "&bV"
+  dust:
+    material: ORANGE_DYE
+    name: "&6Enchanted Dust Slot"
+    lore:
+      - "&7Enchanted dust can be found in"
+      - "&7loot chests, and by grindstone"
+      - "&7disenchanting."
+      - "&6|"
+      - "&6V"
+  reroll:
+    material: EXPERIENCE_BOTTLE
+    name: "&aReroll"
+    lore:
+      - "&7Click to reroll enchantments."
+      - "&7Rerolling costs reset every enchant."
+      - ""
+      - "&bCost: &a%cost% Level(s)"
+  ench:
+    material: ENCHANTED_BOOK
+    name: "%enchant%"
+    lore:
+      - "&7Left click to enchant."
+      - "&7Right click to view enchantment"
+      - "&7information."
+      - ""
+      - "&bCost: &a%cost% Level(s)"
+  locked-none:
+    material: BARRIER
+    name: "&cNone"
+    lore:
+      - "&7Please insert a gear item/book"
+      - "&7and at lesat 2 enchanted dust"
+      - "&7to continue."
+  locked-na:
+    material: BARRIER
+    name: "&cNot Available"
+    lore:
+      - "&7There are no more available"
+      - "&7enchants for this gear and"
+      - "&7rarity combo."
+  locked-already:
+    material: BARRIER
+    name: "&cLocked"
+    lore:
+      - "&7This gear already has an"
+      - "&7enchantment of this rarity!"
+
 challengegui:
   1-day:
     material: IRON_BLOCK

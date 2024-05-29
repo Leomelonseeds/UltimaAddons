@@ -24,5 +24,7 @@ commands:
     default: op
   usk:
     default: op
+  uenchant:
+    default: op
 permissions:
   ua.admin: { }

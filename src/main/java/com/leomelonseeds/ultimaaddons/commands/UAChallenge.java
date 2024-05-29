@@ -28,7 +28,7 @@ public class UAChallenge extends BaseCommand {
     @Default
     @CommandPermission("ua.challenge")
     @Description("Challenge another Kingdom to war")
-    @Syntax("Usage: /uchallenge <kingdom>")
+    @Syntax("<kingdom>")
     public void onChallenge(Player player, String targetKingdom) {
         // Challenger must have a kingdom
         KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(player);
