@@ -43,15 +43,22 @@ public class InventoryManager implements Listener {
     /** Handle clicking of custom GUIs */
     @EventHandler(priority = EventPriority.LOW)
     public void onClick(InventoryClickEvent event) {
-        // Check if inventory is custom
-        Player player = (Player) event.getWhoClicked();
-        if (!(getInventory(player) instanceof UAInventory)) {
+        // Check if an inventory was even clicked
+        Inventory inv = event.getClickedInventory();
+        if (inv == null) {
             return;
         }
         
-        // Handle clicking outside GUI
-        Inventory inv = event.getClickedInventory();
-        if (inv == null) {
+        // Check if inventory is custom
+        Player player = (Player) event.getWhoClicked();
+        UAInventory uinv = getInventory(player);
+        if (uinv == null) {
+            return;
+        }
+        
+        // Check if using cindersmith, if so allow
+        if (uinv instanceof Cindersmith cs && cs.allowClick(event)) {
+            uinv.registerClick(event.getSlot(), event.getClick());
             return;
         }
         
@@ -67,17 +74,31 @@ public class InventoryManager implements Listener {
         }
         
         event.setCancelled(true);
-        getInventory(player).registerClick(event.getSlot(), event.getClick());
+        uinv.registerClick(event.getSlot(), event.getClick());
     }
     
     /** Unregister custom inventories when they are closed. */
     @EventHandler
     public void unregisterCustomInventories(InventoryCloseEvent event) {
-        Player player = (Player) event.getPlayer();
-        
-        // Unregister
-        if (getInventory(player) instanceof UAInventory) {
-            removePlayer(player);
+        unregister((Player) event.getPlayer());
+    }
+    
+    /**
+     * Forcibly unregister a player. Use for server
+     * shutdowns only!
+     * 
+     * @param player
+     */
+    public void unregister(Player player) {
+        UAInventory uinv = getInventory(player);
+        if (uinv == null) {
+            return;
         }
+        
+        if (uinv instanceof Cindersmith cs) {
+            cs.onClose(player);
+        }
+        
+        removePlayer(player);
     }
 }

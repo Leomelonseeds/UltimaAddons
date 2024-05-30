@@ -41,5 +41,6 @@ public class CommandManager {
         cmdManager.registerCommand(new UAIntro());
         cmdManager.registerCommand(new UAChallenge());
         cmdManager.registerCommand(new UASk(plugin));
+        cmdManager.registerCommand(new UAEnchant());
     }
 }

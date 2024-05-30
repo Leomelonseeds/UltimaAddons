@@ -8,12 +8,22 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Registry;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.objects.EnchantResult;
@@ -24,14 +34,17 @@ import net.kyori.adventure.text.Component;
 
 public class Cindersmith extends UAInventory {
     
-    private static List<Integer> reservedSlots = List.of(2, 3, 11, 12, 15, 38, 40, 42); 
-    private static List<Integer> resultSlots = List.of(38, 40, 42);
-    private static List<String> tiers = List.of("common", "uncommon", "rare", "epic", "legendary");
-    private static Map<UUID, Pair<Long, Integer>> data;
+    private static final List<Integer> reservedSlots = List.of(2, 3, 11, 12, 15, 38, 40, 42); 
+    private static final List<Integer> resultSlots = List.of(38, 40, 42);
+    private static final List<String> tiers = List.of("common", "uncommon", "rare", "epic", "legendary");
+    
+    private static Map<UUID, Pair<Long, Integer>> data = new HashMap<>();
+    private static List<Enchantment> vanillaEnchants;
     
     private UltimaAddons plugin;
     private UUID uuid;
     private EnchantResult[] results;
+    private BukkitTask displayRevolver;
     
     public Cindersmith(Player player) {
         super(player, 54, "Cindersmith");
@@ -39,15 +52,21 @@ public class Cindersmith extends UAInventory {
         this.uuid = player.getUniqueId();
         this.results = new EnchantResult[3];
         
-        if (data == null) {
-            data = new HashMap<>();
-        }
-        
         if (!data.containsKey(uuid)) {
             data.put(uuid, Pair.of(System.currentTimeMillis(), 0));
         }
+        
+        if (vanillaEnchants == null) {
+            vanillaEnchants = new ArrayList<>();
+            Registry.ENCHANTMENT.forEach(ve -> {
+                if (!ve.isTreasure() && !ve.isCursed()) {
+                    vanillaEnchants.add(ve);
+                }
+            });
+        }
     }
 
+    // Consider making the gear/dust indicator cycle in the future
     @Override
     public void updateInventory() {
         ConfigurationSection sec = plugin.getConfig().getConfigurationSection("enchantgui");
@@ -74,13 +93,34 @@ public class Cindersmith extends UAInventory {
             inv.setItem(i, pane);
         }
         
-        // Gear indicator icon
-        ItemStack gearInfo = Utils.createItem(sec.getConfigurationSection("gear"));
-        inv.setItem(2, gearInfo);
-        
-        // Dust indicator icon
-        ItemStack dustInfo = Utils.createItem(sec.getConfigurationSection("dust"));
-        inv.setItem(3, dustInfo);
+        // Revolving gear/dust indicators
+        if (displayRevolver == null) {
+            // Gear indicator icon
+            ItemStack gearInfo = Utils.createItem(sec.getConfigurationSection("gear"));
+            gearInfo.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            inv.setItem(2, gearInfo);
+            
+            // Dust indicator icon
+            ItemStack dustInfo = Utils.createItem(sec.getConfigurationSection("dust"));
+            inv.setItem(3, dustInfo);
+            
+            // Revolve 
+            List<String> gearMaterials = sec.getStringList("gear.materials");
+            List<String> dustMaterials = sec.getStringList("dust.materials");
+            displayRevolver = new BukkitRunnable() {
+                
+                int iter = 100;
+                
+                @Override
+                public void run() {
+                    ItemStack gearInfoNew = gearInfo.withType(Material.valueOf(gearMaterials.get(iter % gearMaterials.size())));
+                    ItemStack dustInfoNew = dustInfo.withType(Material.valueOf(dustMaterials.get(iter % dustMaterials.size())));
+                    inv.setItem(2, gearInfoNew);
+                    inv.setItem(3, dustInfoNew);
+                    iter++;
+                }
+            }.runTaskTimerAsynchronously(plugin, 20, 20);
+        }
         
         // Reroll button
         ItemStack reroll = Utils.createItem(sec.getConfigurationSection("reroll"));
@@ -121,15 +161,91 @@ public class Cindersmith extends UAInventory {
             }
             
             display = Utils.createItem(sec.getConfigurationSection("ench"));
-            
-            // TODO: Calculate costs and maximum level in getResults
-            // TODO: Figure out what to do for enchants of different max levels
+            replaceMeta(display, Map.of("%enchant%", er.getDisplayName(), "%cost%", er.getCost() + ""));
+            inv.setItem(slot, display);
         }
     }
 
     @Override
     public void registerClick(int slot, ClickType type) {
-        // TODO Auto-generated method stub
+        if (isPlaceableSlot(slot)) {
+            asyncUpdate();
+            return;
+        }
+        
+        // TODO: Reroll/enchant/get info mechanics
+    }
+    
+    /**
+     * Check if the given click from the ICE should be allowed.
+     * Updates the inventory if a shift click to the top inventory
+     * is detected.
+     * 
+     * @param e
+     */
+    public boolean allowClick(InventoryClickEvent e) {
+        // Allow clicking top slot of inventory
+        if (e.getClickedInventory().equals(e.getView().getTopInventory())){
+            if (isPlaceableSlot(e.getSlot())) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        // Update on successful shift click bottom to top
+        if (e.getClickedInventory().equals(e.getView().getBottomInventory()) && 
+                e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY && 
+                e.isShiftClick() && 
+                e.getResult() == Result.ALLOW) {
+            asyncUpdate();
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Cancel revolving task and give any remaining items
+     * back to the player
+     * 
+     * @param player
+     */
+    public void onClose(Player player) {
+        if (!player.getUniqueId().equals(uuid)) {
+            return;
+        }
+        
+        for (ItemStack item : new ItemStack[] {inv.getItem(11), inv.getItem(12)}) {
+            if (item == null) {
+                continue;
+            }
+            
+            Map<Integer, ItemStack> drops = player.getInventory().addItem(item);
+            for (ItemStack drop : drops.values()) {
+                Item ie = player.getWorld().dropItem(player.getLocation(), drop);
+                ie.setOwner(uuid);
+            }
+        }
+    }
+    
+    /**
+     * Fill results with the appropriate EnchantResults.
+     * This method is guaranteed to return the same results
+     * for a certain seed, gear, and dust rarity/amount combo.
+     * 
+     * To choose enchantments, 3 random doubles are generated.
+     * The index of the enchantment is the size of the list
+     * multiplied by the double, rounded down.
+     * 
+     * TODO: Determine incompatible enchants by loading up AE config
+     * TODO: Level formula
+     * TODO: Cost formula
+     * 
+     * @param gear
+     * @param dustAmount
+     * @param rarity
+     */
+    private void getResults(ItemStack gear, int dustAmount, String rarity) {
         
     }
     
@@ -156,10 +272,6 @@ public class Cindersmith extends UAInventory {
         meta.displayName(res.remove(res.size() - 1));
         meta.lore(res);
         item.setItemMeta(meta);
-    }
-    
-    private void getResults(ItemStack gear, int dustAmount, String rarity) {
-        // TODO
     }
     
     /**
@@ -222,5 +334,18 @@ public class Cindersmith extends UAInventory {
         inv.setItem(resultSlots.get(0), one);
         inv.setItem(resultSlots.get(1), two);
         inv.setItem(resultSlots.get(2), three);
+    }
+    
+    private EnchantResult getEnchantResult(int slot) {
+        int index = resultSlots.indexOf(slot);
+        return index == -1 ? null : results[index];
+    }
+    
+    private boolean isPlaceableSlot(int slot) {
+        return slot == 11 || slot == 12;
+    }
+    
+    private void asyncUpdate() {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> updateInventory());
     }
 }

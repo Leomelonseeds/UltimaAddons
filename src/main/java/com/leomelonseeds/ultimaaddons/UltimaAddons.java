@@ -1,5 +1,6 @@
 package com.leomelonseeds.ultimaaddons;
 
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -130,6 +131,10 @@ public class UltimaAddons extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        Bukkit.getOnlinePlayers().forEach(p -> {
+            p.closeInventory();
+            invManager.unregister(p);
+        });
         writeTradesFile();
         writeRegionsFile();
         itemManager.getAbilities().cancelTasks();

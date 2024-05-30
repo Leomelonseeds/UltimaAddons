@@ -235,6 +235,12 @@ public class LootHandler implements Listener {
             return;
         }
         
+        if (player.getItemOnCursor().getType() != Material.AIR) {
+            if (action == InventoryAction.DROP_ALL_SLOT || action == InventoryAction.DROP_ONE_SLOT) {
+                return;
+            }
+        }
+        
         if (e.getClickedInventory().getType() != InventoryType.GRINDSTONE) {
             return;
         }

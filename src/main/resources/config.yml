@@ -1,6 +1,13 @@
 enchantgui:
   gear:
     material: DIAMOND_SWORD
+    materials:
+      - DIAMOND_SWORD
+      - IRON_AXE
+      - NETHERITE_HOE
+      - BOOK
+      - CROSSBOW
+      - GOLDEN_PICKAXE
     name: "&b&lGear Slot"
     lore:
       - "&7Only items that do not have"
@@ -11,6 +18,12 @@ enchantgui:
       - "&bV"
   dust:
     material: ORANGE_DYE
+    materials:
+      - ORANGE_DYE
+      - LIGHT_GRAY_DYE
+      - LIME_DYE
+      - BLUE_DYE
+      - PURPLE_DYE
     name: "&6Enchanted Dust Slot"
     lore:
       - "&7Enchanted dust can be found in"
@@ -55,6 +68,8 @@ enchantgui:
     lore:
       - "&7This gear already has an"
       - "&7enchantment of this rarity!"
+  custom-blacklist:
+    - immolate
 
 challengegui:
   1-day:
