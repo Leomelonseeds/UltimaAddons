@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.UUID;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,7 +27,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.objects.EnchantResult;
+import com.leomelonseeds.ultimaaddons.objects.enchant.EnchantResult;
+import com.leomelonseeds.ultimaaddons.objects.enchant.UCustomEnchant;
+import com.leomelonseeds.ultimaaddons.objects.enchant.UEnchantment;
+import com.leomelonseeds.ultimaaddons.objects.enchant.UVanillaEnchant;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 import net.advancedplugins.ae.api.AEAPI;
@@ -226,6 +230,8 @@ public class Cindersmith extends UAInventory {
                 ie.setOwner(uuid);
             }
         }
+        
+        displayRevolver.cancel();
     }
     
     /**
@@ -238,14 +244,43 @@ public class Cindersmith extends UAInventory {
      * multiplied by the double, rounded down.
      * 
      * TODO: Determine incompatible enchants by loading up AE config
-     * TODO: Level formula
      * TODO: Cost formula
+     * 
+     * Obtainability:
+     * Max level 3 and above: 2 enchanted dust
+     * Max level 2: 3 enchanted dust
+     * Max level 1: 4 enchanted dust
+     * Max level of enchantment to appear >= -1 * # dust + 5
+     * 
+     * Additional Levels:
+     * Each additional enchant has a % chance of increasing the level of each enchantment.
+     * Max level 5 and above: 100%
+     * Max level 4: 75%
+     * Max level 3: 50%
+     * Max level 2: 33% (on average, 3 dust = full levelup)
+     * Function of x remaining dust, and y remaining levels
+     * % = Min(remaining levels/(6 - min # dust for ench), 1)
+     * 
+     * 
+     * 
      * 
      * @param gear
      * @param dustAmount
      * @param rarity
      */
     private void getResults(ItemStack gear, int dustAmount, String rarity) {
+        // Reset random seed
+        long seed = data.get(uuid).getLeft();
+        Random rand = new Random(seed);
+        
+        // Fetch all possible enchantments of this rarity
+        List<UEnchantment> enchants = new ArrayList<>();
+        if (rarity.equals("common")) {
+            vanillaEnchants.forEach(ve -> enchants.add(new UVanillaEnchant(ve)));
+        } else {
+            AEAPI.getEnchantmentsByGroup(rarity).forEach(ce -> enchants.add(new UCustomEnchant(ce)));
+        }
+        
         
     }
     
