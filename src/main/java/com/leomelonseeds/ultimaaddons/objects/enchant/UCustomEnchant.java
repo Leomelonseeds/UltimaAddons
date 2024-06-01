@@ -13,6 +13,7 @@ public class UCustomEnchant implements UEnchantment {
     
     public UCustomEnchant(String ench) {
         this.ench = ench;
+        // TODO: Load incompatible/required enchants from AE config
     }
 
     @Override
@@ -22,6 +23,7 @@ public class UCustomEnchant implements UEnchantment {
 
     @Override
     public void applyEnchant(ItemStack item, int level) {
+        // TODO: Remove required enchants
         AEAPI.applyEnchant(ench, level, item);
     }
 
@@ -33,6 +35,7 @@ public class UCustomEnchant implements UEnchantment {
     
     @Override
     public boolean isCompatible(ItemStack item) {
+        // TODO: Implement checking for incompatible/required enchants
         return AEAPI.isApplicable(item.getType(), ench);
     }
 

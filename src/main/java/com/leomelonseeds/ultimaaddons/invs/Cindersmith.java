@@ -239,30 +239,32 @@ public class Cindersmith extends UAInventory {
      * This method is guaranteed to return the same results
      * for a certain seed, gear, and dust rarity/amount combo.
      * 
-     * To choose enchantments, 3 random doubles are generated.
-     * The index of the enchantment is the size of the list
-     * multiplied by the double, rounded down.
+     * First, a list of obtainable enchants is compiled for the
+     * combination of input items. Then, 3 random doubles are
+     * generated. 3 enchantments are chosen from these doubles,
+     * with the index of the enchantment being the size of the
+     * the list multiplied by the double, rounded down. Each time
+     * an enchantment is chosen, it is removed from the list. If
+     * no more enchantments are available, it sets that result to null.
      * 
-     * TODO: Determine incompatible enchants by loading up AE config
-     * TODO: Cost formula
+     * Giving more dust gives chances that an enchant with a lower
+     * maximum level may appear. The minimum amount of dust n required
+     * to get a max level m enchant is given by:
+     * n = max(-m + 5, 2) where m >= 1
+     * E.g. a max level 2 enchant requires at least 3 dust.
      * 
-     * Obtainability:
-     * Max level 3 and above: 2 enchanted dust
-     * Max level 2: 3 enchanted dust
-     * Max level 1: 4 enchanted dust
-     * Max level of enchantment to appear >= -1 * # dust + 5
+     * Each additional piece of dust also has a chance of increasing the
+     * level of resulting enchantments. The % chance for each dust to
+     * increase the level of the enchantment p is given by:
+     * p = (m - 1) / (6 - n)
+     * E.g. for a max level 2 enchant, each dust has a 33% chance of
+     * increasing the enchantment result level.
      * 
-     * Additional Levels:
-     * Each additional enchant has a % chance of increasing the level of each enchantment.
-     * Max level 5 and above: 100%
-     * Max level 4: 75%
-     * Max level 3: 50%
-     * Max level 2: 33% (on average, 3 dust = full levelup)
-     * Function of x remaining dust, and y remaining levels
-     * % = Min(remaining levels/(6 - min # dust for ench), 1)
-     * 
-     * 
-     * 
+     * The cost in player XP levels of each enchant c is given by the
+     * following formula, where l is the actual level of the enchant,
+     * and t is the tier index, starting at common = 0:
+     * c = t * 10 + ceil(10 * l / m)
+     * E.g. getting level 1/2 for an uncommon enchant costs 15 levels.
      * 
      * @param gear
      * @param dustAmount

@@ -42,5 +42,8 @@ public class CommandManager {
         cmdManager.registerCommand(new UAChallenge());
         cmdManager.registerCommand(new UASk(plugin));
         cmdManager.registerCommand(new UAEnchant());
+        
+        // Test command - comment out in production (maybe)
+        cmdManager.registerCommand(new UATest());
     }
 }
