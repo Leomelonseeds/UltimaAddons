@@ -15,8 +15,8 @@ public class EnchantResult {
         this.cost = cost;
     }
 
-    public void applyEnchant(ItemStack item) {
-        uench.applyEnchant(item, level);
+    public ItemStack applyEnchant(ItemStack item) {
+        return uench.applyEnchant(item, level);
     }
     
     public String getDisplayName() {

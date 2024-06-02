@@ -3,17 +3,21 @@ package com.leomelonseeds.ultimaaddons.invs;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Registry;
+import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -44,6 +48,7 @@ import net.kyori.adventure.text.Component;
 
 public class Cindersmith extends UAInventory {
     
+    private static final int MIN_DUST = 2;
     private static final List<Integer> reservedSlots = List.of(2, 3, 11, 12, 15, 38, 40, 42); 
     private static final List<Integer> resultSlots = List.of(38, 40, 42);
     private static final List<String> tiers = List.of("common", "uncommon", "rare", "epic", "legendary");
@@ -53,12 +58,14 @@ public class Cindersmith extends UAInventory {
     
     private UltimaAddons plugin;
     private UUID uuid;
+    private Player player;
     private EnchantResult[] results;
     private BukkitTask displayRevolver;
     
     public Cindersmith(Player player) {
         super(player, 54, "Cindersmith");
         this.plugin = UltimaAddons.getPlugin();
+        this.player = player;
         this.uuid = player.getUniqueId();
         this.results = new EnchantResult[3];
         
@@ -172,6 +179,7 @@ public class Cindersmith extends UAInventory {
             
             display = Utils.createItem(sec.getConfigurationSection("ench"));
             replaceMeta(display, Map.of("%enchant%", er.getDisplayName(), "%cost%", er.getCost() + ""));
+            display.setAmount(er.getCost());
             inv.setItem(slot, display);
         }
     }
@@ -183,7 +191,53 @@ public class Cindersmith extends UAInventory {
             return;
         }
         
-        // TODO: Reroll/enchant/get info mechanics
+        String id = Utils.getItemID(inv.getItem(slot));
+        if (id == null) {
+            return;
+        }
+
+        if (id.equals("reroll")) {
+            if (!hasResults()) {
+                sendError(player, "&cNothing to reroll!");
+                return;
+            }
+            
+            if (!takeLevels(player, getRerollCost())) {
+                return;
+            }
+            
+            int cur = data.get(uuid).getRight();
+            data.put(uuid, Pair.of(System.currentTimeMillis(), cur + 1));
+            asyncUpdate();
+            player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, 1F);
+            return;
+        }
+        
+        EnchantResult res = getEnchantResult(slot);
+        if (res == null) {
+            return;
+        }
+        
+        if (type == ClickType.RIGHT) {
+            res.getInfo(player);
+            return;
+        }
+        
+        ItemStack toEnchant = inv.getItem(11);
+        if (toEnchant == null) {
+            return;
+        }
+        
+        if (!takeLevels(player, res.getCost())) {
+            return;
+        }
+
+        inv.setItem(12, null);
+        inv.setItem(11, res.applyEnchant(toEnchant));
+        data.put(uuid, Pair.of(System.currentTimeMillis(), 0));
+        asyncUpdate();
+        player.playSound(player, Sound.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, 1F, 0.8F);
+        player.playSound(player, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 2F, 1F);
     }
     
     /**
@@ -225,18 +279,7 @@ public class Cindersmith extends UAInventory {
             return;
         }
         
-        for (ItemStack item : new ItemStack[] {inv.getItem(11), inv.getItem(12)}) {
-            if (item == null) {
-                continue;
-            }
-            
-            Map<Integer, ItemStack> drops = player.getInventory().addItem(item);
-            for (ItemStack drop : drops.values()) {
-                Item ie = player.getWorld().dropItem(player.getLocation(), drop);
-                ie.setOwner(uuid);
-            }
-        }
-        
+        returnItems(player, inv.getItem(11), inv.getItem(12));
         displayRevolver.cancel();
     }
     
@@ -246,12 +289,10 @@ public class Cindersmith extends UAInventory {
      * for a certain seed, gear, and dust rarity/amount combo.
      * 
      * First, a list of obtainable enchants is compiled for the
-     * combination of input items. Then, 3 random doubles are
-     * generated. 3 enchantments are chosen from these doubles,
-     * with the index of the enchantment being the size of the
-     * the list multiplied by the double, rounded down. Each time
-     * an enchantment is chosen, it is removed from the list. If
-     * no more enchantments are available, it sets that result to null.
+     * combination of input items. Then, 3 random enchantments
+     * are chosen. Each time an enchantment is chosen, it is removed
+     * removed from the list. If no more enchantments are available, 
+     * it sets that result to null.
      * 
      * Giving more dust gives chances that an enchant with a lower
      * maximum level may appear. The minimum amount of dust n required
@@ -277,10 +318,6 @@ public class Cindersmith extends UAInventory {
      * @param rarity
      */
     private void getResults(ItemStack gear, int dustAmount, String rarity) {
-        // Reset random seed
-        long seed = data.get(uuid).getLeft();
-        Random rand = new Random(seed);
-        
         // Fetch all possible enchantments of this rarity
         List<UEnchantment> enchants = new ArrayList<>();
         if (rarity.equals("common")) {
@@ -292,13 +329,52 @@ public class Cindersmith extends UAInventory {
                 config.load(file);
             } catch (IOException | InvalidConfigurationException e) {
                 Bukkit.getLogger().severe("Could not load AE file!");
-                Bukkit.getPlayer(uuid).sendMessage(Utils.toComponent
-                        ("&cThere was an issue fetching custom enchantment data - please contact an admin!"));
+                sendError(player, "&cThere was an issue fetching custom enchantment data - please contact an admin!");
             }
             AEAPI.getEnchantmentsByGroup(rarity).forEach(ce -> enchants.add(new UCustomEnchant(ce, config)));
         }
+
+        // Filter enchantments
+        List<UEnchantment> filtered = enchants.stream().filter(ue -> dustAmount >= minDust(ue) && ue.isCompatible(gear)).collect(Collectors.toList());
+        if (filtered.isEmpty()) {
+            return;
+        }
         
-        
+        // Get results
+        long seed = data.get(uuid).getLeft();
+        Random rand = new Random(seed);
+        for (int i = 0; i < 3; i++) {
+            // Get the enchantment to use
+            UEnchantment res = filtered.remove(rand.nextInt(0, filtered.size()));
+            
+            // Determine levelup
+            int level = 1;
+            int maxLevel = res.getMaxLevel();
+            double chance = (maxLevel - 1) / (double) (6 - minDust(res));
+            Random rand2 = new Random(seed + i + 1);
+            for (int j = MIN_DUST; j < dustAmount; j++) {
+                if (level >= maxLevel) {
+                    break;
+                }
+                
+                if (rand2.nextDouble() < chance) {
+                    level++;
+                }
+            }
+            
+            // Determine cost
+            int cost = tiers.indexOf(rarity) * 10 + (int) Math.ceil(10.0 * level / maxLevel);
+            
+            // Fill result and break if no more enchants available
+            results[i] = new EnchantResult(res, level, cost);
+            if (filtered.isEmpty()) {
+                break;
+            }
+        }
+    }
+    
+    private int minDust(UEnchantment ue) {
+        return Math.max(-1 * ue.getMaxLevel() + 5, MIN_DUST);
     }
     
     /**
@@ -316,9 +392,9 @@ public class Cindersmith extends UAInventory {
         for (Component c : display) {
             String line = Utils.toPlain(c);
             for (Entry<String, String> ph : placeholders.entrySet()) {
-                String replacement = line.replace(ph.getKey(), ph.getValue());
-                res.add(Utils.toComponent(replacement));
+                line = line.replace(ph.getKey(), ph.getValue());
             }
+            res.add(Utils.toComponent(line));
         }
         
         meta.displayName(res.remove(res.size() - 1));
@@ -328,12 +404,27 @@ public class Cindersmith extends UAInventory {
     
     /**
      * Check if there is an item in the gear slot, and more than 2
-     * enchanted dust in the dust slot
+     * enchanted dust in the dust slot. If there is a book in the
+     * gear slot, gives all books except 1 back to the player.
      * 
      * @return null if none, the rarity of the dust if yes
      */
     private String checkItems(ItemStack gear, ItemStack dust) {
-        if (gear == null || dust == null || dust.getAmount() < 2) {
+        if (gear == null) {
+            return null;
+        }
+        
+        if (gear.getType() == Material.BOOK) {
+            int extra = gear.getAmount() - 1;
+            if (extra > 0) {
+                gear.setAmount(1);
+                ItemStack toReturn = new ItemStack(gear);
+                toReturn.setAmount(extra);
+                returnItems(player, toReturn);
+            }
+        }
+        
+        if (dust == null || dust.getAmount() < MIN_DUST) {
             return null;
         }
         
@@ -377,6 +468,38 @@ public class Cindersmith extends UAInventory {
         return false;
     }
     
+    /**
+     * Remove levels from the player.
+     * 
+     * @param player
+     * @param amount
+     * @return true if levels removed, false if not enough
+     */
+    private boolean takeLevels(Player player, int amount) {
+        if (player.getLevel() < amount) {
+            sendError(player, "&cYou do not have enough experience levels!");
+            return false;
+        }
+        
+        player.setLevel(player.getLevel() - amount);
+        return true;
+    }
+    
+    /**
+     * Give items to a player, dropping them on the floor if full
+     * 
+     * @param player
+     * @param items
+     */
+    private void returnItems(Player player, ItemStack... items) {
+        ItemStack[] ret = Arrays.asList(items).stream().filter(Objects::nonNull).toArray(ItemStack[]::new);
+        Map<Integer, ItemStack> drops = player.getInventory().addItem(ret);
+        for (ItemStack drop : drops.values()) {
+            Item ie = player.getWorld().dropItem(player.getLocation(), drop);
+            ie.setOwner(uuid);
+        }
+    }
+    
     private int getRerollCost() {
         int rerolls = data.get(uuid).getRight();
         return (int) Math.pow(2, rerolls);
@@ -399,5 +522,20 @@ public class Cindersmith extends UAInventory {
     
     private void asyncUpdate() {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> updateInventory());
+    }
+    
+    private boolean hasResults() {
+        for (EnchantResult r : results) {
+            if (r != null) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    private void sendError(Player player, String msg) {
+        player.sendMessage(Utils.toComponent(msg));
+        player.playSound(player, Sound.BLOCK_NOTE_BLOCK_BASS, 1F, 1F);
     }
 }
