@@ -11,6 +11,7 @@ import org.kingdoms.constants.namespace.Namespace;
 
 import com.leomelonseeds.ultimaaddons.ability.ae.CaptureEffect;
 import com.leomelonseeds.ultimaaddons.ability.ae.CooldownEffect;
+import com.leomelonseeds.ultimaaddons.ability.ae.FallDistanceDamage;
 import com.leomelonseeds.ultimaaddons.ability.ae.RecuperateEffect;
 import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityArmor;
 import com.leomelonseeds.ultimaaddons.ability.ae.UAddDurabilityCurrentItem;
@@ -100,11 +101,12 @@ public class UltimaAddons extends JavaPlugin {
         parryListener = new ParryListener();
         UAUnclaimProcessor.register();
         new UAPlaceholders().register();
-        registerAE(new CaptureEffect(plugin));
-        registerAE(new RecuperateEffect(plugin));
-        registerAE(new UAddDurabilityCurrentItem(plugin));
-        registerAE(new UAddDurabilityArmor(plugin));
-        registerAE(new CooldownEffect(plugin));
+        registerAE(new CaptureEffect(this));
+        registerAE(new RecuperateEffect(this));
+        registerAE(new UAddDurabilityCurrentItem(this));
+        registerAE(new UAddDurabilityArmor(this));
+        registerAE(new CooldownEffect(this));
+        registerAE(new FallDistanceDamage(this));
 
         // Register listener
         PluginManager pm = getServer().getPluginManager();

@@ -1,5 +1,8 @@
 package com.leomelonseeds.ultimaaddons.objects.enchant;
 
+import java.util.List;
+
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -10,8 +13,10 @@ import net.advancedplugins.ae.api.AEAPI;
 public class UCustomEnchant implements UEnchantment {
     
     private String ench;
+    private List<String> required;
+    private List<String> incompatible;
     
-    public UCustomEnchant(String ench) {
+    public UCustomEnchant(String ench, FileConfiguration aeConfig) {
         this.ench = ench;
         // TODO: Load incompatible/required enchants from AE config
     }

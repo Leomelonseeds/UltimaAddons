@@ -1,7 +1,6 @@
 package com.leomelonseeds.ultimaaddons.utils;
 
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.kingdoms.constants.group.Kingdom;
 import org.kingdoms.constants.player.KingdomPlayer;
@@ -43,13 +42,8 @@ public class UAPlaceholders extends PlaceholderExpansion {
                 break;
             }
             
-            Player op = (Player) player;
             if (params.equals("canparry")) {
                 return UltimaAddons.getPlugin().getParry().canParry(player.getUniqueId()) + "";
-            }
-            
-            if (params.equals("falldistance")) {
-                return op.getFallDistance() + "";
             }
         } while (false);
         

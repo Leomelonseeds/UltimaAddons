@@ -1,5 +1,7 @@
 package com.leomelonseeds.ultimaaddons.invs;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +15,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Registry;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -33,6 +38,7 @@ import com.leomelonseeds.ultimaaddons.objects.enchant.UEnchantment;
 import com.leomelonseeds.ultimaaddons.objects.enchant.UVanillaEnchant;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
+import net.advancedplugins.ae.Core;
 import net.advancedplugins.ae.api.AEAPI;
 import net.kyori.adventure.text.Component;
 
@@ -280,7 +286,16 @@ public class Cindersmith extends UAInventory {
         if (rarity.equals("common")) {
             vanillaEnchants.forEach(ve -> enchants.add(new UVanillaEnchant(ve)));
         } else {
-            AEAPI.getEnchantmentsByGroup(rarity).forEach(ce -> enchants.add(new UCustomEnchant(ce)));
+            File file = new File(Core.getInstance().getDataFolder().toString(), "enchantments.yml");
+            FileConfiguration config = new YamlConfiguration();
+            try {
+                config.load(file);
+            } catch (IOException | InvalidConfigurationException e) {
+                Bukkit.getLogger().severe("Could not load AE file!");
+                Bukkit.getPlayer(uuid).sendMessage(Utils.toComponent
+                        ("&cThere was an issue fetching custom enchantment data - please contact an admin!"));
+            }
+            AEAPI.getEnchantmentsByGroup(rarity).forEach(ce -> enchants.add(new UCustomEnchant(ce, config)));
         }
         
         
