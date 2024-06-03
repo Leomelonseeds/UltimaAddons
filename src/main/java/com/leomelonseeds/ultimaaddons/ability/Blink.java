@@ -1,6 +1,5 @@
 package com.leomelonseeds.ultimaaddons.ability;
 
-import com.leomelonseeds.ultimaaddons.utils.Utils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -8,6 +7,8 @@ import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+
+import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class Blink extends Ability {
 
@@ -31,7 +32,7 @@ public class Blink extends Ability {
             Location plus = toLoc.clone().add(0, 1, 0);
 
             // Only accept if location is safe, otherwise use prev location
-            if (plus.getBlock().getType() != Material.AIR) {
+            if (plus.getBlock().getType().isSolid()) {
                 break;
             }
 

@@ -134,7 +134,7 @@ public class AbilityManager implements Listener {
                     
                     PotionEffectType effect = materials.get(d);
                     if (effect == null) {
-                        return;
+                        continue;
                     }
                     
                     int duration = 25;

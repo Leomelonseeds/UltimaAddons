@@ -90,7 +90,7 @@ public class UCustomEnchant implements UEnchantment {
         }
         
         // Basic applicability check
-        if (!AEAPI.isApplicable(item.getType(), ench)) {
+        if (!AEAPI.getMaterialsForEnchantment(ench).contains(item.getType().toString())) {
             return false;
         }
         
