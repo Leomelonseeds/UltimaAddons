@@ -11,6 +11,9 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+
 public class UVanillaEnchant implements UEnchantment {
     
     private Enchantment ench;
@@ -54,7 +57,9 @@ public class UVanillaEnchant implements UEnchantment {
     public void getInfo(Player player) {
         String key = ench.getKey().value();
         String link = "https://minecraft.wiki/w/" + key;
-        player.sendMessage(Utils.toComponent("&6Check the official Minecraft Wiki: &e&n" + link));
+        Component toSend = Utils.toComponent("&6Check the official Minecraft Wiki: &e&n" + link);
+        toSend = toSend.clickEvent(ClickEvent.openUrl(link));
+        player.sendMessage(toSend);
     }
 
     @Override
