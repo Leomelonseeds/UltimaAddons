@@ -273,31 +273,30 @@ public class ShopkeeperListener implements Listener {
 
     private void updateTrades(Player p, RotatingShopkeeper rsk) {
         Bukkit.getScheduler().runTask(plugin, () -> {
-                    InventoryView openInventory = p.getOpenInventory();
-                    assert openInventory.getTopInventory().getType() == InventoryType.MERCHANT;
-                    MerchantInventory merchantInventory = (MerchantInventory) openInventory.getTopInventory();
-                    Merchant merchant = merchantInventory.getMerchant();
-                    List<MerchantRecipe> recipes = merchant.getRecipes();
+            InventoryView openInventory = p.getOpenInventory();
+            assert openInventory.getTopInventory().getType() == InventoryType.MERCHANT;
+            MerchantInventory merchantInventory = (MerchantInventory) openInventory.getTopInventory();
+            Merchant merchant = merchantInventory.getMerchant();
+            List<MerchantRecipe> recipes = merchant.getRecipes();
 
-                    if (recipes.isEmpty())
-                        return;
+            if (recipes.isEmpty())
+                return;
 
-                    List<Integer> limits = rsk.getLimits();
-                    List<Integer> uses = rsk.getUses(p);
+            List<Integer> limits = rsk.getLimits();
+            List<Integer> uses = rsk.getUses(p);
 
-                    for (int i = 0; i < recipes.size(); i++) {
-                        MerchantRecipe recipe = recipes.get(i);
-                        int limit = limits.get(i);
-                        int usage = uses.isEmpty() ? 0 : uses.get(i);
+            for (int i = 0; i < recipes.size(); i++) {
+                MerchantRecipe recipe = recipes.get(i);
+                int limit = limits.get(i);
+                int usage = uses.isEmpty() ? 0 : uses.get(i);
 
-                        recipe.setMaxUses(limit);
-                        recipe.setUses(usage);
-                    }
+                recipe.setMaxUses(limit);
+                recipe.setUses(usage);
+            }
 
-                    // Send packet
-                    sendOffers(p);
-                }
-        );
+            // Send packet
+            sendOffers(p);
+        });
     }
     
     // Fetch first playertradingshopkeepers in region
