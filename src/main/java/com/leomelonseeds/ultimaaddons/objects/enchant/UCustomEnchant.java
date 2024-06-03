@@ -2,15 +2,12 @@ package com.leomelonseeds.ultimaaddons.objects.enchant;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -18,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 import net.advancedplugins.ae.api.AEAPI;
+import net.advancedplugins.ae.enchanthandler.enchantments.AdvancedEnchantment;
 
 public class UCustomEnchant implements UEnchantment {
     
@@ -32,28 +30,30 @@ public class UCustomEnchant implements UEnchantment {
      * @param ench
      * @param aeConfig set to null to not load required/incompatible enchants
      */
-    public UCustomEnchant(String ench, FileConfiguration aeConfig) {
+    public UCustomEnchant(String ench, boolean checkRequirements) {
         this.ench = ench;
-        if (aeConfig == null) {
+        if (!checkRequirements) {
             required = Collections.emptyMap();
             incompatible = Collections.emptyMap();
             return;
         }
         
-        this.required = compileEnchants(aeConfig.getStringList(ench + ".settings.required-enchants"));
-        this.incompatible = compileEnchants(aeConfig.getStringList(ench + ".settings.not-applyable-with"));
+        AdvancedEnchantment ae = AEAPI.getEnchantmentInstance(ench);
+        this.required = compileEnchants(ae.getRequiredEnchants());
+        
+        Map<String, Integer> aeIncompat = new HashMap<>();
+        ae.getBlacklistedEnchants().forEach(s -> aeIncompat.put(s, 1)); // Dummy values, AE does not support incompat levels
+        this.incompatible = compileEnchants(aeIncompat);
     }
     
-    private Map<UEnchantment, Integer> compileEnchants(List<String> list) {
+    private Map<UEnchantment, Integer> compileEnchants(Map<String, Integer> list) {
         Map<UEnchantment, Integer> ret = new HashMap<>();
-        list.forEach(s -> {
-            String[] args = s.split(":");
-            int minLevel = args.length == 2 ? NumberUtils.toInt(args[1]) : 0;
-            Enchantment ve = Registry.ENCHANTMENT.get(NamespacedKey.minecraft(args[0]));
+        list.entrySet().forEach(e -> {
+            Enchantment ve = Registry.ENCHANTMENT.get(NamespacedKey.minecraft(e.getKey()));
             if (ve != null) {
-                ret.put(new UVanillaEnchant(ve), minLevel);
+                ret.put(new UVanillaEnchant(ve), e.getValue());
             } else {
-                ret.put(new UCustomEnchant(s, null), minLevel);
+                ret.put(new UCustomEnchant(e.getKey(), false), e.getValue());
             }
         });
         return ret;

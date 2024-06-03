@@ -14,10 +14,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.World.Environment;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
+import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,6 +32,7 @@ import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.inventory.GrindstoneInventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -61,8 +65,42 @@ import net.kyori.adventure.text.Component;
  */
 public class MiscListener implements Listener {
 
+    private static final double DEFAULT_MINECART_SPEED = 0.4;
+    
     private static Map<Player, String> msgs = new HashMap<>();
     private static Set<Player> elytraCancelling = new HashSet<>();
+    
+    // Minecart speed on copper
+    // Thanks to https://github.com/ergor/hsrails/blob/master/src/main/java/no/netb/mc/hsrails/MinecartListener.java
+    @EventHandler
+    public void onVehicleMove(VehicleMoveEvent event) {
+        if (!(event.getVehicle() instanceof Minecart cart)) {
+            return;
+        }
+        
+        Location cartLocation = cart.getLocation();
+        World cartsWorld = cart.getWorld();
+        Block rail = cartsWorld.getBlockAt(cartLocation);
+        if (rail.getType() != Material.POWERED_RAIL) {
+            return;
+        }
+        
+        String type = cartsWorld.getBlockAt(cartLocation.add(0, -1, 0)).getType().toString();
+        if (!type.contains("COPPER") || type.contains("ORE") || type.contains("RAW")) {
+            cart.setMaxSpeed(DEFAULT_MINECART_SPEED);
+            return;
+        }
+        
+        if (type.contains("OXIDIZED")) {
+            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 6);
+        } else if (type.contains("WEATHERED")) {
+            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 5.33);
+        } else if (type.contains("EXPOSED")) {
+            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 4.67);
+        } else {
+            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 4);
+        }
+    }
     
     // Cave noise when moving between safe/mob scaled zones
     @EventHandler
