@@ -3,6 +3,7 @@ This plugin adds a couple features to the Ultima Kingdoms server that are not pr
 
 ## Kingdoms
 UltimaAddons uses the KingdomsX API by Crypto Morin to provide several extra features.
+
 ### Challenges
 - Kingdoms can now only challenge 1 Kingdom at a time. However, one Kingdom may get challenged by multiple other Kingdoms.
 - There is now a confirmation process before sending a challenge to make sure that it feels like a commitment.
@@ -57,11 +58,14 @@ The plugin also hooks into AdvancedEnchantments' API to provide the following cu
 - RECUPERATE: Reduces cooldown time for shields when they are disabled by an axe.
 - UADD_DURABILITY_CURRENT_ITEM: Adds/removes durability from an item, with consideration for unbreaking enchantment and custom durability items.
 - UADD_DURABILITY_ARMOR: Adds/removes durability from all worn armor, with consideration for unbreaking enchantment and custom durability items.
+- FALL_DISTANCE_DAMAGE: Multiplies damage dealt by the fall distance of the attacker.
 
-Additionally, the plugin allows the following enchants to function properly by providing placeholders or helper methods:
+This, with some additional placeholders, allows the the following enchants to function properly:
 - Parry: Block your shield right as your opponent is about to hit you to perform a parry, dealing true damage and knocking them backwards.
 - Gardener: Critical hits do more damage the higher you fall from.
 - Mobslinger: Hold any mob's spawn egg in your offhand to load and shoot it from your crossbow.
+- Disintegrate: Hits do more durability damage to both your weapon and opponent armor.
+- Recuperate: Reduces cooldown time for shields when they are disabled by an axe.
 
 ## Custom Items
 The plugin also provides some custom items and recipes that add some fresh gameplay elements to the survival experience. All recipes can be found by using the `/recipes` command in-game. Most weapons with abilities have cooldowns that are not listed here, since they are subject to change. Several items have increased durability over their vanilla counterparts, such as the armorsets.
@@ -98,6 +102,24 @@ The plugin replaces regular teleportation commands with item-based teleports. Af
 - Mithril Ingot: Formed when shulkers are destroyed by star-like temperatires. Gives Speed I when held. Used to craft Mithril armor.
 - Dragon Firework: The only firework that can boost elytras in flight. Boost is tripled in the End.
 - Bundle: An item that never became obtainable in survival, now has a recipe.
+- Enchanted Dust: Allows enchantments to be obtained through the Cindersmith
+
+## Enchanting
+Ultima has a fully custom method of obtaining its vanilla and custom enchantments, starting from a resource known as enchanted dust. This can then be used in the Cindersmith custom enchanting table to obtain different rarities and levels of enchantments.
+
+### Enchanted Dust
+Common (vanilla), uncommon, rare, epic, and legendary dust can be obtained via:
+- Chest loot. The rarity and amount of dust increases the closer the player is to the world border.
+- Mining. The rarity and amount of dust depends on the distance to the world border, fortune, AuraSkills mining luck, and type of ore mined.
+- Grindstone disenchanting. Each removed enchant has a chance of giving dust of the enchant's rarity. The amount of dust depends on AuraSkills Sorcery level, the level of the enchant, and its rarity if it is a vanilla enchant.
+
+### Cindersmith
+- A custom enchantment table-like GUI that takes in a gear item (or book), and enchanted dust (instead of the vanilla lapis).
+- Only items that do not already have an enchantment of the rarity of the inputted dust can be enchanted.
+- There is a *reroll* button, which allows you to refresh the enchantment options. The cost of rerolling doubles each reroll, and resets when you enchant an item.
+- The enchantment choices are the same rarity as the inputted enchanted dust. Common corresponds to vanilla enchants.
+- Placing more enchanted dust produces higher level enchantments.
+- Enchantment cost is determined by its rarity and current/max level.
 
 ## Shopkeepers
 The plugin also hooks onto Shopkeepers and creates two new types of shopkeepers (combinable), namely:
@@ -122,3 +144,4 @@ The plugin uses the AdvancedRegionMarket API alongside Shopkeepers to link renta
 Finally, the plugin adds a few game mechanics to make the survival experience more balanced and enjoyable.
 
 - Elytras do not work if exposed to rain.
+- Powered rails placed on copper blocks increases the maximum speed of Minecarts by 4x, and up to 6x if the copper is fully oxidized.
