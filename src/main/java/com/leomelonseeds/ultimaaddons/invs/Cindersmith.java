@@ -172,7 +172,7 @@ public class Cindersmith extends UAInventory {
             }
             
             display = Utils.createItem(sec.getConfigurationSection("ench"));
-            replaceMeta(display, Map.of("%enchant%", er.getDisplayName(), "%cost%", er.getCost() + ""));
+            replaceMeta(display, Map.of("%enchant%", er.getDisplayName(), "%cost%", er.getCost() + "", "%dust%", er.getDust() + ""));
             display.setAmount(er.getCost());
             inv.setItem(slot, display);
         }
@@ -218,7 +218,8 @@ public class Cindersmith extends UAInventory {
         }
         
         ItemStack toEnchant = inv.getItem(11);
-        if (toEnchant == null) {
+        ItemStack dust = inv.getItem(12);
+        if (toEnchant == null || dust == null) {
             return;
         }
         
@@ -226,7 +227,7 @@ public class Cindersmith extends UAInventory {
             return;
         }
 
-        inv.setItem(12, null);
+        dust.setAmount(dust.getAmount() - res.getDust());
         inv.setItem(11, res.applyEnchant(toEnchant));
         data.put(uuid, Pair.of(System.currentTimeMillis(), 0));
         asyncUpdate();
@@ -334,6 +335,7 @@ public class Cindersmith extends UAInventory {
             UEnchantment res = filtered.remove(rand.nextInt(0, filtered.size()));
             
             // Determine levelup
+            int dustUsed = MIN_DUST;
             int level = 1;
             int maxLevel = res.getMaxLevel();
             double chance = (maxLevel - 1) / (double) (6 - minDust(res));
@@ -342,7 +344,8 @@ public class Cindersmith extends UAInventory {
                 if (level >= maxLevel) {
                     break;
                 }
-                
+
+                dustUsed++;
                 if (rand2.nextDouble() < chance) {
                     level++;
                 }
@@ -352,7 +355,7 @@ public class Cindersmith extends UAInventory {
             int cost = tiers.indexOf(rarity) * 10 + (int) Math.ceil(10.0 * level / maxLevel);
             
             // Fill result and break if no more enchants available
-            results[i] = new EnchantResult(res, level, cost);
+            results[i] = new EnchantResult(res, level, cost, dustUsed);
             if (filtered.isEmpty()) {
                 break;
             }
