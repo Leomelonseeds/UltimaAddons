@@ -6,11 +6,17 @@ Ultima uses the [ImageFrame](https://www.spigotmc.org/resources/imageframe-load-
 
 ## Obtaining
 Here are the necessary steps to obtain an image map of your choice:
-- Find an image you like, and get its URL. Most of the times, this can be found by right clicking the image and choosing "Copy image address". In this example, we take the classic arson frog.
+- Find an image you like, and get its URL. Most of the times, this can be found by right clicking the image and choosing "Copy image address". In this example, we take the classic arson frog.  
+![Screenshot 2024-06-02 225849](https://github.com/Leomelonseeds/UltimaAddons/assets/17891302/089ce421-e4c4-4fcd-8896-94d6673c3aeb)
+
 - In Minecraft, build a wall and place item frames, making the wall as large as you want the image to be. Here, we will use a 3x2 wall - 3 wide and 2 high.
-- Make sure you have at least as many empty maps in your inventory as the amount of item frames you just placed. We need 6 maps for our arson frog.
+- Make sure you have at least as many empty maps in your inventory as the amount of item frames you just placed. We need 6 maps for our arson frog.  
+![2024-06-02_23 00 23](https://github.com/Leomelonseeds/UltimaAddons/assets/17891302/6a324b04-01b5-4ac2-8ca8-84041cb9b2c5)
+
 - Run `iframe create [name] [url] [width] [height] combined`, replacing `[name]` with the name you want to give the image to retrieve it later, `[url]` with the url of the image, and `[width]` and `[height]` with the desired width and height of your image in-game. The keyword `combined` will use the maps in your inventory to create a single item containing your image. The command I will use is `iframe create Arson https://i.pinimg.com/736x/0f/81/11/0f811188b9f378590f2e1e18dbf0fae3.jpg 3 2 combined`.
-- You should now obtain an item containing your image. You can then right click this on your wall of item frames to place it.
+- You should now obtain an item containing your image. You can then right click this on your wall of item frames to place it.  
+![2024-06-02_23 35 22](https://github.com/Leomelonseeds/UltimaAddons/assets/17891302/64d75b85-24a3-48da-a93c-7ed595d96cb1)
+
 
 Without the `combined` keyword, the plugin will create one map for each item frame, 6 in total for our arson frog. This is messy, so we recommend getting the combined version for any usage.
 
