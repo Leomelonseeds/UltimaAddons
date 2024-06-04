@@ -42,3 +42,7 @@ sources:
     menu_item:
       material: water_bucket
     unit: '{sources.units.meter}'
+  tryme:
+    type: ua/tryme
+    menu_item:
+      material: OAK_SIGN

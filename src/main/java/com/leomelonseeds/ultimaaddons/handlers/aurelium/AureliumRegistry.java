@@ -5,6 +5,7 @@ import java.nio.file.FileSystems;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.data.file.Data;
+import com.leomelonseeds.ultimaaddons.objects.TrymeSource;
 import com.leomelonseeds.ultimaaddons.objects.UASkills;
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 
@@ -12,6 +13,7 @@ import dev.aurelium.auraskills.api.AuraSkillsApi;
 import dev.aurelium.auraskills.api.ability.CustomAbility;
 import dev.aurelium.auraskills.api.registry.NamespacedRegistry;
 import dev.aurelium.auraskills.api.skill.CustomSkill;
+import dev.aurelium.auraskills.api.source.XpSourceParser;
 
 public class AureliumRegistry {
     private File aureliumFolder;
@@ -37,6 +39,11 @@ public class AureliumRegistry {
         
         // And the abilities
         registerAbilities(UASkills.ABIDING, UASkills.BURGLAR);
+        
+        // And the sources
+        registry.registerSourceType("tryme", (XpSourceParser<TrymeSource>) (source, context) -> {
+            return new TrymeSource(context.parseValues(source));
+        });
     }
 
     public File getAureliumFolder() {
