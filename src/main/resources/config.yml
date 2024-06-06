@@ -270,6 +270,8 @@ loot:
     # Additional dust has a lvl/maxlvl * multiplier chance of dropping.
     # Additional dust drops are determined with the same formula as vanilla.
     custom-multiplier: 1
+  # Chance of enchanted book being an enchanted dust instead
+  fishing-dust-chance: 50
   
 staff-log:
   - pt

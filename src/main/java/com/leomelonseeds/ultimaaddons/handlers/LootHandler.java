@@ -19,6 +19,7 @@ import org.bukkit.Sound;
 import org.bukkit.World.Environment;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
@@ -31,6 +32,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
@@ -141,15 +143,7 @@ public class LootHandler implements Listener {
         // Otherwise apply ench table enchant and attempt to custom enchant as well
         int levels = rand.nextInt(sec.getInt("enchant.min"), sec.getInt("enchant.max") + 1);
         gear = Bukkit.getItemFactory().enchantWithLevels(gear, levels, false, rand);
-        int custom = getMaxLevel(ring + 1);
-        if (custom > 1) {
-            for (int i = custom; i > 1; i--) {
-                if (randomlyEnchant(gear, i)) {
-                    break;
-                }
-            }
-        }
-        
+        randomlyEnchant(gear, getMaxLevel(ring + 1));
         return gear;
     }
     
@@ -207,6 +201,43 @@ public class LootHandler implements Listener {
                 ent.getWorld().dropItem(ent.getLocation(), item);
             }
         }
+    }
+    
+    // Drops dust or enchanted books when fishing
+    @EventHandler
+    public void onFish(PlayerFishEvent e) {
+        if (e.getState() != PlayerFishEvent.State.CAUGHT_FISH) {
+            return;
+        }
+        
+        Item caught = (Item) e.getCaught();
+        ItemStack loot = caught.getItemStack();
+        if (loot.getType() != Material.ENCHANTED_BOOK && loot.getType() != Material.BOW) {
+            return;
+        }
+
+        int lvl = getMaxLevel(getGroup(caught.getLocation()));
+        if (lvl <= 0) {
+            return;
+        }
+        
+        if (loot.getType() == Material.BOW) {
+            randomlyEnchant(loot, lvl);
+            caught.setItemStack(loot);
+            return;
+        }
+        
+        // Material must be an enchanted book here
+        double dustChance = lootConfig.getDouble("fishing-dust-chance") / 100.0;
+        if (rand.nextDouble() > dustChance) {
+            randomlyEnchant(loot, lvl);
+            caught.setItemStack(loot);
+            return;
+        }
+
+        ItemManager items = UltimaAddons.getPlugin().getItems();
+        ItemStack dust = items.getItem(groups.get(lvl) + "dust");
+        caught.setItemStack(dust);
     }
     
     // Drops random amounts of enchanted dust on grindstone disenchant
@@ -449,12 +480,7 @@ public class LootHandler implements Listener {
                 continue;
             }
             
-            int enchLvl = getMaxLevel(group);
-            for (int i = enchLvl; i > 1; i--) {
-                if (randomlyEnchant(gear, i)) {
-                    break;
-                }
-            }
+            randomlyEnchant(gear, getMaxLevel(group));
         }
     }
     
@@ -522,15 +548,23 @@ public class LootHandler implements Listener {
     }
     
     /**
-     * Puts a random compatible enchantment of the rarity on the item.
+     * Puts a random compatible custom enchantment of the rarity on the item.
+     * Iterates from the group provided down until group = 1
      * If no compatible enchantments are found, nothing happens.
      * If the item is an enchanted book, replaces with a random ench book of this group.
      * 
      * @param item
      * @param group
-     * @return true if item got enchanted
      */
-    private boolean randomlyEnchant(ItemStack item, int group) {
+    private void randomlyEnchant(ItemStack item, int group) {
+        for (int i = group; i > 1; i--) {
+            if (randomEnchantHelper(item, i)) {
+                return;
+            }
+        }
+    }
+    
+    private boolean randomEnchantHelper(ItemStack item, int group) {
         List<String> available = AEAPI.getEnchantmentsByGroup(groups.get(group));
         if (item.getType() == Material.ENCHANTED_BOOK) {
             String enchant = available.get(rand.nextInt(available.size()));
@@ -556,5 +590,4 @@ public class LootHandler implements Listener {
         AEAPI.applyEnchant(enchant, lvl, item);
         return true;
     }
-
 }

@@ -310,8 +310,9 @@ public class ItemManager implements Listener {
         ItemMeta actualMeta = actual.getItemMeta();
         switch (itemConfig.getInt(path)) {
             case 1:
-                cur.setType(actual.getType());
+                cur = cur.withType(actual.getType());
                 cur.setItemMeta(actualMeta);
+                e.setCurrentItem(cur);
                 break;
             case 2:
                 if (curMeta.hasAttributeModifiers()) {
@@ -330,7 +331,7 @@ public class ItemManager implements Listener {
                     curMeta.addItemFlags(flag);
                 }
             case 3:
-                cur.setType(actual.getType());
+                cur = cur.withType(actual.getType());
 
                 // Update lore without removing enchantments
                 List<Component> updated = new ArrayList<>();
@@ -377,6 +378,7 @@ public class ItemManager implements Listener {
                 }
                 
                 cur.setItemMeta(curMeta);
+                e.setCurrentItem(cur);
         }
     }
     

@@ -451,6 +451,7 @@ public class KingdomsListener implements Listener {
         });
     }
 
+    @SuppressWarnings("deprecation")
     @EventHandler(priority = EventPriority.LOWEST)
     public void onOutpostPlace(PlayerInteractEvent e) {
         // Check if item is kingdom item
