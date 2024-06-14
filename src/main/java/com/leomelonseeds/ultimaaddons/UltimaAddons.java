@@ -192,7 +192,7 @@ public class UltimaAddons extends JavaPlugin {
 
     public void writeTradesFile() {
         for (Integer id : linkManager.keySet()) {
-            new Save(id, linkManager.getRotatingShopkeeper(id));
+            new Save(id, linkManager.getUAShopkeeper(id));
         }
         tradesFile.save();
     }

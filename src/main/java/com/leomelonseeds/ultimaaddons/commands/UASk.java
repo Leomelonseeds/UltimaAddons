@@ -1,33 +1,21 @@
 package com.leomelonseeds.ultimaaddons.commands;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
-
-import org.bukkit.command.CommandSender;
-
+import co.aikar.commands.BaseCommand;
+import co.aikar.commands.annotation.*;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.data.Save;
 import com.leomelonseeds.ultimaaddons.objects.RotatingShopkeeper;
+import com.leomelonseeds.ultimaaddons.objects.UAShopkeeper;
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 import com.leomelonseeds.ultimaaddons.utils.RandomCollection;
 import com.leomelonseeds.ultimaaddons.utils.TimeParser;
-import com.nisovin.shopkeepers.api.ShopkeepersPlugin;
-import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
 import com.nisovin.shopkeepers.api.shopkeeper.admin.regular.RegularAdminShopkeeper;
 import com.nisovin.shopkeepers.api.shopkeeper.offers.TradeOffer;
+import org.bukkit.command.CommandSender;
 
-import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Description;
-import co.aikar.commands.annotation.Subcommand;
-import co.aikar.commands.annotation.Syntax;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 
 @CommandAlias("usk")
 public class UASk extends BaseCommand {
@@ -82,7 +70,7 @@ public class UASk extends BaseCommand {
             CommandUtils.sendErrorMsg(sender, "Not a RSK (no link)");
             return;
         }
-        CommandUtils.sendMsg(sender, "Parent ID: " + this.plugin.getSKLinker().getRotatingShopkeeper(childID).getParentID());
+        CommandUtils.sendMsg(sender, "Parent ID: " + this.plugin.getSKLinker().getUAShopkeeper(childID).getParentID());
     }
 
     @Subcommand("limit")
@@ -96,9 +84,10 @@ public class UASk extends BaseCommand {
     @CommandPermission("ua.sk.rotate")
     @Description("Rotate the trades of all shopkeepers")
     public void onRotateAll(CommandSender sender) {
-        for (RotatingShopkeeper rsk : this.plugin.getSKLinker().getValues())
-            if (!rotateTrades(rsk))
-                CommandUtils.sendErrorMsg(sender, "A fatal error occurred for child shopkeeper id: " + rsk.getId());
+        for (UAShopkeeper usk : this.plugin.getSKLinker().getValues())
+            if (usk instanceof RotatingShopkeeper rsk)
+                if (!rotateTrades(rsk))
+                    CommandUtils.sendErrorMsg(sender, "A fatal error occurred for child shopkeeper id: " + rsk.getChildID());
         CommandUtils.sendMsg(sender, "Items were successfully rotated for all RSKs");
     }
 
@@ -112,35 +101,45 @@ public class UASk extends BaseCommand {
             CommandUtils.sendErrorMsg(sender, "Not a linked child RSK");
             return;
         }
-        RotatingShopkeeper rsk = this.plugin.getSKLinker().getRotatingShopkeeper(skID);
-        if (rotateTrades(rsk)) CommandUtils.sendMsg(sender, "Items were successfully rotated");
-        else CommandUtils.sendErrorMsg(sender, "A fatal error occurred");
+        UAShopkeeper usk = this.plugin.getSKLinker().getUAShopkeeper(skID);
+        if (usk instanceof RotatingShopkeeper rsk) {
+            if (rotateTrades(rsk))
+                CommandUtils.sendMsg(sender, "Items were successfully rotated");
+            else CommandUtils.sendErrorMsg(sender, "A fatal error occurred");
+        } else {
+            //todo
+        }
     }
 
     private boolean rotateTrades(RotatingShopkeeper rsk) {
         // Rotate Trades
-        // Check if broken before rotating
-        if (rsk.isBroken()) {
-            ((RegularAdminShopkeeper) rsk).clearOffers();
-            return false;
-        }
         RegularAdminShopkeeper ask = (RegularAdminShopkeeper) rsk.getShopkeeper();
         RegularAdminShopkeeper parentAsk = (RegularAdminShopkeeper) rsk.getParentShopkeeper();
+
+        // Check if broken before rotating
+        if (!rsk.isValid()) {
+            ask.clearOffers();
+            return false;
+        }
 
         // Start rotating, clear current offers
         ask.clearOffers();
         List<? extends TradeOffer> offers = parentAsk.getOffers();
         RandomCollection<Integer> rc = new RandomCollection<>();
-        for (int i = 0; i < rsk.getWeights().size(); i++)
-            rc.add(rsk.getWeights().get(i), i);
+        for (int i = 0; i < rsk.getWeights().length; i++)
+            rc.add(rsk.getWeights()[i], i);
 
         Random rand = new Random();
-        int numTrades = rand.nextInt(rsk.getMinTrades(), rsk.getMaxTrades() + 1);
+
+        String id = String.valueOf(rsk.getChildID());
+        int minTrades = Objects.requireNonNull(UltimaAddons.getPlugin().getTradesFile().getConfig().getConfigurationSection(id)).getInt("min_trades");
+        int maxTrades = Objects.requireNonNull(UltimaAddons.getPlugin().getTradesFile().getConfig().getConfigurationSection(id)).getInt("max_trades");
+        int numTrades = rand.nextInt(minTrades, maxTrades + 1);
         for (int i = 0; i < numTrades; i++)
             ask.addOffer(offers.get(rc.next()));
 
-        rsk.getAllUses().clear();
-        this.plugin.getTradesFile().getConfig().set(rsk.getId() + ".uses", null);
+        rsk.clearUses();
+        this.plugin.getTradesFile().getConfig().set(rsk.getChildID() + ".uses", null);
         this.plugin.getTradesFile().save();
 
         return true;
@@ -148,33 +147,32 @@ public class UASk extends BaseCommand {
 
     @Subcommand("sync")
     @CommandPermission("ua.sk.syncing")
-    @CommandCompletion("@sk @sk")
+    @CommandCompletion("@sk @sk rsk|ask")
     @Description("Sync a parent to a child")
-    @Syntax("<parent shopkeeper id> <child shopkeeper id>")
-    public void onSync(CommandSender sender, int parentID, int childID) {
+    @Syntax("<parent shopkeeper id> <child shopkeeper id> <type>")
+    public void onSync(CommandSender sender, int parentID, int childID, String type) {
         // See if either are already linked
         if (this.plugin.getSKLinker().hasShopkeeper(childID)) {
-            CommandUtils.sendErrorMsg(sender, "Child already linked");
+            CommandUtils.sendErrorMsg(sender, "Child already linked!");
             return;
         }
         if (this.plugin.getSKLinker().hasShopkeeper(parentID)) {
-            CommandUtils.sendErrorMsg(sender, "Parent is linked as a child (chain linking is not allowed)");
+            CommandUtils.sendErrorMsg(sender, "Parent is linked as a child (chain linking is not allowed)!");
             return;
         }
         // Check that it isn't itself
         if (childID == parentID) {
-            CommandUtils.sendErrorMsg(sender, "Cannot link shopkeeper to itself");
+            CommandUtils.sendErrorMsg(sender, "Cannot link shopkeeper to itself!");
+            return;
+        }
+        if (!type.equals("ask") && !type.equals("rsk")) {
+            CommandUtils.sendErrorMsg(sender, "Invalid shopkeeper type!");
             return;
         }
 
-        Shopkeeper sk = ShopkeepersPlugin.getInstance().getShopkeeperRegistry().getShopkeeperById(parentID);
-        int size = Objects.requireNonNull(sk).getTradingRecipes(null).size();
-        List<Double> weights = new ArrayList<>(Collections.nCopies(size, 1.0));
-        List<Integer> limits = new ArrayList<>(Collections.nCopies(size, 10));
-
-        RotatingShopkeeper rsk = new RotatingShopkeeper(childID, parentID, weights, limits, new HashMap<>(), 0, 0);
+        RotatingShopkeeper rsk = new RotatingShopkeeper(childID, parentID);
         this.plugin.getSKLinker().addLink(childID, rsk);
-        new Save(childID, this.plugin.getSKLinker().getRotatingShopkeeper(childID));
+        new Save(childID, rsk);
         this.plugin.getTradesFile().save();
 
         CommandUtils.sendMsg(sender, "Successfully synced both shopkeepers");

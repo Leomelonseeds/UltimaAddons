@@ -1,25 +1,29 @@
 package com.leomelonseeds.ultimaaddons.handlers.shopkeeper;
 
+import com.leomelonseeds.ultimaaddons.objects.UAShopkeeper;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.leomelonseeds.ultimaaddons.objects.RotatingShopkeeper;
-
 public class LinkManager {
-    public static Map<Integer, RotatingShopkeeper> shopkeeperMap = new HashMap<>();
+    public Map<Integer, UAShopkeeper> shopkeeperMap;
 
-    public void deleteLink(int shopkeeper) {
-        shopkeeperMap.remove(shopkeeper);
+    public LinkManager() {
+        shopkeeperMap = new HashMap<>();
     }
 
-    public void addLink(int child, RotatingShopkeeper rsk) {
-        shopkeeperMap.put(child, rsk);
+    public void deleteLink(int childID) {
+        shopkeeperMap.remove(childID);
     }
 
-    public RotatingShopkeeper getRotatingShopkeeper(int id) {
-        return shopkeeperMap.getOrDefault(id, null);
+    public void addLink(int childID, UAShopkeeper uask) {
+        shopkeeperMap.put(childID, uask);
+    }
+
+    public UAShopkeeper getUAShopkeeper(int childID) {
+        return shopkeeperMap.getOrDefault(childID, null);
     }
 
     public void clear() {
@@ -34,11 +38,11 @@ public class LinkManager {
         return shopkeeperMap.keySet();
     }
 
-    public boolean hasShopkeeper(int child) {
-        return shopkeeperMap.containsKey(child);
+    public boolean hasShopkeeper(int childID) {
+        return shopkeeperMap.containsKey(childID);
     }
 
-    public Collection<RotatingShopkeeper> getValues() {
+    public Collection<? extends UAShopkeeper> getValues() {
         return shopkeeperMap.values();
     }
 }

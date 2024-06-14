@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 public class CommandUtils {
 
     public static void sendErrorMsg(CommandSender target, String msg) {
-        target.sendMessage(Utils.toComponent("&cError: &7" + msg));
+        target.sendMessage(Utils.toComponent("&c&l[!]&r &c" + msg));
     }
 
     public static void sendMsg(CommandSender target, String msg) {
@@ -32,7 +32,7 @@ public class CommandUtils {
     }
 
     public static void sendSuccessMsg(CommandSender target, String msg) {
-        target.sendMessage(Utils.toComponent("&aSuccess: &7" + msg));
+        target.sendMessage(Utils.toComponent("&a&l[!]&r &a" + msg));
     }
 
     public static Player getPlayer(CommandSender target) {

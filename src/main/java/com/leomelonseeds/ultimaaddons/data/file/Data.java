@@ -39,5 +39,6 @@ public class Data {
             UltimaAddons.getPlugin().saveResource(resourceFolder + "/" + name, false);
         }
         config = YamlConfiguration.loadConfiguration(file);
+        this.save();
     }
 }

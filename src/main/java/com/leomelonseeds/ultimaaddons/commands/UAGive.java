@@ -95,7 +95,7 @@ public class UAGive extends BaseCommand {
         });
 
         String itemName = meta != null && meta.hasDisplayName() ? Utils.toPlain(meta.displayName()) : i.getType().toString();
-        CommandUtils.sendSuccessMsg(sender, "Gave &c" + amount + "x " + itemName + "&7 to &c" + target.getName());
+        CommandUtils.sendSuccessMsg(sender, "Gave &c" + amount + "x " + itemName + "&a to &c" + target.getName());
     }
 
     private String[] checkCoordinates(CommandSender sender, String coordinates) {
