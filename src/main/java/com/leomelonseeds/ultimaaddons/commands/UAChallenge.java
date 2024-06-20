@@ -59,7 +59,7 @@ public class UAChallenge extends BaseCommand {
 
         // Attacker must have a nexus
         if (attacker.getNexus() == null) {
-            CommandUtils.sendErrorMsg(player, "You must place your nexus using &a/k nexus &cbefore you can declare war!");
+            CommandUtils.sendErrorMsg(player, "You must place your nexus using &a/k nexus &7before you can declare war!");
             return;
         }
 

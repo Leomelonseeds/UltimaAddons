@@ -40,6 +40,7 @@ import com.leomelonseeds.ultimaaddons.UltimaAddons;
 
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
+import github.scarsz.discordsrv.objects.managers.AccountLinkManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -150,8 +151,24 @@ public class Utils {
         }
         
         if (discord != null) {
+            discord += " \n ► ||" + generateMentions(attacker) + "||";
+            discord += " \n ► ||" + generateMentions(target) + "||";
             discord(discord);
         }
+    }
+    
+    private static String generateMentions(Kingdom k) {
+        AccountLinkManager acm = DiscordSRV.getPlugin().getAccountLinkManager();
+        String ret = "";
+        for (String id : acm.getManyDiscordIds(k.getMembers()).values()) {
+            ret += "<@" + id + "> ";
+        }
+        
+        if (ret.isBlank()) {
+            return "No linked accounts!";
+        }
+        
+        return ret;
     }
     
     
