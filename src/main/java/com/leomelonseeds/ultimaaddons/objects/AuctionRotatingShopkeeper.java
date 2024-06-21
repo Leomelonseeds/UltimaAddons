@@ -1,12 +1,22 @@
 package com.leomelonseeds.ultimaaddons.objects;
 
-import java.util.List;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class AuctionRotatingShopkeeper extends RotatingShopkeeper {
-    public AuctionRotatingShopkeeper(int childID, int parentID, List<Double> weights, List<Integer> limits, Map<UUID, List<Integer>> uses, int minTrades, int maxTrades) {
-        super(childID, parentID, weights, limits, uses, minTrades, maxTrades);
+    private Map<UUID, ItemStack> refunds;
+
+    public AuctionRotatingShopkeeper(int childID, int parentID) {
+        super(childID, parentID);
+        refunds = new HashMap<>();
+    }
+
+    public AuctionRotatingShopkeeper(int childID, int parentID, double[] weights, Map<UUID, int[]> uses) {
+        super(childID, parentID, weights, new int[weights.length], uses);
+        refunds = new HashMap<>();
     }
 
     // TODO

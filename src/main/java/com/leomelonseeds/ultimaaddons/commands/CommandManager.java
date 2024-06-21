@@ -1,5 +1,6 @@
 package com.leomelonseeds.ultimaaddons.commands;
 
+import com.leomelonseeds.ultimaaddons.objects.UAShopkeeper;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 
@@ -27,7 +28,7 @@ public class CommandManager {
             return ImmutableList.of(worldLoc, stringLoc);
         });
         cmdManager.getCommandCompletions().registerCompletion("ua_sk", c -> ImmutableList.copyOf(
-                plugin.getSKLinker().getValues().stream().map(RotatingShopkeeper::getId).map(String::valueOf).toList()
+                plugin.getSKLinker().getValues().stream().map(UAShopkeeper::getID).map(String::valueOf).toList()
         ));
         cmdManager.getCommandCompletions().registerCompletion("sk", c -> ImmutableList.copyOf(
                 ShopkeepersPlugin.getInstance().getShopkeeperRegistry().getAllShopkeepers().stream().filter(sk ->

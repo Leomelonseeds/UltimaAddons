@@ -1,125 +1,87 @@
 package com.leomelonseeds.ultimaaddons.objects;
 
-import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+import com.google.common.collect.ImmutableMap;
 import com.nisovin.shopkeepers.api.ShopkeepersPlugin;
 import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
-import com.nisovin.shopkeepers.api.shopkeeper.admin.regular.RegularAdminShopkeeper;
 import org.bukkit.entity.Player;
 
 import java.util.*;
 
 
-public class RotatingShopkeeper {
-    private List<Double> weights;
-    private List<Integer> limits;
-    private Map<UUID, List<Integer>> uses;
-    private int parentID;
-    private int id;
-    private int minTrades;
-    private int maxTrades;
+public class RotatingShopkeeper extends UAShopkeeper {
+    private double[] weights;
+    private int[] limits;
+    private Map<UUID, int[]> uses;
 
-    public RotatingShopkeeper(int childID, int parentID, List<Double> weights, List<Integer> limits, Map<UUID, List<Integer>> uses, int minTrades, int maxTrades) {
-        this.parentID = parentID;
-        this.id = childID;
+    public RotatingShopkeeper(int childID, int parentID) {
+        super(childID, parentID);
+        Shopkeeper parentSK = ShopkeepersPlugin.getInstance().getShopkeeperRegistry().getShopkeeperById(parentID);
+        int size = Objects.requireNonNull(parentSK).getTradingRecipes(null).size();
+        this.weights = new double[size];
+        Arrays.fill(weights, 1);
+        this.limits = new int[size];
+        Arrays.fill(limits, 1);
+        this.uses = new HashMap<>();
+    }
+
+    public RotatingShopkeeper(int childID, int parentID, double[] weights, int[] limits, Map<UUID, int[]> uses) {
+        super(childID, parentID);
         this.weights = weights;
         this.limits = limits;
         this.uses = uses;
-        this.minTrades = minTrades;
-        this.maxTrades = maxTrades;
     }
 
-    public List<Double> getWeights() {
-        return weights;
+    public double[] getWeights() {
+        return weights.clone();
     }
 
-    public List<Integer> getLimits() {
-        return limits;
+    public int[] getLimits() {
+        return limits.clone();
     }
 
-    public Shopkeeper getShopkeeper() {
-        return ShopkeepersPlugin.getInstance().getShopkeeperRegistry().getShopkeeperById(id);
+    public ImmutableMap<UUID, int[]> getAllUses() {
+        return ImmutableMap.copyOf(uses);
     }
 
-    public Shopkeeper getParentShopkeeper() {
-        return ShopkeepersPlugin.getInstance().getShopkeeperRegistry().getShopkeeperById(parentID);
+    public void clearUses() {
+        uses.clear();
     }
 
-    public int getParentID() {
-        return parentID;
+    public int[] getUses(Player p) {
+        if (!uses.containsKey(p.getUniqueId()))
+            return null;
+        return uses.get(p.getUniqueId()).clone();
     }
 
-    public int getId() {
-        return id;
+    public boolean logUse(Player p, int index) {
+        if (getUses(p) == null)
+            uses.put(p.getUniqueId(), new int[Objects.requireNonNull(getShopkeeper()).getTradingRecipes(null).size()]);
+        if (index >= getUses(p).length)
+            return false;
+        if (index < 0)
+            return false;
+        uses.get(p.getUniqueId())[index] += 1;
+        return true;
     }
 
-    public int getMinTrades() {
-        return minTrades;
-    }
-
-    public int getMaxTrades() {
-        return maxTrades;
-    }
-
-    public Set<Map.Entry<UUID, List<Integer>>> getUsesEntrySet() {
-        return uses.entrySet();
-    }
-
-    public List<Integer> getUses(Player p) {
-        return uses.getOrDefault(p.getUniqueId(), Collections.emptyList());
-    }
-
-    public Map<UUID, List<Integer>> getAllUses() {
-        return uses;
-    }
-
-    public void setUses(Player p, List<Integer> counts) {
-        uses.put(p.getUniqueId(), counts);
-    }
-
-    public boolean isBroken() {
-        Shopkeeper sk = ShopkeepersPlugin.getInstance().getShopkeeperRegistry().getShopkeeperById(id);
-        Shopkeeper parentSk = ShopkeepersPlugin.getInstance().getShopkeeperRegistry().getShopkeeperById(parentID);
-        if (sk == null) {
-            CommandUtils.sendConsoleMsg("&ctrades.yml | " + id + " | Shopkeeper does not exist");
-            return true;
-        }
-        if (parentSk == null) {
-            CommandUtils.sendConsoleMsg("&ctrades.yml | " + id + " | Parent shopkeeper does not exist");
-            return true;
-        }
-        if (!(sk instanceof RegularAdminShopkeeper) || !(parentSk instanceof RegularAdminShopkeeper)) {
-            CommandUtils.sendConsoleMsg("&ctrades.yml | " + id + " | Shopkeeper type(s) not supported.");
-            return true;
-        }
-        if (weights.size() != parentSk.getTradingRecipes(null).size()) {
-            CommandUtils.sendConsoleMsg("&ctrades.yml | " + id + " | Size mismatch (weight list and trading list not equal)");
-            return true;
-        }
-        if (limits.size() != parentSk.getTradingRecipes(null).size()) {
-            CommandUtils.sendConsoleMsg("&ctrades.yml | " + id + " | Size mismatch (weight list and trading list not equal)");
-            return true;
-        }
-        boolean allCountsFine = true;
-        for (List<Integer> counts : uses.values())
-            if (counts.size() != getShopkeeper().getTradingRecipes(null).size()) {
-                CommandUtils.sendConsoleMsg("&ctrades.yml | " + id + " | Uses list mismatch trades length");
-                allCountsFine = false;
-            }
-        if (!allCountsFine)
-            return true;
-        if (maxTrades < minTrades) {
-            CommandUtils.sendConsoleMsg("&ctrades.yml | " + id + " | Max is less than Min");
-            return true;
-        }
-        if (maxTrades > parentSk.getTradingRecipes(null).size()) {
-            CommandUtils.sendConsoleMsg("&ctrades.yml | " + id + " | Parent does not have enough offers for max value");
-            return true;
-        }
-        return false;
-    }
-
-    public void clearTrades() {
-        if (getShopkeeper() instanceof RegularAdminShopkeeper rask)
-            rask.clearOffers();
+    @Override
+    public boolean isValid() {
+        if (!super.isValid()) return false;
+        Shopkeeper sk = getShopkeeper();
+        Shopkeeper parentSK = getParentShopkeeper();
+        int parentRecipeSize = parentSK.getTradingRecipes(null).size();
+        int childRecipeSize = sk.getTradingRecipes(null).size();
+        if (weights.length != parentRecipeSize)
+            return false;
+        if (limits.length != parentRecipeSize)
+            return false;
+        if (Arrays.stream(weights).anyMatch(n -> n == 0))
+            return false;
+        if (Arrays.stream(limits).anyMatch(n -> n == 0))
+            return false;
+        for (int[] counts : uses.values())
+            if (counts.length != childRecipeSize)
+                return false;
+        return true;
     }
 }

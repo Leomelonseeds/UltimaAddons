@@ -107,7 +107,7 @@ public class UAChallenge extends BaseCommand {
         // Attacker cannot be new
         if (Utils.isNew(target)) {
             CommandUtils.sendErrorMsg(player, "That kingdom is new! You will have to wait &e" + Utils.timeUntilNotNew(target) +
-                    " &7before you can challenge them.");
+                    " &cbefore you can challenge them.");
             return;
         }
 
@@ -130,13 +130,13 @@ public class UAChallenge extends BaseCommand {
         if (challenges.containsKey(target.getId())) {
             long time = challenges.get(target.getId());
             if (time > date) {
-                CommandUtils.sendErrorMsg(player, "&e" + target.getName() + " &7has already challenged your kingdom! " +
+                CommandUtils.sendErrorMsg(player, "&e" + target.getName() + " &chas already challenged your kingdom! " +
                         "War starts in &e" + Utils.formatDate(time - date));
                 return;
             }
 
             if (time + Utils.getWarTime() > date) {
-                CommandUtils.sendErrorMsg(player, "Your war with &e" + target.getName() + " &7is still ongoing!");
+                CommandUtils.sendErrorMsg(player, "Your war with &e" + target.getName() + " &cis still ongoing!");
                 return;
             }
         }

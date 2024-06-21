@@ -9,7 +9,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 public class Load {
     public Load() {
@@ -23,20 +26,17 @@ public class Load {
             int id = Integer.parseInt(key);
 
             int parentID = config.getInt(key + ".parent", -1);
-            List<Double> weights = config.getDoubleList(key + ".weights");
-            List<Integer> limits = config.getIntegerList(key + ".limits");
+            double[] weights = config.getDoubleList(key + ".weights").stream().mapToDouble(i -> i).toArray();
+            int[] limits = config.getIntegerList(key + ".limits").stream().mapToInt(i -> i).toArray();
 
-            Map<UUID, List<Integer>> uses = new HashMap<>();
+            Map<UUID, int[]> uses = new HashMap<>();
             String usesPath = key + ".uses";
             if (config.getConfigurationSection(usesPath) != null)
                 for (String str : Objects.requireNonNull(config.getConfigurationSection(usesPath)).getKeys(false))
-                    uses.put(UUID.fromString(str), config.getIntegerList(key + ".uses." + str));
+                    uses.put(UUID.fromString(str), config.getIntegerList(key + ".uses." + str).stream().mapToInt(i -> i).toArray());
 
-            int maxTrades = config.getInt(key + ".max_trades", 0);
-            int minTrades = config.getInt(key + ".min_trades", 0);
-
-            RotatingShopkeeper rsk = new RotatingShopkeeper(id, parentID, weights, limits, uses, minTrades, maxTrades);
-            if (rsk.isBroken()) {
+            RotatingShopkeeper rsk = new RotatingShopkeeper(id, parentID, weights, limits, uses);
+            if (!rsk.isValid()) {
                 rsk.clearTrades();
                 continue;
             }
