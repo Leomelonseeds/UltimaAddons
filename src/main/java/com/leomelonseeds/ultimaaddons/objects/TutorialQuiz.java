@@ -11,14 +11,15 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.utils.ChatConfirm;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class TutorialQuiz {
 
-    private static final int rewardAmt = 6;
     private static Map<Integer, Pair<String, String>> questions;
     private Player player;
+    private int rewardAmt;
     
     /**
      * Starts a tutorial quiz for a player
@@ -27,6 +28,7 @@ public class TutorialQuiz {
      */
     public TutorialQuiz(Player player) {
         this.player = player;
+        this.rewardAmt = UltimaAddons.getPlugin().getConfig().getInt("tutorial-reward");
         loadQuestions();
         init();
     }

@@ -8,6 +8,8 @@ party:
   min: 1
   max: 2
   
+# Amount of diamonds to give for tutorial reward
+tutorial-reward: 5
 
 enchantgui:
   gear:
