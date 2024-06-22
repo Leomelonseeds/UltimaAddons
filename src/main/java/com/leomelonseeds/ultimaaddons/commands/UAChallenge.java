@@ -143,11 +143,12 @@ public class UAChallenge extends BaseCommand {
         
         if (!attacker.hasShield()) {
             finalizeChallenge(player, target, attacker, false);
+            return;
         }
 
         // Remove kingdom shield if they have one
         CommandUtils.sendMsg(player, "&cYour kingdom is shielded for &e" + Utils.formatDate(attacker.getShieldTimeLeft()) +
-                "&c. Challenging another kingdom will remove this shield, and you will have to wait &e" +
+                "&c! Challenging another kingdom will remove this shield, and you will have to wait &e" +
                 Utils.formatDate(Utils.getNextShield(attacker) - date) + " &cbefore you can buy another one. " +
                 "Please type 'confirm' in the chat within 30 seconds to continue.");
         new ChatConfirm(player, "confirm", 30, "Declaration cancelled.", result ->
