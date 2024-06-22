@@ -16,6 +16,7 @@ import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class ChallengeInv extends UAInventory {
@@ -23,12 +24,14 @@ public class ChallengeInv extends UAInventory {
     private Kingdom target;
     private Kingdom attacker;
     private Player player;
+    private boolean deactivateShield;
     
-    public ChallengeInv(Kingdom target, Kingdom attacker, Player player) {
+    public ChallengeInv(Kingdom target, Kingdom attacker, Player player, boolean deactivateShield) {
         super(player, 27, "&8-=( &cChallenge &e" + target.getName() + " &8)=-");
         this.target = target;
         this.attacker = attacker;
         this.player = player;
+        this.deactivateShield = deactivateShield;
     }
 
     @Override
@@ -69,6 +72,19 @@ public class ChallengeInv extends UAInventory {
             if (target.getMembers().isEmpty() || target.hasShield()) {
                 player.sendMessage(Utils.toComponent("&cThe target kingdom either bought a shield or no longer exists..."));
                 return;
+            }
+
+            // Check cost
+            int cost = attacker.getLands().size();
+            long current = attacker.getResourcePoints();
+            if (current < cost) {
+                CommandUtils.sendErrorMsg(player, "Declaring war costs &e" + cost + " &cresource points for your kingdom! You currently have &e" + current + "&c.");
+                return;
+            }
+            
+            // Deactivate shields
+            if (deactivateShield) {
+                attacker.deactivateShield();
             }
             
             // Setup Kingdom challenge

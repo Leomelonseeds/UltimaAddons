@@ -140,24 +140,25 @@ public class UAChallenge extends BaseCommand {
                 return;
             }
         }
-
-        // Remove kingdom shield if they have one
-        if (attacker.hasShield()) {
-            CommandUtils.sendMsg(player, "&cYour kingdom is shielded for &e" + Utils.formatDate(attacker.getShieldTimeLeft()) +
-                    "&c. Challenging another kingdom will remove this shield, and you will have to wait &e" +
-                    Utils.formatDate(Utils.getNextShield(attacker) - date) + " &cbefore you can buy another one. " +
-                    "Please type 'confirm' in the chat within 30 seconds to continue.");
-            new ChatConfirm(player, "confirm", 30, "Declaration cancelled.", result ->
-            {
-                if (result == null || !result)
-                    return;
-                attacker.deactivateShield();
-            });
+        
+        if (!attacker.hasShield()) {
+            finalizeChallenge(player, target, attacker, false);
         }
 
-        if (attacker.hasShield())
-            return;
-
+        // Remove kingdom shield if they have one
+        CommandUtils.sendMsg(player, "&cYour kingdom is shielded for &e" + Utils.formatDate(attacker.getShieldTimeLeft()) +
+                "&c. Challenging another kingdom will remove this shield, and you will have to wait &e" +
+                Utils.formatDate(Utils.getNextShield(attacker) - date) + " &cbefore you can buy another one. " +
+                "Please type 'confirm' in the chat within 30 seconds to continue.");
+        new ChatConfirm(player, "confirm", 30, "Declaration cancelled.", result ->
+        {
+            if (result == null || !result)
+                return;
+            finalizeChallenge(player, target, attacker, true);
+        });
+    }
+    
+    private void finalizeChallenge(Player player, Kingdom target, Kingdom attacker, boolean deactivateShield) {
         CommandUtils.sendMsg(player, "");
         CommandUtils.sendMsg(player, "&cYou are sending a declaration of war to &e" + target.getName() + "&c. After a chosen amount of time, "
                 + "both you and the enemy will have &62 hours &cto invade each other's lands. You can only challenge 1 Kingdom at a time, "
@@ -165,13 +166,12 @@ public class UAChallenge extends BaseCommand {
 
         Utils.schedule(40, () -> {
             CommandUtils.sendMsg(player, "");
-            CommandUtils.sendMsg(player, "&cAdditionally, invading each enemy chunk will cost resource points depending on how many lands you have. "
-                    + "Currently, it is estimated that each invasion will cost &e" + attacker.getLands().size() + " &cresource points.");
+            CommandUtils.sendMsg(player, "&cAdditionally, both Kingdoms &4cannot &cclaim/unclaim lands or move their nexus during the preparation period.");
         });
 
         Utils.schedule(80, () -> {
             CommandUtils.sendMsg(player, "");
-            CommandUtils.sendMsg(player, "&cFinally, both Kingdoms &4cannot &cclaim/unclaim lands or move their nexus during the preparation period.");
+            CommandUtils.sendMsg(player, "&cFinally, declaring war will cost your Kingdom &e" + attacker.getLands().size() + " &cresource points.");
         });
 
         Utils.schedule(120, () -> {
@@ -181,7 +181,7 @@ public class UAChallenge extends BaseCommand {
             {
                 if (result == null || !result)
                     return;
-                new ChallengeInv(target, attacker, player);
+                new ChallengeInv(target, attacker, player, deactivateShield);
             });
         });
     }
