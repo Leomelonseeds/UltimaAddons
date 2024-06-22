@@ -1,5 +1,5 @@
 # Ultima Addons
-This plugin adds a couple features to the Ultima Kingdoms server that are not present in other plugins. While this plugin is intended for use on the Ultima server, you may compile this plugin for yourself to use on your own server, but I will provide no guarantees or support that it will work for yourself. There are many configuration changes in plugins listed here and otherwise which aren't noted here that contribute to Ultima's experience. The best way to see these features are simply to log on to play.ultimamc.net and join the Kingdoms server (currently under revamp and coming soon).
+This plugin adds a couple features to the Ultima Kingdoms server that are not present in other plugins. While this plugin is intended for use on the Ultima server, you may compile this plugin for yourself to use on your own server, but I will provide no guarantees or support that it will work for yourself. There are many configuration changes in plugins listed here and otherwise which aren't noted here that contribute to Ultima's experience. The best way to see these features are simply to log on to play.ultimamc.net and join the Kingdoms server.
 
 ## Kingdoms
 UltimaAddons uses the KingdomsX API by Crypto Morin to provide several extra features.
