@@ -1,3 +1,14 @@
+# Drop party settings
+# time: time between each give, in ticks
+# amount: amount of iterations for each drop party
+# min/max: diamond chips per give
+party:
+  time: 4
+  amount: 60
+  min: 1
+  max: 2
+  
+
 enchantgui:
   gear:
     material: DIAMOND_SWORD

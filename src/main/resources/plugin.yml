@@ -18,6 +18,8 @@ commands:
   uchallenge: { }
   recipes: { }
   uintro: { }
+  udropparty:
+    default: op
   ugive:
     default: op
   ureload:

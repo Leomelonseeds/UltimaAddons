@@ -1,12 +1,11 @@
 package com.leomelonseeds.ultimaaddons.commands;
 
-import com.leomelonseeds.ultimaaddons.objects.UAShopkeeper;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 
 import com.google.common.collect.ImmutableList;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.objects.RotatingShopkeeper;
+import com.leomelonseeds.ultimaaddons.objects.UAShopkeeper;
 import com.nisovin.shopkeepers.api.ShopkeepersPlugin;
 import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
 import com.nisovin.shopkeepers.api.shopkeeper.admin.regular.RegularAdminShopkeeper;
@@ -43,6 +42,7 @@ public class CommandManager {
         cmdManager.registerCommand(new UAChallenge());
         cmdManager.registerCommand(new UASk(plugin));
         cmdManager.registerCommand(new UAEnchant());
+        cmdManager.registerCommand(new UDropParty());
         
         // Test command - comment out in production (maybe)
         cmdManager.registerCommand(new UATest());
