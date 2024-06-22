@@ -71,7 +71,8 @@ public class ChatConfirm implements Listener {
         if (!sender.equals(player)) {
             return;
         }
-        
+
+        e.setCancelled(true);
         String msg = e.getMessage();
         boolean success = msg.equalsIgnoreCase(req);
         if (!success && !msg.equalsIgnoreCase(deny)) {
@@ -79,7 +80,6 @@ public class ChatConfirm implements Listener {
         }
         
         this.timeout.cancel();
-        e.setCancelled(true);
         stop();
         Bukkit.getScheduler().runTask(plugin, () -> callback(success));
     }
