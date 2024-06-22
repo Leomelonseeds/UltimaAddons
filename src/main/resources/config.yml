@@ -21,29 +21,30 @@ enchantgui:
       - BOOK
       - CROSSBOW
       - GOLDEN_PICKAXE
+      - STONE_SHOVEL
     name: "&b&lGear Slot"
     lore:
       - "&7Only items that do not have"
       - "&7enchants of the enchanted dust's"
       - "&7tier can be enchanted. Books"
       - "&7can only be enchanted once."
-      - "&b|"
-      - "&bV"
   dust:
     material: ORANGE_DYE
     materials:
-      - ORANGE_DYE
       - LIGHT_GRAY_DYE
       - LIME_DYE
       - BLUE_DYE
       - PURPLE_DYE
-    name: "&6Enchanted Dust Slot"
+      - ORANGE_DYE
+    name: "&6&lEnchanted Dust Slot"
     lore:
       - "&7Enchanted dust can be found in"
-      - "&7loot chests, and by grindstone"
-      - "&7disenchanting."
-      - "&6|"
-      - "&6V"
+      - "&7loot chests, mining, and through"
+      - "&7grindstone disenchanting."
+      - ""
+      - "&7Place more dust to get higher level"
+      - "&7enchants. All dust in this slot is"
+      - "&7consumed on use."
   reroll:
     material: EXPERIENCE_BOTTLE
     name: "&aReroll"
@@ -60,13 +61,13 @@ enchantgui:
       - "&7Right click to view enchantment"
       - "&7information."
       - ""
-      - "&bCost: &a%cost% Level(s)"
+      - "&bCost: &a%cost% Level(s), %dust% Dust"
   locked-none:
     material: BARRIER
     name: "&cNone"
     lore:
       - "&7Please insert a gear item/book"
-      - "&7and at lesat 2 enchanted dust"
+      - "&7and at least 2 enchanted dust"
       - "&7to continue."
   locked-na:
     material: BARRIER
@@ -83,7 +84,7 @@ enchantgui:
       - "&7enchantment of this rarity!"
   custom-blacklist:
     - immolate
-
+    
 challengegui:
   1-day:
     material: IRON_BLOCK
@@ -110,7 +111,7 @@ introgui:
       author: "Ultima"
       pages:
         - "§lKingdoms Handbook\n\n§rWelcome to Kingdoms! To get started, use §2/k create §rto create a Kingdom, or ask someone to invite you to theirs."
-        - "Kingdoms can be §2Paci- fist §ror §cAggressors§r. Pacifist Kingdoms can’t invade and can't be invaded, but also can't claim as many lands, and §ldo not §rmake passive income.\n\nPacifists can switch to aggressors, but aggressors cannot change to pacifist."
+        - "Kingdoms can be §2Paci- fist §ror §cAggressors§r. Pacifist Kingdoms can’t invade and can't be invaded, but also can't claim as many lands, and §ldo not §rmake passive income.\n\nYour pacifism status is set on Kingdom creation, and cannot be changed."
         - "Kingdoms can claim lands using §2/k claim§r, which are chunks that are protected from grief. Aggressor Kingdoms can invade other Kingdoms and take over their lands.\n\nThe §lInvasion Hand- book §rhas more information on how to start wars."
         - "The most important block in your Kingdom is the §lNexus§r, which is placed when you create the Kingdom. You can move it around with §2/k nexus§r. If your Nexus is captured by an enemy, your Kingdom will be §cdisbanded§r."
         - "From the §lNexus§r, you can level up your Kingdom by purchasing upgrades, structures, and turrets. You can also manage Kingdom shields, permissions, and ranks."
@@ -150,7 +151,7 @@ introgui:
       author: "Ultima"
       pages:
         - "§lThe Market\n\n§rThere is a Kingdom known as the Market near the center of the world, where you can buy and sell items in exchange for §bdiamonds§r. You may also setup your own shops to become a capitalist overlord."
-        - "§lMinecarts\n\n§rPowered rails placed on redstone blocks make minecarts travel §n4x faster§r than vanilla. Make sure to have smooth turns so your carts don't derail."
+        - "§lMinecarts\n\n§rPowered rails placed on copper blocks make minecarts travel §n4x faster§r than vanilla. The speed is even faster the more oxidized the copper."
         - "§lElytra\n\n§rElytra boosting is only possible with §dDragon Fireworks§r, which can be obtained, among other means, through trading at the Market."
         - "§lCustom Items\n\n§rCustom items and recipes are available, including powerful weapons and armor sets - use §2/recipes §rto see them."
         - "§lTeleportation\n\n§rUse §dTotems of Warping §rto TP to locations like your Kingdom home, last death location, lodestones, or other players. They are craftable (check §2/recipes§r) and also available at the Market."
