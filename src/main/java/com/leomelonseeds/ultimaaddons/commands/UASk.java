@@ -142,6 +142,7 @@ public class UASk extends BaseCommand {
         this.plugin.getTradesFile().getConfig().set(rsk.getChildID() + ".uses", null);
         this.plugin.getTradesFile().save();
 
+        rsk.getShopkeeper().abortUISessionsDelayed();
         return true;
     }
 
