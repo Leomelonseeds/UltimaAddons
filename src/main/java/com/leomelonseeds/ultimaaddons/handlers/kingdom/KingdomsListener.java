@@ -262,39 +262,54 @@ public class KingdomsListener implements Listener {
     public void onCreate(KingdomCreateEvent e) {
         Kingdom k = e.getKingdom();
         Utils.discord(":fleur_de_lis: **" + k.getName() + "** has been founded");
-        openSelectionGUI(k);
+        openSelectionGUI(k, 1);
     }
 
     // Open custom creation GUI that only closes once an option is selected
-    private void openSelectionGUI(Kingdom k) {
+    private void openSelectionGUI(Kingdom k, int att) {
         KingdomPlayer kp = k.getKing();
         Player player = kp.getPlayer();
-        InteractiveGUI gui = GUIAccessor.prepare(player, KingdomsGUI.KINGDOM$CREATE);
-        gui.push("pacifist", () -> {
-            k.setPacifist(true, kp, null);
-            KingdomsLang.COMMAND_CREATE_PACIFIST.sendMessage(player);
-            allowedClose.add(player);
-            player.closeInventory();
-            Utils.schedule(2, () -> allowedClose.remove(player));
-        }).push("aggressor", () -> {
-            k.setPacifist(false, kp, null);
-            KingdomsLang.COMMAND_CREATE_AGGRESSOR.sendMessage(player);
-            allowedClose.add(player);
-            player.closeInventory();
-            Utils.schedule(2, () -> allowedClose.remove(player));
-            
-            // Add shield if aggressor
-            long shieldtime = k.getSince() + Utils.getNewbieTime();
-            k.activateShield(shieldtime - System.currentTimeMillis());
-            k.getMetadata().put(UltimaAddons.shield_time, new StandardKingdomMetadata(shieldtime));
-        });
+        if (att > 10) {
+            setAggressor(k, kp, player);
+            return;
+        }
         
+        InteractiveGUI gui = GUIAccessor.prepare(player, KingdomsGUI.KINGDOM$CREATE);
+        gui.push("pacifist", () -> setPacifist(k, kp, player))
+        .push("aggressor", () -> setAggressor(k, kp, player));
         gui.onClose(() -> Utils.schedule(1, () -> {
+            // Should not happen
+            if (!player.isOnline()) {
+                setAggressor(k, kp, player);
+                return;
+            }
+            
             if (!allowedClose.contains(player)) {
-                openSelectionGUI(k);
+                openSelectionGUI(k, att + 1);
             }
         }));
         gui.open();
+    }
+    
+    private void setAggressor(Kingdom k, KingdomPlayer kp, Player player) {
+        k.setPacifist(false, kp, null);
+        KingdomsLang.COMMAND_CREATE_AGGRESSOR.sendMessage(player);
+        allowedClose.add(player);
+        player.closeInventory();
+        Utils.schedule(2, () -> allowedClose.remove(player));
+        
+        // Add shield if aggressor
+        long shieldtime = k.getSince() + Utils.getNewbieTime();
+        k.activateShield(shieldtime - System.currentTimeMillis());
+        k.getMetadata().put(UltimaAddons.shield_time, new StandardKingdomMetadata(shieldtime));
+    }
+    
+    private void setPacifist(Kingdom k, KingdomPlayer kp, Player player) {
+        k.setPacifist(true, kp, null);
+        KingdomsLang.COMMAND_CREATE_PACIFIST.sendMessage(player);
+        allowedClose.add(player);
+        player.closeInventory();
+        Utils.schedule(2, () -> allowedClose.remove(player));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
