@@ -277,7 +277,7 @@ public class KingdomsListener implements Listener {
         InteractiveGUI gui = GUIAccessor.prepare(player, KingdomsGUI.KINGDOM$CREATE);
         gui.push("pacifist", () -> setPacifist(k, kp, player))
         .push("aggressor", () -> setAggressor(k, kp, player));
-        gui.onClose(() -> Utils.schedule(1, () -> {
+        gui.onClose(() -> {
             // Should not happen
             if (!player.isOnline()) {
                 setAggressor(k, kp, player);
@@ -287,7 +287,7 @@ public class KingdomsListener implements Listener {
             if (!allowedClose.contains(player)) {
                 openSelectionGUI(k, att + 1);
             }
-        }));
+        });
         gui.open();
     }
     
@@ -296,7 +296,7 @@ public class KingdomsListener implements Listener {
         KingdomsLang.COMMAND_CREATE_AGGRESSOR.sendMessage(player);
         allowedClose.add(player);
         player.closeInventory();
-        Utils.schedule(2, () -> allowedClose.remove(player));
+        Utils.schedule(1, () -> allowedClose.remove(player));
         
         // Add shield if aggressor
         long shieldtime = k.getSince() + Utils.getNewbieTime();
@@ -309,7 +309,7 @@ public class KingdomsListener implements Listener {
         KingdomsLang.COMMAND_CREATE_PACIFIST.sendMessage(player);
         allowedClose.add(player);
         player.closeInventory();
-        Utils.schedule(2, () -> allowedClose.remove(player));
+        Utils.schedule(1, () -> allowedClose.remove(player));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
