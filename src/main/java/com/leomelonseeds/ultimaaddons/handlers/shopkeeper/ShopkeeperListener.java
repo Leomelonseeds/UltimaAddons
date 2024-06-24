@@ -1,32 +1,8 @@
 package com.leomelonseeds.ultimaaddons.handlers.shopkeeper;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.data.Save;
-import com.leomelonseeds.ultimaaddons.objects.RegionData;
-import com.leomelonseeds.ultimaaddons.objects.RotatingShopkeeper;
-import com.leomelonseeds.ultimaaddons.objects.UAShopkeeper;
-import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
-import com.leomelonseeds.ultimaaddons.utils.TimeParser;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
-import com.nisovin.shopkeepers.api.ShopkeepersAPI;
-import com.nisovin.shopkeepers.api.events.*;
-import com.nisovin.shopkeepers.api.shopkeeper.ShopCreationData;
-import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
-import com.nisovin.shopkeepers.api.shopkeeper.ShopkeeperCreateException;
-import com.nisovin.shopkeepers.api.shopkeeper.TradingRecipe;
-import com.nisovin.shopkeepers.api.shopkeeper.player.PlayerShopCreationData;
-import com.nisovin.shopkeepers.api.shopkeeper.player.PlayerShopType;
-import com.nisovin.shopkeepers.api.shopkeeper.player.PlayerShopkeeper;
-import com.nisovin.shopkeepers.api.shopkeeper.player.trade.TradingPlayerShopkeeper;
-import com.nisovin.shopkeepers.api.ui.DefaultUITypes;
-import net.alex9849.arm.AdvancedRegionMarket;
-import net.alex9849.arm.events.PreBuyEvent;
-import net.alex9849.arm.events.RestoreRegionEvent;
-import net.alex9849.arm.events.UnsellRegionEvent;
-import net.alex9849.arm.regions.Region;
-import net.alex9849.arm.regions.RegionManager;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.trading.MerchantOffers;
+import java.util.List;
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftAbstractVillager;
@@ -39,11 +15,45 @@ import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.Merchant;
+import org.bukkit.inventory.MerchantInventory;
+import org.bukkit.inventory.MerchantRecipe;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.UUID;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.data.Save;
+import com.leomelonseeds.ultimaaddons.objects.RegionData;
+import com.leomelonseeds.ultimaaddons.objects.RotatingShopkeeper;
+import com.leomelonseeds.ultimaaddons.objects.UAShopkeeper;
+import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+import com.leomelonseeds.ultimaaddons.utils.TimeParser;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
+import com.nisovin.shopkeepers.api.ShopkeepersAPI;
+import com.nisovin.shopkeepers.api.events.PlayerCreatePlayerShopkeeperEvent;
+import com.nisovin.shopkeepers.api.events.PlayerDeleteShopkeeperEvent;
+import com.nisovin.shopkeepers.api.events.ShopkeeperOpenUIEvent;
+import com.nisovin.shopkeepers.api.events.ShopkeeperTradeCompletedEvent;
+import com.nisovin.shopkeepers.api.events.ShopkeeperTradeEvent;
+import com.nisovin.shopkeepers.api.shopkeeper.ShopCreationData;
+import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
+import com.nisovin.shopkeepers.api.shopkeeper.ShopkeeperCreateException;
+import com.nisovin.shopkeepers.api.shopkeeper.TradingRecipe;
+import com.nisovin.shopkeepers.api.shopkeeper.player.PlayerShopCreationData;
+import com.nisovin.shopkeepers.api.shopkeeper.player.PlayerShopType;
+import com.nisovin.shopkeepers.api.shopkeeper.player.PlayerShopkeeper;
+import com.nisovin.shopkeepers.api.shopkeeper.player.trade.TradingPlayerShopkeeper;
+import com.nisovin.shopkeepers.api.ui.DefaultUITypes;
+
+import net.alex9849.arm.AdvancedRegionMarket;
+import net.alex9849.arm.events.PreBuyEvent;
+import net.alex9849.arm.events.RestoreRegionEvent;
+import net.alex9849.arm.events.UnsellRegionEvent;
+import net.alex9849.arm.regions.Region;
+import net.alex9849.arm.regions.RegionManager;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.trading.MerchantOffers;
 
 public class ShopkeeperListener implements Listener {
     private final UltimaAddons plugin = UltimaAddons.getPlugin();
@@ -63,6 +73,7 @@ public class ShopkeeperListener implements Listener {
         TradingPlayerShopkeeper sk = getRegionShopkeeper(r);
         if (sk == null) {
             Utils.msg(buyer, "&cThis region does not have a shopkeeper! Please contact an admin to fix this.");
+            return;
         }
 
         sk.setOwner(buyer);
@@ -78,6 +89,10 @@ public class ShopkeeperListener implements Listener {
     @EventHandler
     public void onRegionUnsell(UnsellRegionEvent e) {
         Region r = e.getRegion();
+        if (r.getOwner() == null) {
+            return;
+        }
+        
         Player buyer = Bukkit.getPlayer(r.getOwner());
         String id = r.getRegion().getId();
         PlayerShopkeeper nsk = resetShopkeeper(id, buyer);

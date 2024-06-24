@@ -81,6 +81,7 @@ public class Cindersmith extends UAInventory {
     @Override
     public void updateInventory() {
         ConfigurationSection sec = plugin.getConfig().getConfigurationSection("enchantgui");
+        this.results = new EnchantResult[3];
         
         // Pane fill
         for (int i = 0; i < 54; i++) {
@@ -253,11 +254,14 @@ public class Cindersmith extends UAInventory {
         }
         
         // Update on successful shift click bottom to top
-        if (e.getClickedInventory().equals(e.getView().getBottomInventory()) && 
-                e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY && 
+        if (e.getClickedInventory().equals(e.getView().getBottomInventory())) {
+            if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY && 
                 e.isShiftClick() && 
                 e.getResult() == Result.ALLOW) {
-            asyncUpdate();
+                asyncUpdate();
+            } else {
+                return false;
+            }
         }
         
         return true;
