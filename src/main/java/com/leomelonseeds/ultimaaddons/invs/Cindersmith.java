@@ -186,6 +186,10 @@ public class Cindersmith extends UAInventory {
             return;
         }
         
+        if (type.toString().contains("SHIFT")) {
+            return;
+        }
+        
         String id = Utils.getItemID(inv.getItem(slot));
         if (id == null) {
             return;
@@ -339,12 +343,13 @@ public class Cindersmith extends UAInventory {
             UEnchantment res = filtered.remove(rand.nextInt(0, filtered.size()));
             
             // Determine levelup
-            int dustUsed = MIN_DUST;
+            int initDust = minDust(res);
+            int dustUsed = initDust;
             int level = 1;
             int maxLevel = res.getMaxLevel();
-            double chance = (maxLevel - 1) / (double) (6 - minDust(res));
+            double chance = (maxLevel - 1) / (double) (6 - initDust);
             Random rand2 = new Random(seed + i + 1);
-            for (int j = MIN_DUST; j < dustAmount; j++) {
+            for (int j = initDust; j < dustAmount; j++) {
                 if (level >= maxLevel) {
                     break;
                 }

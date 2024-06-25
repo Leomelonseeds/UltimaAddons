@@ -1,6 +1,8 @@
 package com.leomelonseeds.ultimaaddons.handlers.kingdom;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
@@ -71,7 +73,7 @@ import dev.aurelium.auraskills.api.event.skill.EntityXpGainEvent;
 public class KingdomsListener implements Listener {
 
     private static Set<Structure> justRemoved = new HashSet<>();
-    private static Set<Player> allowedClose = new HashSet<>();
+    private static Map<Player, Integer> cantClose = new HashMap<>();
     
 
     // -------------------------------------------------
@@ -262,41 +264,43 @@ public class KingdomsListener implements Listener {
     public void onCreate(KingdomCreateEvent e) {
         Kingdom k = e.getKingdom();
         Utils.discord(":fleur_de_lis: **" + k.getName() + "** has been founded");
-        openSelectionGUI(k, 1);
+        openSelectionGUI(k);
     }
 
     // Open custom creation GUI that only closes once an option is selected
-    private void openSelectionGUI(Kingdom k, int att) {
+    private void openSelectionGUI(Kingdom k) {
         KingdomPlayer kp = k.getKing();
         Player player = kp.getPlayer();
+        int att = cantClose.getOrDefault(player, 0) + 1;
         if (att > 10) {
             setAggressor(k, kp, player);
+            Bukkit.getLogger().warning(player.getName() + " closed the GUI too many times and was auto set to aggressor");
             return;
         }
+        cantClose.put(player, att);
         
         InteractiveGUI gui = GUIAccessor.prepare(player, KingdomsGUI.KINGDOM$CREATE);
         gui.push("pacifist", () -> setPacifist(k, kp, player))
         .push("aggressor", () -> setAggressor(k, kp, player));
-        gui.onClose(() -> {
+        gui.onClose(() -> Utils.schedule(1, () -> {
             // Should not happen
             if (!player.isOnline()) {
                 setAggressor(k, kp, player);
                 return;
             }
             
-            if (!allowedClose.contains(player)) {
-                openSelectionGUI(k, att + 1);
+            if (cantClose.containsKey(player)) {
+                openSelectionGUI(k);
             }
-        });
+        }));
         gui.open();
     }
     
     private void setAggressor(Kingdom k, KingdomPlayer kp, Player player) {
         k.setPacifist(false, kp, null);
         KingdomsLang.COMMAND_CREATE_AGGRESSOR.sendMessage(player);
-        allowedClose.add(player);
+        cantClose.remove(player);
         player.closeInventory();
-        Utils.schedule(1, () -> allowedClose.remove(player));
         
         // Add shield if aggressor
         long shieldtime = k.getSince() + Utils.getNewbieTime();
@@ -307,9 +311,8 @@ public class KingdomsListener implements Listener {
     private void setPacifist(Kingdom k, KingdomPlayer kp, Player player) {
         k.setPacifist(true, kp, null);
         KingdomsLang.COMMAND_CREATE_PACIFIST.sendMessage(player);
-        allowedClose.add(player);
+        cantClose.remove(player);
         player.closeInventory();
-        Utils.schedule(1, () -> allowedClose.remove(player));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -321,7 +324,7 @@ public class KingdomsListener implements Listener {
             inGame = "&6" + k + " &2is a pacifist Kingdom.";
         } else {
             Utils.discord(":fire: **" + k + "** is now an aggressor Kingdom");
-            inGame = "&6" + k + " &2is is now an aggressor Kingdom.";
+            inGame = "&6" + k + " &2is now an aggressor Kingdom.";
         }
         
         Bukkit.getOnlinePlayers().forEach(p -> Utils.msg(p, inGame));
