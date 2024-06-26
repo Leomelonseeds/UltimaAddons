@@ -23,6 +23,7 @@ import com.leomelonseeds.ultimaaddons.data.file.Data;
 import com.leomelonseeds.ultimaaddons.handlers.LootHandler;
 import com.leomelonseeds.ultimaaddons.handlers.MiscListener;
 import com.leomelonseeds.ultimaaddons.handlers.ParryListener;
+import com.leomelonseeds.ultimaaddons.handlers.ShulkerHandler;
 import com.leomelonseeds.ultimaaddons.handlers.aurelium.AureliumRegistry;
 import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
 import com.leomelonseeds.ultimaaddons.handlers.kingdom.KingdomsListener;
@@ -119,6 +120,7 @@ public class UltimaAddons extends JavaPlugin {
         pm.registerEvents(itemManager.getTotems(), this);
         pm.registerEvents(new ShopkeeperListener(), this);
         pm.registerEvents(new MiscListener(), this);
+        pm.registerEvents(new ShulkerHandler(), this);
         pm.registerEvents(lootHandler, this);
         pm.registerEvents(parryListener, this);
 
