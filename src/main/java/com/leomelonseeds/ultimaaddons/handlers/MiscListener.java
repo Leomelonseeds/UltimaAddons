@@ -23,6 +23,7 @@ import org.bukkit.entity.Firework;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -32,6 +33,7 @@ import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.inventory.GrindstoneInventory;
 import org.bukkit.inventory.ItemFlag;
@@ -42,6 +44,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.kingdoms.constants.player.KingdomPlayer;
+import org.kingdoms.platform.bukkit.location.BukkitImmutableLocation;
 
 import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
@@ -69,6 +73,22 @@ public class MiscListener implements Listener {
     
     private static Map<Player, String> msgs = new HashMap<>();
     private static Set<Player> elytraCancelling = new HashSet<>();
+    
+    // Respawn at bed location if it exists, otherwise go k home, otherwise let essentials do the job
+    @EventHandler(priority = EventPriority.HIGH)
+    public final void onRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        if (player.getRespawnLocation() != null) {
+            return;
+        }
+        
+        KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(event.getPlayer());
+        if (!kp.hasKingdom()) {
+            return;
+        }
+        
+        event.setRespawnLocation(BukkitImmutableLocation.from(kp.getKingdom().getHome()));
+    }
     
     // Minecart speed on copper
     // Thanks to https://github.com/ergor/hsrails/blob/master/src/main/java/no/netb/mc/hsrails/MinecartListener.java
