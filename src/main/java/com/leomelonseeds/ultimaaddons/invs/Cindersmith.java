@@ -231,6 +231,11 @@ public class Cindersmith extends UAInventory {
         if (!takeLevels(player, res.getCost())) {
             return;
         }
+        
+        if (dust.getAmount() < res.getDust()) {
+            sendError(player, "&cNot enough dust for this enchantment!");
+            return;
+        }
 
         dust.setAmount(dust.getAmount() - res.getDust());
         inv.setItem(11, res.applyEnchant(toEnchant));
@@ -297,9 +302,8 @@ public class Cindersmith extends UAInventory {
      * removed from the list. If no more enchantments are available, 
      * it sets that result to null.
      * 
-     * Giving more dust gives chances that an enchant with a lower
-     * maximum level may appear. The minimum amount of dust n required
-     * to get a max level m enchant is given by:
+     * The minimum amount of dust n required to get a max level m 
+     * enchant is given by:
      * n = max(-m + 5, 2) where m >= 1
      * E.g. a max level 2 enchant requires at least 3 dust.
      * 
@@ -330,7 +334,7 @@ public class Cindersmith extends UAInventory {
         }
 
         // Filter enchantments
-        List<UEnchantment> filtered = enchants.stream().filter(ue -> dustAmount >= minDust(ue) && ue.isCompatible(gear)).collect(Collectors.toList());
+        List<UEnchantment> filtered = enchants.stream().filter(ue -> ue.isCompatible(gear)).collect(Collectors.toList());
         if (filtered.isEmpty()) {
             return;
         }

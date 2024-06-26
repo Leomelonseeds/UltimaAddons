@@ -6,7 +6,8 @@ public enum TotemType {
     KHOME("khome"),
     DEATH("death"),
     LODESTONE("lodestone"),
-    PLAYER("player");
+    PLAYER("player"),
+    RANDOM("random");
 
     private final String text;
     

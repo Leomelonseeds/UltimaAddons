@@ -1,3 +1,6 @@
+# Disable if discord not set
+enable-discord: true
+
 # Drop party settings
 # time: time between each give, in ticks
 # amount: amount of iterations for each drop party
@@ -505,6 +508,16 @@ items:
       lore:
         - "&7Right-click to request a teleportation"
         - "&7to a set player, if they are online."
+    random:
+      material: TOTEM_OF_UNDYING
+      name: "&dTotem of Warping &b(Random)"
+      glow: true
+      custom-model-data: 48760
+      update: 1
+      lore:
+        - "&7Right-click to initiate a teleportation"
+        - "&7to random location in the world. This item"
+        - "&7cannot be dropped."
   exlodestone:
     material: COMPASS
     name: "&fLodestone Compass"

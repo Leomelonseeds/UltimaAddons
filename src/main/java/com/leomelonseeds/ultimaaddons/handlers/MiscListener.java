@@ -384,6 +384,10 @@ public class MiscListener implements Listener {
     // Log Staff
     @EventHandler
     public void listen(PlayerCommandPreprocessEvent e) {
+        if (!UltimaAddons.getPlugin().getConfig().getBoolean("enable-discord")) {
+            return;
+        }
+        
         // No need to log non-staff members
         Player p = e.getPlayer();
         if (!p.hasPermission("group.helper") && !p.hasPermission("group.builder")) {

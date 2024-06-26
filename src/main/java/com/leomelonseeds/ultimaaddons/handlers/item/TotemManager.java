@@ -32,6 +32,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -155,6 +156,15 @@ public class TotemManager implements Listener {
                     Utils.sendSound(Sound.BLOCK_BEACON_AMBIENT, 2F, 1.2F + since * 0.2F, from);
                     msg(player, "&bTeleporting in &f" + iteration + " &bseconds, do not move...");
                     iteration--;
+                    return;
+                }
+                
+                // Handle random TP
+                if (isType(Utils.getItemID(totem, totemKey), TotemType.RANDOM)) {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rtp player " + player.getName());
+                    curItem.setAmount(curItem.getAmount() - 1);
+                    removePlayer(player, null);
+                    this.cancel();
                     return;
                 }
 
@@ -324,6 +334,12 @@ public class TotemManager implements Listener {
             }
 
             initiateTeleportation(player, hand, totem, loc);
+            return;
+        }
+        
+        // RANDOM TP
+        if (isType(totid, TotemType.RANDOM)) {
+            initiateTeleportation(player, hand, totem, null);
             return;
         }
 
@@ -599,6 +615,20 @@ public class TotemManager implements Listener {
 
         addOrDropItem(i, (Player) e.getEntity());
         e.getItem().setItemStack(i);
+    }
+    
+    // Do not allow dropping of random totem
+    @EventHandler
+    public void onDrop(PlayerDropItemEvent e) {
+        ItemStack item = e.getItemDrop().getItemStack();
+        String totid = Utils.getItemID(item, totemKey);
+        if (totid == null) {
+            return;
+        }
+        
+        if (isType(totid, TotemType.RANDOM)) {
+            e.setCancelled(true);
+        }
     }
 
     // Sets the crafting inventory result to the specified item, unless the given

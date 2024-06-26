@@ -6,7 +6,6 @@ author: M310N
 description: Extra features for Ultima
 depend:
   - Kingdoms
-  - DiscordSRV
   - PlaceholderAPI
   - AdvancedEnchantments
   - Shopkeepers
@@ -14,6 +13,9 @@ depend:
   - Vault
   - WorldEdit
   - AuraSkills
+softdepend:
+  - BetterRTP
+  - DiscordSRV
 commands:
   uchallenge: { }
   recipes: { }

@@ -306,6 +306,10 @@ public class Utils {
     }
     
     public static void discord(String s) {
+        if (!UltimaAddons.getPlugin().getConfig().getBoolean("enable-discord")) {
+            return;
+        }
+        
         TextChannel warChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("war");
         warChannel.sendMessage(s).queue();
     }
