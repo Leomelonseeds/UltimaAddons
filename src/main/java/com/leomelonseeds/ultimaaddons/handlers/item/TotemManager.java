@@ -16,7 +16,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.Statistic;
-import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
@@ -49,6 +48,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.kingdoms.constants.player.KingdomPlayer;
+import org.kingdoms.platform.bukkit.location.BukkitImmutableLocation;
 import org.kingdoms.server.location.ImmutableLocation;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
@@ -224,6 +224,12 @@ public class TotemManager implements Listener {
                     curItem.setAmount(curItem.getAmount() - 1);
                 }
 
+                // Set yaw and pitch if tp location doesn't have them set
+                if (curLoc.getYaw() == 0) {
+                    curLoc.setYaw(player.getLocation().getYaw());
+                    curLoc.setPitch(player.getLocation().getPitch());
+                }
+                
                 msg(player, "&bTeleporting...");
                 player.teleport(curLoc);
                 Utils.sendSound(Sound.ITEM_TOTEM_USE, 0.8F, 2F, curLoc);
@@ -319,9 +325,7 @@ public class TotemManager implements Listener {
                 return;
             }
 
-            World w = Bukkit.getWorld(loc.getWorld().getName());
-            Location tpLoc = new Location(w, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
-            initiateTeleportation(player, hand, totem, tpLoc);
+            initiateTeleportation(player, hand, totem, BukkitImmutableLocation.from(loc));
             return;
         }
 
@@ -353,7 +357,7 @@ public class TotemManager implements Listener {
                 return;
             }
 
-            initiateTeleportation(player, hand, totem, loc);
+            initiateTeleportation(player, hand, totem, loc.toCenterLocation().add(0, -0.5, 0));
             return;
         }
 
