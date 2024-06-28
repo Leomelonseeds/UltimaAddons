@@ -162,6 +162,7 @@ public class TotemManager implements Listener {
                 // Handle random TP
                 if (isType(Utils.getItemID(totem, totemKey), TotemType.RANDOM)) {
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rtp player " + player.getName());
+                    setSpawn(player, from);
                     curItem.setAmount(curItem.getAmount() - 1);
                     removePlayer(player, null);
                     this.cancel();
@@ -239,6 +240,27 @@ public class TotemManager implements Listener {
                 removePlayer(player, null);
             }
         }.runTaskTimer(plugin, 1, 20)); // Start 1 tick later to make sure its not immediately cancelled due to movement or something
+    }
+    
+    /**
+     * Sets the player spawn, only if player is more than 10 blocks away
+     * from the initial location provided. If not, then it tries again
+     * after 10 ticks.
+     * 
+     * @param player
+     * @param init
+     */
+    private void setSpawn(Player player, Location init) {
+        Utils.schedule(10, () -> {
+            Location cur = player.getLocation();
+            if (cur.distance(init) < 10) {
+                setSpawn(player, init);
+                return;
+            }
+            
+            player.setRespawnLocation(cur, true);
+            player.sendMessage(Utils.toComponent("&fRespawn point set"));
+        });
     }
 
     private Material getGround(Location location) {
