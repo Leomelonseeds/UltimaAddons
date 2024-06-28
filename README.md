@@ -145,3 +145,4 @@ Finally, the plugin adds a few game mechanics to make the survival experience mo
 
 - Elytras do not work if exposed to rain.
 - Powered rails placed on copper blocks increases the maximum speed of Minecarts by 4x, and up to 6x if the copper is fully oxidized.
+- Shulkers can be opened by right-clicking them.
