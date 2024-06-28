@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.BlockState;
@@ -13,11 +14,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -27,22 +26,33 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
+
 /**
  * THANKS TO https://github.com/JustKato/BetterShulkers FOR THE CODE, MODIFIED TO WORK ON RIGHT CLICK
  */
 public class ShulkerHandler implements Listener {
     
-    private Map<Inventory, ItemStack> openShulkers;
+    private Map<Player, Pair<Inventory, ItemStack>> openShulkers;
     
     public ShulkerHandler() {
         this.openShulkers = new HashMap<>();
+    }
+    
+    public void saveAll() {
+        openShulkers.values().forEach(s -> saveShulker(s));
     }
 
     // React each time a shulker is dropped
     @EventHandler(priority = EventPriority.LOWEST)
     public void onClick(PlayerInteractEvent e) {
+        if (!UltimaAddons.getPlugin().getConfig().getBoolean("enable-shulkers")) {
+            return;
+        }
+        
         Player p = e.getPlayer();
-        if (e.getAction() != Action.RIGHT_CLICK_AIR) {
+        if (openShulkers.containsKey(p)) {
             return;
         }
         
@@ -63,7 +73,7 @@ public class ShulkerHandler implements Listener {
         }
 
         Inventory inv = sm.getInventory();
-        openShulkers.put(inv, item);
+        openShulkers.put(p, Pair.of(inv, item));
         p.openInventory(inv);
         p.playSound(p.getLocation(), Sound.BLOCK_SHULKER_BOX_OPEN, 0.5F, 1F);
         e.setCancelled(true);
@@ -75,59 +85,43 @@ public class ShulkerHandler implements Listener {
             return;
         }
         
-        Inventory inv = e.getInventory();
-        ItemStack item = openShulkers.remove(inv);
-        if (item == null) {
+        Pair<Inventory, ItemStack> shulker = openShulkers.get(p);
+        if (shulker == null) {
             return;
         }
         
-        handleInventoryShananigans(inv, item);
+        // Add a small cooldown to stop opening in the same tick
+        Utils.schedule(10, () -> openShulkers.remove(p));
+        saveShulker(shulker);
         p.playSound(p.getLocation(), Sound.BLOCK_SHULKER_BOX_CLOSE, 0.5F, 1F);
-    }
-
-    @EventHandler
-    public void onShulkerInventoryInteract(InventoryInteractEvent e) {
-        if (!(e.getWhoClicked() instanceof Player)) {
-            return;
-        }
-        
-        Inventory inv = e.getInventory();
-        ItemStack item = openShulkers.get(inv);
-        if (item == null) {
-            return;
-        }
-        
-        handleInventoryShananigans(inv, item);
     }
     
     
     @EventHandler
     public void onPlayerDropOpenedShulker(PlayerDropItemEvent e) {
-        Inventory inv = e.getPlayer().getOpenInventory().getTopInventory();
-        ItemStack item = openShulkers.get(inv);
-        if (item == null) {
+        if (!openShulkers.containsKey(e.getPlayer())) {
             return;
         }
-
-        // Check if the currently open inventory is a shulker
+        
+        ItemStack item = openShulkers.get(e.getPlayer()).getRight();
         if (e.getItemDrop().getItemStack().equals(item)) {
             e.setCancelled(true);
         }
     }
 
     @EventHandler
-    public void onMoveOpenedShulkers(InventoryClickEvent e) {
+    public void onMoveItem(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player p)) {
             return;
         }
         
         // Get the currently open inventory
-        Inventory inv = p.getOpenInventory().getTopInventory();
-        if (!openShulkers.containsKey(inv)) {
+        if (!openShulkers.containsKey(p)) {
             return;
         }
-
-        if (e.getCurrentItem().equals(openShulkers.get(inv))) {
+        
+        ItemStack item = openShulkers.get(p).getRight();
+        if (e.getCurrentItem() != null && e.getCurrentItem().equals(item)) {
             e.setCancelled(true);
         }
     }
@@ -150,7 +144,8 @@ public class ShulkerHandler implements Listener {
      * 
      * @param inv
      */
-    private static void handleInventoryShananigans(Inventory inv, ItemStack item) {
+    private static void saveShulker(Pair<Inventory, ItemStack> shulker) {
+        ItemStack item = shulker.getRight();
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
             return;
@@ -161,7 +156,7 @@ public class ShulkerHandler implements Listener {
             return;
         }
         
-        sm.getInventory().setContents(inv.getContents());
+        sm.getInventory().setContents(shulker.getLeft().getContents());
         BlockStateMeta bsm = (BlockStateMeta) meta;
         bsm.setBlockState(sm);
         item.setItemMeta(bsm);

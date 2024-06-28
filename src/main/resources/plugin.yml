@@ -30,5 +30,7 @@ commands:
     default: op
   uenchant:
     default: op
+  utoggleshulkers:
+    default: op
 permissions:
   ua.admin: { }

@@ -1,3 +1,6 @@
+# Disable if a dupe is found
+enable-shulkers: true
+
 # Disable if discord not set
 enable-discord: true
 

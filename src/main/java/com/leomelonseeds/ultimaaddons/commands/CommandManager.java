@@ -43,6 +43,7 @@ public class CommandManager {
         cmdManager.registerCommand(new UASk(plugin));
         cmdManager.registerCommand(new UAEnchant());
         cmdManager.registerCommand(new UDropParty());
+        cmdManager.registerCommand(new UToggleShulkers());
         
         // Test command - comment out in production (maybe)
         cmdManager.registerCommand(new UATest());

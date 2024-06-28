@@ -58,6 +58,7 @@ public class UltimaAddons extends JavaPlugin {
     private RegionManager regionManager;
     private InventoryManager invManager;
     private ItemManager itemManager;
+    private ShulkerHandler shulkerHandler;
     private ConfigFile configFile;
     private Data tradesFile;
     private Data regionsFile;
@@ -100,6 +101,7 @@ public class UltimaAddons extends JavaPlugin {
         itemManager = new ItemManager(this);
         lootHandler = new LootHandler(this);
         parryListener = new ParryListener();
+        shulkerHandler = new ShulkerHandler();
         UAUnclaimProcessor.register();
         new UAPlaceholders().register();
         registerAE(new CaptureEffect(this));
@@ -120,7 +122,7 @@ public class UltimaAddons extends JavaPlugin {
         pm.registerEvents(itemManager.getTotems(), this);
         pm.registerEvents(new ShopkeeperListener(), this);
         pm.registerEvents(new MiscListener(), this);
-        pm.registerEvents(new ShulkerHandler(), this);
+        pm.registerEvents(shulkerHandler, this);
         pm.registerEvents(lootHandler, this);
         pm.registerEvents(parryListener, this);
 
@@ -139,6 +141,7 @@ public class UltimaAddons extends JavaPlugin {
             p.closeInventory();
             invManager.unregister(p);
         });
+        shulkerHandler.saveAll();
         writeTradesFile();
         writeRegionsFile();
         itemManager.getAbilities().cancelTasks();
