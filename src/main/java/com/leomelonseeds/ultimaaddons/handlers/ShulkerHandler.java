@@ -14,14 +14,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -53,6 +52,10 @@ public class ShulkerHandler implements Listener {
         
         Player p = e.getPlayer();
         if (openShulkers.containsKey(p)) {
+            return;
+        }
+        
+        if (e.getAction() != Action.RIGHT_CLICK_AIR) {
             return;
         }
         
@@ -103,8 +106,7 @@ public class ShulkerHandler implements Listener {
             return;
         }
         
-        ItemStack item = openShulkers.get(e.getPlayer()).getRight();
-        if (e.getItemDrop().getItemStack().equals(item)) {
+        if (e.getItemDrop().getItemStack().getType().equals(Material.SHULKER_BOX)) {
             e.setCancelled(true);
         }
     }
@@ -115,7 +117,6 @@ public class ShulkerHandler implements Listener {
             return;
         }
         
-        // Get the currently open inventory
         if (!openShulkers.containsKey(p)) {
             return;
         }
@@ -128,13 +129,11 @@ public class ShulkerHandler implements Listener {
 
     @EventHandler
     public void onShulkerPlace(BlockPlaceEvent e) {
-        var blockPlaced = e.getBlockPlaced();
-        if (!(blockPlaced.getType().equals(Material.SHULKER_BOX))) {
+        if (!openShulkers.containsKey(e.getPlayer())) {
             return;
         }
         
-        InventoryView openedInventory = e.getPlayer().getOpenInventory();
-        if (openedInventory.getType().equals(InventoryType.SHULKER_BOX)) {
+        if (e.getBlockPlaced().getType().equals(Material.SHULKER_BOX)) {
             e.setCancelled(true);
         }
     }
