@@ -29,10 +29,10 @@ Listed below are many of the formulas used on Ultima to determine various costs/
     
 ### Cindersmith
 - Minimum dust for enchantment: `max(-max_level + 5, 2)`
-    - 'max_level': The maximum level of this enchantment.
+    - `max_level`: The maximum level of this enchantment.
     - Example: Fire Aspect, an enchantment with max level 2, requires 3 dust for Fire Aspect I.
 - Chance for a higher level: `(max_level - 1) / (6 - min_dust)`
-    - 'min_dust': The minimum amount of dust to get this enchantment, specified above.
+    - `min_dust`: The minimum amount of dust to get this enchantment, specified above.
     - This formula gives the chance that each additional piece of dust above `min_dust` dust will increase the level of the resulting enchantment by 1.
     - Example: From above, we know that Fire Aspect requires 3 dust. Each dust above 3 has a 33% chance of increasing the resulting enchantment to level 2.
 - Level cost: `tier * 10 + ceil(10 * level / max_level)`
