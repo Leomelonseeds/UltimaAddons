@@ -161,12 +161,25 @@ public class MiscListener implements Listener {
         List<ItemStack> drops = e.getDrops();
         double chance = UASkills.ABIDING.getValue(abiding) / 100.0;
         for (ItemStack drop : new ArrayList<>(drops)) {
-            if (random.nextDouble() > chance) {
+            if (random.nextDouble() < chance) {
+                drops.remove(drop);
+                e.getItemsToKeep().add(drop);
                 continue;
             }
             
+            int soulbound = AEAPI.getEnchantmentsOnItem(drop).getOrDefault("soulbound", 0);
+            if (soulbound <= 0) {
+                continue;
+            }
+
             drops.remove(drop);
-            e.getItemsToKeep().add(drop);
+            ItemStack boundDrop = new ItemStack(drop);
+            AEAPI.removeEnchantment(boundDrop, "soulbound");
+            if (soulbound > 1) {
+                AEAPI.applyEnchant("soulbound", soulbound - 1, boundDrop);
+            }
+            
+            e.getItemsToKeep().add(boundDrop);
         }
     }
     
@@ -355,7 +368,6 @@ public class MiscListener implements Listener {
     }
 
     // Stop items with hide_enchant flag being used in grindstone
-    // Also has temp fix for AE disenchanted custom books still keeping name
     @EventHandler
     public void onGrindstone(PrepareGrindstoneEvent e) {
         GrindstoneInventory gi = e.getInventory();
@@ -368,11 +380,6 @@ public class MiscListener implements Listener {
                 continue;
             }
             
-            if (AEAPI.isCustomEnchantBook(i)) {
-                e.getResult().setItemMeta(null);
-                return;
-            }
-
             ItemMeta meta = i.getItemMeta();
             if (meta.getItemFlags().contains(ItemFlag.HIDE_ENCHANTS)) {
                 e.setResult(null);
