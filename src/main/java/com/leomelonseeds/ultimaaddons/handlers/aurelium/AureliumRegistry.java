@@ -5,8 +5,9 @@ import java.nio.file.FileSystems;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.data.file.Data;
-import com.leomelonseeds.ultimaaddons.objects.TrymeSource;
 import com.leomelonseeds.ultimaaddons.objects.UASkills;
+import com.leomelonseeds.ultimaaddons.objects.aurelium.CindersmithSource;
+import com.leomelonseeds.ultimaaddons.objects.aurelium.TrymeSource;
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
 
 import dev.aurelium.auraskills.api.AuraSkillsApi;
@@ -43,6 +44,10 @@ public class AureliumRegistry {
         // And the sources
         registry.registerSourceType("tryme", (XpSourceParser<TrymeSource>) (source, context) -> {
             return new TrymeSource(context.parseValues(source));
+        });
+        
+        registry.registerSourceType("cindersmith", (XpSourceParser<CindersmithSource>) (source, context) -> {
+            return new CindersmithSource(context.parseValues(source));
         });
     }
 

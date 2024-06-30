@@ -31,12 +31,14 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.objects.UASkills;
 import com.leomelonseeds.ultimaaddons.objects.enchant.EnchantResult;
 import com.leomelonseeds.ultimaaddons.objects.enchant.UCustomEnchant;
 import com.leomelonseeds.ultimaaddons.objects.enchant.UEnchantment;
 import com.leomelonseeds.ultimaaddons.objects.enchant.UVanillaEnchant;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
+import dev.aurelium.auraskills.api.AuraSkillsApi;
 import net.advancedplugins.ae.api.AEAPI;
 import net.kyori.adventure.text.Component;
 
@@ -232,17 +234,23 @@ public class Cindersmith extends UAInventory {
             return;
         }
         
-        if (dust.getAmount() < res.getDust()) {
+        int dustAmt = res.getDust();
+        if (dust.getAmount() < dustAmt) {
             sendError(player, "&cNot enough dust for this enchantment!");
             return;
         }
 
-        dust.setAmount(dust.getAmount() - res.getDust());
+        dust.setAmount(dust.getAmount() - dustAmt);
         inv.setItem(11, res.applyEnchant(toEnchant));
         data.put(uuid, Pair.of(System.currentTimeMillis(), 0));
         asyncUpdate();
         player.playSound(player, Sound.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, 1F, 0.8F);
         player.playSound(player, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 2F, 1F);
+        
+        // Aurelium exp = 10 * rarity * dust used
+        String rarity = Utils.getItemID(dust).replace("dust", "");
+        int exp = 10 * dustAmt * (tiers.indexOf(rarity) + 1);
+        AuraSkillsApi.get().getUser(player.getUniqueId()).addSkillXp(UASkills.SORCERY, exp);
     }
     
     /**
@@ -424,10 +432,6 @@ public class Cindersmith extends UAInventory {
                 toReturn.setAmount(extra);
                 returnItems(player, toReturn);
             }
-        }
-        
-        if (dust == null || dust.getAmount() < MIN_DUST) {
-            return null;
         }
         
         String id = Utils.getItemID(dust);

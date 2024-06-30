@@ -86,3 +86,7 @@ sources:
     menu_item:
       material: grindstone
     unit: '{sources.units.grindstone_level}'
+  cindersmith:
+    type: ua/cindersmith
+    menu_item:
+      material: LIGHT_GRAY_DYE

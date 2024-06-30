@@ -1,4 +1,4 @@
-package com.leomelonseeds.ultimaaddons.objects;
+package com.leomelonseeds.ultimaaddons.objects.aurelium;
 
 import java.util.Locale;
 

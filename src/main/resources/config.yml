@@ -13,7 +13,7 @@ party:
   amount: 60
   min: 1
   max: 2
-  
+
 # Amount of diamonds to give for tutorial reward
 tutorial-reward: 5
 
@@ -21,161 +21,220 @@ enchantgui:
   gear:
     material: DIAMOND_SWORD
     materials:
-      - DIAMOND_SWORD
-      - IRON_AXE
-      - NETHERITE_HOE
-      - BOOK
-      - CROSSBOW
-      - GOLDEN_PICKAXE
-      - STONE_SHOVEL
-    name: "&b&lGear Slot"
+    - DIAMOND_SWORD
+    - IRON_AXE
+    - NETHERITE_HOE
+    - BOOK
+    - CROSSBOW
+    - GOLDEN_PICKAXE
+    - STONE_SHOVEL
+    name: '&b&lGear Slot'
     lore:
-      - "&7Only items that do not have"
-      - "&7enchants of the enchanted dust's"
-      - "&7tier can be enchanted. Books"
-      - "&7can only be enchanted once."
+    - '&7Only items that do not have'
+    - '&7enchants of the enchanted dust''s'
+    - '&7tier can be enchanted. Books'
+    - '&7can only be enchanted once.'
   dust:
     material: ORANGE_DYE
     materials:
-      - LIGHT_GRAY_DYE
-      - LIME_DYE
-      - BLUE_DYE
-      - PURPLE_DYE
-      - ORANGE_DYE
-    name: "&6&lEnchanted Dust Slot"
+    - LIGHT_GRAY_DYE
+    - LIME_DYE
+    - BLUE_DYE
+    - PURPLE_DYE
+    - ORANGE_DYE
+    name: '&6&lEnchanted Dust Slot'
     lore:
-      - "&7Enchanted dust can be found in"
-      - "&7loot chests, mining, and through"
-      - "&7grindstone disenchanting."
-      - ""
-      - "&7Place more dust to get higher level"
-      - "&7enchants. All dust in this slot is"
-      - "&7consumed on use."
+    - '&7Enchanted dust can be found in'
+    - '&7loot chests, mining, and through'
+    - '&7grindstone disenchanting.'
+    - ''
+    - '&7Place more dust to get higher level'
+    - '&7enchants. All dust in this slot is'
+    - '&7consumed on use.'
   reroll:
     material: EXPERIENCE_BOTTLE
-    name: "&aReroll"
+    name: '&aReroll'
     lore:
-      - "&7Click to reroll enchantments."
-      - "&7Rerolling costs reset every enchant."
-      - ""
-      - "&bCost: &a%cost% Level(s)"
+    - '&7Click to reroll enchantments.'
+    - '&7Rerolling costs reset every enchant.'
+    - ''
+    - '&bCost: &a%cost% Level(s)'
   ench:
     material: ENCHANTED_BOOK
-    name: "%enchant%"
+    name: '%enchant%'
     lore:
-      - "&7Left click to enchant."
-      - "&7Right click to view enchantment"
-      - "&7information."
-      - ""
-      - "&bCost: &a%cost% Level(s), %dust% Dust"
+    - '&7Left click to enchant.'
+    - '&7Right click to view enchantment'
+    - '&7information.'
+    - ''
+    - '&bCost: &a%cost% Level(s), %dust% Dust'
   locked-none:
     material: BARRIER
-    name: "&cNone"
+    name: '&cNone'
     lore:
-      - "&7Please insert a gear item/book"
-      - "&7and at least 2 enchanted dust"
-      - "&7to continue."
+    - '&7Please insert a gear item/book'
+    - '&7and at least 1 enchanted dust'
+    - '&7to continue.'
   locked-na:
     material: BARRIER
-    name: "&cNot Available"
+    name: '&cNot Available'
     lore:
-      - "&7There are no more available"
-      - "&7enchants for this gear and"
-      - "&7rarity combo."
+    - '&7There are no more available'
+    - '&7enchants for this gear and'
+    - '&7rarity combo.'
   locked-already:
     material: BARRIER
-    name: "&cLocked"
+    name: '&cLocked'
     lore:
-      - "&7This gear already has an"
-      - "&7enchantment of this rarity!"
+    - '&7This gear already has an'
+    - '&7enchantment of this rarity!'
   custom-blacklist:
-    - immolate
-    
+  - immolate
+
 challengegui:
   1-day:
     material: IRON_BLOCK
-    name: "&2In 1 day"
+    name: '&2In 1 day'
     slot: 11
     days: 1
   2-day:
     material: GOLD_BLOCK
-    name: "&2In 2 days"
+    name: '&2In 2 days'
     slot: 13
     days: 2
   3-day:
     material: DIAMOND_BLOCK
-    name: "&2In 3 days"
+    name: '&2In 3 days'
     slot: 15
     days: 3
-    
+
 introgui:
   kingdomshandbook:
     material: WRITTEN_BOOK
-    name: "&f&lKingdoms Handbook"
+    name: '&f&lKingdoms Handbook'
     book:
-      title: "KINGDOMS HANDBOOK"
-      author: "Ultima"
+      title: KINGDOMS HANDBOOK
+      author: Ultima
       pages:
-        - "§lKingdoms Handbook\n\n§rWelcome to Kingdoms! To get started, use §2/k create §rto create a Kingdom, or ask someone to invite you to theirs."
-        - "Kingdoms can be §2Paci- fist §ror §cAggressors§r. Pacifist Kingdoms can’t invade and can't be invaded, but also can't claim as many lands, and §ldo not §rmake passive income.\n\nYour pacifism status is set on Kingdom creation, and cannot be changed."
-        - "Kingdoms can claim lands using §2/k claim§r, which are chunks that are protected from grief. Aggressor Kingdoms can invade other Kingdoms and take over their lands.\n\nThe §lInvasion Hand- book §rhas more information on how to start wars."
-        - "The most important block in your Kingdom is the §lNexus§r, which is placed when you create the Kingdom. You can move it around with §2/k nexus§r. If your Nexus is captured by an enemy, your Kingdom will be §cdisbanded§r."
-        - "From the §lNexus§r, you can level up your Kingdom by purchasing upgrades, structures, and turrets. You can also manage Kingdom shields, permissions, and ranks."
-        - "All nexus purchases cost §lResource Points§r. You can gain resource points by depositing diamonds or diamond blocks within your Nexus’ resource point converter, and they can be withdrawn back into diamonds later."
-        - "Use §2/k help§r and explore your Nexus to discover more Kingdoms features. Happy claiming!"
+      - |-
+        §lKingdoms Handbook
+
+        §rWelcome to Kingdoms! To get started, use §2/k create §rto create a Kingdom, or ask someone to invite you to theirs.
+      - |-
+        Kingdoms can be §2Paci- fist §ror §cAggressors§r. Pacifist Kingdoms can’t invade and can't be invaded, but also can't claim as many lands, and §ldo not §rmake passive income.
+
+        Your pacifism status is set on Kingdom creation, and cannot be changed.
+      - |-
+        Kingdoms can claim lands using §2/k claim§r, which are chunks that are protected from grief. Aggressor Kingdoms can invade other Kingdoms and take over their lands.
+
+        The §lInvasion Hand- book §rhas more information on how to start wars.
+      - The most important block in your Kingdom is the §lNexus§r, which is placed
+        when you create the Kingdom. You can move it around with §2/k nexus§r. If
+        your Nexus is captured by an enemy, your Kingdom will be §cdisbanded§r.
+      - From the §lNexus§r, you can level up your Kingdom by purchasing upgrades,
+        structures, and turrets. You can also manage Kingdom shields, permissions,
+        and ranks.
+      - All nexus purchases cost §lResource Points§r. You can gain resource points
+        by depositing diamonds or diamond blocks within your Nexus’ resource point
+        converter, and they can be withdrawn back into diamonds later.
+      - Use §2/k help§r and explore your Nexus to discover more Kingdoms features.
+        Happy claiming!
       generation: COPY_OF_ORIGINAL
     lore:
-      - ""
-      - "&7A guide to the basics of the"
-      - "&7Kingdoms system."
+    - ''
+    - '&7A guide to the basics of the'
+    - '&7Kingdoms system.'
     slot: 0
   invasionhandbook:
     material: WRITTEN_BOOK
-    name: "&f&lInvasion Handbook"
+    name: '&f&lInvasion Handbook'
     book:
-      title: "INVASION HANDBOOK"
-      author: "Ultima"
+      title: INVASION HANDBOOK
+      author: Ultima
       pages:
-        - "§lInvasion Handbook\n\n§rSo, you want to start a war with another Kingdom. Here’s how."
-        - "First, you need to declare war by using §2/k challenge§r. You’ll pick a preparation period of 1-3 days, after which you and the enemy are allowed to invade each other for up to §n2 hours§r. The exact war start time can be seen in our §3discord§r, in your local time zone. Don't miss it!"
-        - "You can only declare war on §6neutral§r or §cenemy §rKingdoms. To cancel a war, request a neutral, truce, or ally relation with your opponent using §2/k [relation] [kingdom]§r."
-        - "When war starts, use §2/k invade §rto start an invasion on an enemy chunk. You can only capture lands that are not completely surrounded by other enemy chunks - in other words, you can only invade chunks on §nenemy borders§r."
-        - "After starting an invasion, the enemy §lChampion §rwill spawn. The Champion is a mob that helps Kingdoms defend their lands. It can be upgraded through the Nexus."
-        - "To capture the chunk, you have to stand in it for §n3 minutes§r. Any defenders in the chunk will §lstop §rcap- ture progress from advancing. Defenders include enemy players, their allies, and the Champion. Failing to capture within §n15 minutes§r will result in a §cdefeat§r."
-        - "If the invasion is successful, the chunk will become your Kingdom’s land. If you capture an §6§lOutpost §rland, all other lands claimed from that Outpost will be §6unclaimed§r. If you capture the enemy §c§lNexus §rland, the enemy Kingdom will be §cdisbanded§r."
-        - "So get out there, become as powerful as you desire, and godspeed."
+      - |-
+        §lInvasion Handbook
+
+        §rSo, you want to start a war with another Kingdom. Here’s how.
+      - First, you need to declare war by using §2/k challenge§r. You’ll pick a preparation
+        period of 1-3 days, after which you and the enemy are allowed to invade each
+        other for up to §n2 hours§r. The exact war start time can be seen in our §3discord§r,
+        in your local time zone. Don't miss it!
+      - You can only declare war on §6neutral§r or §cenemy §rKingdoms. To cancel a
+        war, request a neutral, truce, or ally relation with your opponent using §2/k
+        [relation] [kingdom]§r.
+      - When war starts, use §2/k invade §rto start an invasion on an enemy chunk.
+        You can only capture lands that are not completely surrounded by other enemy
+        chunks - in other words, you can only invade chunks on §nenemy borders§r.
+      - After starting an invasion, the enemy §lChampion §rwill spawn. The Champion
+        is a mob that helps Kingdoms defend their lands. It can be upgraded through
+        the Nexus.
+      - To capture the chunk, you have to stand in it for §n3 minutes§r. Any defenders
+        in the chunk will §lstop §rcap- ture progress from advancing. Defenders include
+        enemy players, their allies, and the Champion. Failing to capture within §n15
+        minutes§r will result in a §cdefeat§r.
+      - If the invasion is successful, the chunk will become your Kingdom’s land.
+        If you capture an §6§lOutpost §rland, all other lands claimed from that Outpost
+        will be §6unclaimed§r. If you capture the enemy §c§lNexus §rland, the enemy
+        Kingdom will be §cdisbanded§r.
+      - So get out there, become as powerful as you desire, and godspeed.
       generation: COPY_OF_ORIGINAL
     lore:
-      - ""
-      - "&7A guide to invading other Kingdoms."
+    - ''
+    - '&7A guide to invading other Kingdoms.'
     slot: 1
   specialfeatures:
     material: WRITTEN_BOOK
-    name: "&f&l&oNon-Vanilla &f&lFeatures"
+    name: '&f&l&oNon-Vanilla &f&lFeatures'
     book:
-      title: "NON-VANILLA FEATURES"
-      author: "Ultima"
+      title: NON-VANILLA FEATURES
+      author: Ultima
       pages:
-        - "§lThe Market\n\n§rThere is a Kingdom known as the Market near the center of the world, where you can buy and sell items in exchange for §bdiamonds§r. You may also setup your own shops to become a capitalist overlord."
-        - "§lMinecarts\n\n§rPowered rails placed on copper blocks make minecarts travel §n4x faster§r than vanilla. The speed is even faster the more oxidized the copper."
-        - "§lElytra\n\n§rElytra boosting is only possible with §dDragon Fireworks§r, which can be obtained, among other means, through trading at the Market."
-        - "§lCustom Items\n\n§rCustom items and recipes are available, including powerful weapons and armor sets - use §2/recipes §rto see them."
-        - "§lTeleportation\n\n§rUse §dTotems of Warping §rto TP to locations like your Kingdom home, last death location, lodestones, or other players. They are craftable (check §2/recipes§r) and also available at the Market."
-        - "§lThe Nether\n\n§r1 block in the Nether = §n2 blocks§r in the Overworld. This differs from vanilla, which has a 1:8 ratio by default."
-        - "§lWorldborder\n\n§rThe Overworld and End borders are 8000 blocks from the center, while the Nether border is 4000 blocks away."
+      - |-
+        §lThe Market
+
+        §rThere is a Kingdom known as the Market near the center of the world, where you can buy and sell items in exchange for §bdiamonds§r. You may also setup your own shops to become a capitalist overlord.
+      - |-
+        §lEnchanting
+
+        §rIn your journeys, you will find §oEnchanted Dust §rof different rarities. Take these to the §5Cindersmith §rin the Market to get custom enchantments.
+      - |-
+        §lMinecarts
+
+        §rPowered rails placed on copper blocks make minecarts travel §n4x faster§r than vanilla. The speed is even faster the more oxidized the copper.
+      - |-
+        §lElytra
+
+        §rElytra boosting is only possible with §dDragon Fireworks§r, which can be obtained, among other means, through trading at the Market.
+      - |-
+        §lCustom Items
+
+        §rCustom items and recipes are available, including powerful weapons and armor sets - use §2/recipes §rto see them.
+      - |-
+        §lTeleportation
+
+        §rUse §dTotems of Warping §rto TP to locations like your Kingdom home, last death location, lodestones, or other players. They are craftable (check §2/recipes§r) and also available at the Market.
+      - |-
+        §lThe Nether
+
+        §r1 block in the Nether = §n2 blocks§r in the Overworld. This differs from vanilla, which has a 1:8 ratio by default.
+      - |-
+        §lWorldborder
+
+        §rThe Overworld and End borders are 8000 blocks from the center, while the Nether border is 4000 blocks away.
       generation: COPY_OF_ORIGINAL
     lore:
-      - ""
-      - "&7Useful features unique to Ultima."
+    - ''
+    - '&7Useful features unique to Ultima.'
     slot: 2
   diamond:
     material: DIAMOND
-    name: "&bTake Intro Quiz"
+    name: '&bTake Intro Quiz'
     lore:
-      - ""
-      - "&7Take this quiz based on the books"
-      - "&7to get several free diamonds. Trust"
-      - "&7me, it doesn't take long!"
+    - ''
+    - '&7Take this quiz based on the books'
+    - '&7to get several free diamonds. Trust'
+    - '&7me, it doesn''t take long!'
     slot: 4
 #  0.0002-day:
 #    material: IRON_BLOCK
@@ -190,39 +249,39 @@ introgui:
 recipegui:
   next:
     material: ARROW
-    name: "&fNext Page"
+    name: '&fNext Page'
   prev:
     material: ARROW
-    name: "&fPrevious Page"
+    name: '&fPrevious Page'
   fill:
     material: BLACK_STAINED_GLASS_PANE
-    name: ""
+    name: ''
   locked:
     material: BARRIER
-    name: "&cLocked"
+    name: '&cLocked'
     lore:
-      - "&7You cannot use this recipe yet!"
-    
+    - '&7You cannot use this recipe yet!'
+
 # Configuration for chest/ore drops for loot
 loot:
   # Because of code jank, the armor/weapon/enchant stats are actually for the tier above
   main:
     common:
-      distance: 4096    # Max distance this loot will generate at
-      chance: 10        # Chance that the chest will generate loot at all, or if gear will have custom enchant
-      maxdust: 1        # Max amount of any dust that will generate
-      armor: "leather"  # The armor type the NEXT tier may have
-      weapon: ""        # The weapon type the NEXT tier may have
-      enchant:          # Armor enchanted as through ench table with min-max levels
+      distance: 4096 # Max distance this loot will generate at
+      chance: 10 # Chance that the chest will generate loot at all, or if gear will have custom enchant
+      maxdust: 1 # Max amount of any dust that will generate
+      armor: leather # The armor type the NEXT tier may have
+      weapon: '' # The weapon type the NEXT tier may have
+      enchant: # Armor enchanted as through ench table with min-max levels
         min: 1
         max: 10
         chance: 50
     uncommon:
       distance: 5120
-      chance: 50        # Chance that the lower tier will turn into this tier (total chance = lower tier * this)
+      chance: 50 # Chance that the lower tier will turn into this tier (total chance = lower tier * this)
       maxdust: 2
-      armor: "golden"
-      weapon: "wooden"
+      armor: golden
+      weapon: wooden
       enchant:
         min: 5
         max: 15
@@ -231,8 +290,8 @@ loot:
       distance: 6144
       chance: 50
       maxdust: 3
-      armor: "golden"
-      weapon: "stone"
+      armor: golden
+      weapon: stone
       enchant:
         min: 10
         max: 20
@@ -241,8 +300,8 @@ loot:
       distance: 7168
       chance: 50
       maxdust: 4
-      armor: "iron"
-      weapon: "iron"
+      armor: iron
+      weapon: iron
       enchant:
         min: 15
         max: 30
@@ -251,8 +310,8 @@ loot:
       distance: 10000
       chance: 25
       maxdust: 5
-      armor: "diamond"
-      weapon: "diamond"
+      armor: diamond
+      weapon: diamond
       enchant:
         min: 15
         max: 30
@@ -261,7 +320,7 @@ loot:
     # Replaces main.common.chance for ores
     # If a deepslate variant is not detected, it will
     # automatically use non-deepslate chance
-    chance:  
+    chance:
       COAL_ORE: 0.5
       DEEPSLATE_COAL_ORE: 50
       NETHER_GOLD_ORE: 1
@@ -277,7 +336,7 @@ loot:
     luck-add: 0.25
   mobs:
     # Chance that any equipment will drop
-    drop-chance: 2 
+    drop-chance: 2
     looting-add: 1
   # Disenchanting -> Enchanted Dust config
   # Total amount of dust dropped = chance % 100 + remainder chance for 1 additional.
@@ -292,103 +351,103 @@ loot:
     custom-multiplier: 1
   # Chance of enchanted book being an enchanted dust instead
   fishing-dust-chance: 50
-  
+
 staff-log:
-  - pt
-  - powertool
-  - coords
-  - spawn
-  - home
-  - sethome
-  - gm
-  - gmsp
-  - gamemode
-  - creative
-  - creativemode
-  - gmc
-  - spec
-  - spectator
-  - give
-  - item
-  - i
-  - tppos
-  - tp
-  - tele
-  - teleport
-  - tp2p
-  - back
-  - return
-  - fly
-  - feed
-  - eat
-  - heal
-  - repair
-  - fix
-  - enchant
-  - enchantment
-  - xp
-  - fly
-  - ept
-  - epowertool
-  - ecoords
-  - espawn
-  - ehome
-  - esethome
-  - egm
-  - egmsp
-  - egamemode
-  - ecreative
-  - ecreativemode
-  - egmc
-  - espec
-  - espectator
-  - egive
-  - eitem
-  - ei
-  - etppos
-  - etp
-  - etele
-  - eteleport
-  - etp2p
-  - eback
-  - ereturn
-  - efly
-  - efeed
-  - eeat
-  - eheal
-  - erepair
-  - efix
-  - eenchant
-  - eenchantment
-  - exp
-  - efly
-  - eecreative
-  - eexp
-  - ugive
-  - wand
-  - set
-  - replace
-  - regen
-  - minecraft:tp
-  - minecraft:teleport
-  - minecraft:give
-  - minecraft:effect
-  - minecraft:gamemode
-  - effect
-  - sv
-  - vanish
-  
+- pt
+- powertool
+- coords
+- spawn
+- home
+- sethome
+- gm
+- gmsp
+- gamemode
+- creative
+- creativemode
+- gmc
+- spec
+- spectator
+- give
+- item
+- i
+- tppos
+- tp
+- tele
+- teleport
+- tp2p
+- back
+- return
+- fly
+- feed
+- eat
+- heal
+- repair
+- fix
+- enchant
+- enchantment
+- xp
+- fly
+- ept
+- epowertool
+- ecoords
+- espawn
+- ehome
+- esethome
+- egm
+- egmsp
+- egamemode
+- ecreative
+- ecreativemode
+- egmc
+- espec
+- espectator
+- egive
+- eitem
+- ei
+- etppos
+- etp
+- etele
+- eteleport
+- etp2p
+- eback
+- ereturn
+- efly
+- efeed
+- eeat
+- eheal
+- erepair
+- efix
+- eenchant
+- eenchantment
+- exp
+- efly
+- eecreative
+- eexp
+- ugive
+- wand
+- set
+- replace
+- regen
+- minecraft:tp
+- minecraft:teleport
+- minecraft:give
+- minecraft:effect
+- minecraft:gamemode
+- effect
+- sv
+- vanish
+
 skaddon:
   limit_warn_start: 5
   # Time to count down to for restock | Must be "HH:mm:ss" format
-  restock_time: "00:00:00"
-     
+  restock_time: 00:00:00
+
 # Mobs excluded from the capture enchantment 
 capture-exclude:
-  - ENDER_DRAGON
-  - WITHER
-  - ELDER_GUARDIAN
-  - WARDEN 
+- ENDER_DRAGON
+- WITHER
+- ELDER_GUARDIAN
+- WARDEN
 
 # Time a player must have NOT shielded for before a parry can work in ticks
 parry-cooldown: 20
@@ -399,589 +458,587 @@ parry-duration: 3
 items:
   obsidianingot:
     material: NETHERITE_INGOT
-    name: "&5Obsidian Ingot"
+    name: '&5Obsidian Ingot'
     glow: true
     custom-model-data: 48743
     chance: 0.2 # out of 1
     update: 1
     lore:
-      - "&7A rare ingredient dropped when"
-      - "&7the blast resistance of obsidian"
-      - "&7is overcome. You feel tougher as"
-      - "&7you hold it in your palms."
+    - '&7A rare ingredient dropped when'
+    - '&7the blast resistance of obsidian'
+    - '&7is overcome. You feel tougher as'
+    - '&7you hold it in your palms.'
   radiantshard:
     material: AMETHYST_SHARD
-    name: "&dRadiant Shard"
+    name: '&dRadiant Shard'
     glow: true
     custom-model-data: 48744
     update: 1
     lore:
-      - "&7It glows with energy and warmth."
-      - "&7Feel yourself rejuvenated as you"
-      - "&7hold it in your palms."
+    - '&7It glows with energy and warmth.'
+    - '&7Feel yourself rejuvenated as you'
+    - '&7hold it in your palms.'
   infusedingot:
     material: COPPER_INGOT
-    name: "&6Infused Ingot"
+    name: '&6Infused Ingot'
     glow: true
     custom-model-data: 48745
     chance: 0.01
     chanceadd: 0.01 # % added for every level of oxidation
     update: 1
     lore:
-      - "&7A rare ingredient dropped when"
-      - "&7unwaxed copper is destroyed by"
-      - "&7a charged explosion. Drop chance"
-      - "&7increases the more oxidized the"
-      - "&7copper. Feel yourself become"
-      - "&7stronger as you hold it in"
-      - "&7your palms."
+    - '&7A rare ingredient dropped when'
+    - '&7unwaxed copper is destroyed by'
+    - '&7a charged explosion. Drop chance'
+    - '&7increases the more oxidized the'
+    - '&7copper. Feel yourself become'
+    - '&7stronger as you hold it in'
+    - '&7your palms.'
   mithrilingot:
     material: IRON_INGOT
-    name: "&7&lMithril Ingot"
+    name: '&7&lMithril Ingot'
     glow: true
     custom-model-data: 48746
     chance: 0.5
     update: 1
     lore:
-      - "&7Formed when shulkers are destroyed"
-      - "&7by star-like temperatures, you feel"
-      - "&7lighter on your feet as you hold it"
-      - "&7in your palms."
+    - '&7Formed when shulkers are destroyed'
+    - '&7by star-like temperatures, you feel'
+    - '&7lighter on your feet as you hold it'
+    - '&7in your palms.'
   totemofwarping:
     unset:
       material: TOTEM_OF_UNDYING
-      name: "&dTotem of Warping &8(Unset)"
+      name: '&dTotem of Warping &8(Unset)'
       glow: true
       custom-model-data: 48747
       update: 1
       lore:
-        - "&7A totem that, when combined with"
-        - "&7certain ingredients (&f/recipes&7), allows"
-        - "&7you to teleport to a desired location."
-        - "&7Totems are consumed on use."
+      - '&7A totem that, when combined with'
+      - '&7certain ingredients (&f/recipes&7), allows'
+      - '&7you to teleport to a desired location.'
+      - '&7Totems are consumed on use.'
     khome:
       material: TOTEM_OF_UNDYING
-      name: "&dTotem of Warping &b(Kingdom Home)"
+      name: '&dTotem of Warping &b(Kingdom Home)'
       glow: true
       custom-model-data: 48748
       update: 1
       lore:
-        - "&7Right-click to initiate a teleportation"
-        - "&7to your kingdom home location."
+      - '&7Right-click to initiate a teleportation'
+      - '&7to your kingdom home location.'
     home:
       material: TOTEM_OF_UNDYING
-      name: "&dTotem of Warping &b(Bed)"
+      name: '&dTotem of Warping &b(Bed)'
       glow: true
       custom-model-data: 48749
       update: 1
       lore:
-        - "&7Right-click to initiate a teleportation"
-        - "&7to your bed or respawn anchor location."
+      - '&7Right-click to initiate a teleportation'
+      - '&7to your bed or respawn anchor location.'
     death:
       material: TOTEM_OF_UNDYING
-      name: "&dTotem of Warping &b(Death)"
+      name: '&dTotem of Warping &b(Death)'
       glow: true
       custom-model-data: 48750
       update: 1
       lore:
-        - "&7Right-click to initiate a teleportation"
-        - "&7to your last death location. Only works"
-        - "&7up to &f5 minutes &7after your last death."
-        - "&7This item is kept in inventory on death."
+      - '&7Right-click to initiate a teleportation'
+      - '&7to your last death location. Only works'
+      - '&7up to &f5 minutes &7after your last death.'
+      - '&7This item is kept in inventory on death.'
     lodestone:
       material: TOTEM_OF_UNDYING
-      name: "&dTotem of Warping &b(Lodestone)"
-      set-name: "&dTotem of Warping &b(Lodestone: %location%)"
+      name: '&dTotem of Warping &b(Lodestone)'
+      set-name: '&dTotem of Warping &b(Lodestone: %location%)'
       glow: true
       custom-model-data: 48751
       update: 3
       lore:
-        - "&7Right-click to initiate a teleportation"
-        - "&7to a set lodestone. Does not work if the"
-        - "&7lodestone has been destroyed."
+      - '&7Right-click to initiate a teleportation'
+      - '&7to a set lodestone. Does not work if the'
+      - '&7lodestone has been destroyed.'
       enchants:
         VANISHING_CURSE: 1
     player:
       material: TOTEM_OF_UNDYING
-      name: "&dTotem of Warping &b(Player)"
-      set-name: "&dTotem of Warping &b(Player: %player%)"
+      name: '&dTotem of Warping &b(Player)'
+      set-name: '&dTotem of Warping &b(Player: %player%)'
       glow: true
       custom-model-data: 48752
       update: 3
       lore:
-        - "&7Right-click to request a teleportation"
-        - "&7to a set player, if they are online."
+      - '&7Right-click to request a teleportation'
+      - '&7to a set player, if they are online.'
     random:
       material: TOTEM_OF_UNDYING
-      name: "&dTotem of Warping &b(Random)"
+      name: '&dTotem of Warping &b(Random)'
       glow: true
       custom-model-data: 48760
       update: 1
       lore:
-        - "&7Right-click to initiate a teleportation"
-        - "&7to random location in the world. This item"
-        - "&7cannot be dropped."
+      - '&7Right-click to initiate a teleportation to'
+      - '&7a random location in the world. This item'
+      - '&7cannot be dropped.'
   exlodestone:
     material: COMPASS
-    name: "&fLodestone Compass"
+    name: '&fLodestone Compass'
     glow: true
     lore:
-      - "&7Right-click a compass on a lodestone"
-      - "&7to create a Lodestone Compass. The"
-      - "&7resulting totem will be bound to the"
-      - "&7same lodestone as this compass."
+    - '&7Right-click a compass on a lodestone'
+    - '&7to create a Lodestone Compass. The'
+    - '&7resulting totem will be bound to the'
+    - '&7same lodestone as this compass.'
   exbook:
     material: WRITTEN_BOOK
-    name: "&fWritten Book"
+    name: '&fWritten Book'
     book:
-      title: "Written Book"
-      author: "M310N"
+      title: Written Book
+      author: M310N
       pages:
-        - "hello there"
+      - hello there
       generation: ORIGINAL
     lore:
-      - ""
-      - "&7The resulting totem will be bound"
-      - "&7to the writer of this book. The"
-      - "&7contents and name of the book do"
-      - "&7not matter, but its generation"
-      - "&7must be original."
+    - ''
+    - '&7The resulting totem will be bound'
+    - '&7to the writer of this book. The'
+    - '&7contents and name of the book do'
+    - '&7not matter, but its generation'
+    - '&7must be original.'
   dchip:
     material: PRISMARINE_CRYSTALS
-    name: "&fDiamond Chip"
+    name: '&fDiamond Chip'
     glow: true
     custom-model-data: 48720
     update: 1
   blazesword:
     material: GOLDEN_SWORD
-    name: "&6Blaze Sword"
+    name: '&6Blaze Sword'
     enchants:
       FIRE_ASPECT: 3
     flags:
-      - HIDE_ATTRIBUTES
+    - HIDE_ATTRIBUTES
     custom-model-data: 48721
     lore:
-      - ""
-      - "&cRight-click while holding this flaming"
-      - "&cweapon to shoot 3 fireballs in quick"
-      - "&csuccession at your enemies. This ability"
-      - "&chas a &610s &ccooldown."
-      - ""
-      - "&7When in Main Hand:"
-      - "&2 7 Attack Damage"
-      - "&2 1.6 Attack Speed"
+    - ''
+    - '&cRight-click while holding this flaming'
+    - '&cweapon to shoot 3 fireballs in quick'
+    - '&csuccession at your enemies. This ability'
+    - '&chas a &610s &ccooldown.'
+    - ''
+    - '&7When in Main Hand:'
+    - '&2 7 Attack Damage'
+    - '&2 1.6 Attack Speed'
     update: 2
     durability: 500
     attributes:
       GENERIC_ATTACK_DAMAGE:
-        name: "Attack Damage"
+        name: Attack Damage
         operation: ADD_NUMBER
         amount: 6
         slot: HAND
       GENERIC_ATTACK_SPEED:
-        name: "Attack Speed"
+        name: Attack Speed
         operation: ADD_NUMBER
         amount: -2.33
         slot: HAND
     ability:
-      name: "Fireball Trio"
+      name: Fireball Trio
       cooldown: 10
       yield: 1
       randomness: 0.05
   tanto:
     material: STONE_SWORD
-    name: "&aTantō"
+    name: '&aTantō'
     custom-model-data: 48722
     lore:
-      - ""
-      - "&eA short sword that can be"
-      - "&eswung extremely fast."
-      - ""
-      - "&7When in Main Hand:"
-      - "&2 5 Attack Damage"
-      - "&2 20 Attack Speed"
+    - ''
+    - '&eA short sword that can be'
+    - '&eswung extremely fast.'
+    - ''
+    - '&7When in Main Hand:'
+    - '&2 5 Attack Damage'
+    - '&2 20 Attack Speed'
     update: 2
     flags:
-      - HIDE_ATTRIBUTES
+    - HIDE_ATTRIBUTES
     attributes:
       GENERIC_ATTACK_DAMAGE:
-        name: "Attack Damage"
+        name: Attack Damage
         operation: ADD_NUMBER
         amount: 4
         slot: HAND
       GENERIC_ATTACK_SPEED:
-        name: "Attack Speed"
+        name: Attack Speed
         operation: ADD_NUMBER
         amount: 16
         slot: HAND
   orcus:
     material: NETHERITE_HOE
-    name: "&1Orcus"
+    name: '&1Orcus'
     custom-model-data: 48723
     lore:
-      - ""
-      - "&eThis scythe was once wielded by the"
-      - "&egod of death himself. Land a critical"
-      - "&ehit on an enemy player to remove"
-      - "&620% &eof their remaining health, and"
-      - "&etemporarily blind and wither them."
-      - "&eThis ability has a &630s &ecooldown."
-      - ""
-      - "&7When in Main Hand:"
-      - "&2 6.5 Attack Damage"
-      - "&2 1.6 Attack Speed"
+    - ''
+    - '&eThis scythe was once wielded by the'
+    - '&egod of death himself. Land a critical'
+    - '&ehit on an enemy player to remove'
+    - '&620% &eof their remaining health, and'
+    - '&etemporarily blind and wither them.'
+    - '&eThis ability has a &630s &ecooldown.'
+    - ''
+    - '&7When in Main Hand:'
+    - '&2 6.5 Attack Damage'
+    - '&2 1.6 Attack Speed'
     enchants:
       VANISHING_CURSE: 1
     update: 2
     flags:
-      - HIDE_ATTRIBUTES
+    - HIDE_ATTRIBUTES
     attributes:
       GENERIC_ATTACK_DAMAGE:
-        name: "Attack Damage"
+        name: Attack Damage
         operation: ADD_NUMBER
         amount: 5.5
         slot: HAND
       GENERIC_ATTACK_SPEED:
-        name: "Attack Speed"
+        name: Attack Speed
         operation: ADD_NUMBER
         amount: -2.33
         slot: HAND
     ability:
-      name: "Lifesteal"
+      name: Lifesteal
       cooldown: 30
       percent: 20
   shadowblade:
     material: DIAMOND_SWORD
-    name: "&5Shadowblade"
+    name: '&5Shadowblade'
     custom-model-data: 48724
     lore:
-      - ""
-      - "&dHarness the power of the barren"
-      - "&dwasteland of the End. Right-click"
-      - "&dto teleport &f10 blocks &din the"
-      - "&ddirection you are looking. If you"
-      - "&dteleport fthrough a player, you will"
-      - "&dautomatically face that player."
-      - "&dThis ability has a &f20s &dcooldown."
+    - ''
+    - '&dHarness the power of the barren'
+    - '&dwasteland of the End. Right-click'
+    - '&dto teleport &f10 blocks &din the'
+    - '&ddirection you are looking. If you'
+    - '&dteleport fthrough a player, you will'
+    - '&dautomatically face that player.'
+    - '&dThis ability has a &f20s &dcooldown.'
     update: 3
     ability:
-      name: "Blink"
+      name: Blink
       cooldown: 20
       distance: 10
   oxtailsaber:
     material: IRON_SWORD
-    name: "&6Oxtail Saber"
+    name: '&6Oxtail Saber'
     custom-model-data: 48725
     lore:
-      - ""
-      - "&eDual wield this weapon to attack"
-      - "&eenemies 1.5x as fast, reducing"
-      - "&etheir damage tick cooldown."
-      - ""
-      - "&7When in Main Hand:"
-      - "&2 6 Attack Damage"
-      - "&2 2.5 Attack Speed"
+    - ''
+    - '&eDual wield this weapon to attack'
+    - '&eenemies 1.5x as fast, reducing'
+    - '&etheir damage tick cooldown.'
+    - ''
+    - '&7When in Main Hand:'
+    - '&2 6 Attack Damage'
+    - '&2 2.5 Attack Speed'
     update: 2
     flags:
-      - HIDE_ATTRIBUTES
+    - HIDE_ATTRIBUTES
     attributes:
       GENERIC_ATTACK_DAMAGE:
-        name: "Attack Damage"
+        name: Attack Damage
         operation: ADD_NUMBER
         amount: 5
         slot: HAND
       GENERIC_ATTACK_SPEED:
-        name: "Attack Speed"
+        name: Attack Speed
         operation: ADD_NUMBER
         amount: -1.5
         slot: HAND
     ability:
-      name: "Dual"
+      name: Dual
       cooldown: 0
       speed: 8
   shiruken:
     material: NETHER_STAR
-    name: "&6Shiruken"
+    name: '&6Shiruken'
     custom-model-data: 48726
     lore:
-      - ""
-      - "&eA throwable weapon that damages"
-      - "&eenemies in rapid bursts. Drops"
-      - "&eas an item after hitting a block"
-      - "&eor enemy."
+    - ''
+    - '&eA throwable weapon that damages'
+    - '&eenemies in rapid bursts. Drops'
+    - '&eas an item after hitting a block'
+    - '&eor enemy.'
     update: 3
     ability:
-      name: "Shiruken"
+      name: Shiruken
       cooldown: 2
       speed: 3
       damage: 1
       ticks: 20
   mithril:
     lore:
-      - ""
-      - "&eA light, flexible, yet durable set"
-      - "&eof armor. Each piece, when worn,"
-      - "&egives &6+0.5% &emovement speed per"
-      - "&elevel of &bAgility &eabove 25."
+    - ''
+    - '&eA light, flexible, yet durable set'
+    - '&eof armor. Each piece, when worn,'
+    - '&egives &6+0.5% &emovement speed per'
+    - '&elevel of &bAgility &eabove 25.'
     scaled-attribute:
       skill: AGILITY
       type: GENERIC_MOVEMENT_SPEED
-      name: "Speed"
+      name: Speed
       operation: MULTIPLY_SCALAR_1
       amount: 0.005
     helmet:
       material: CHAINMAIL_HELMET
-      name: "&7&lMithril Helmet"
+      name: '&7&lMithril Helmet'
       custom-model-data: 48727
       durability: 600
       update: 3
     chestplate:
       material: CHAINMAIL_CHESTPLATE
-      name: "&7&lMithril Chestplate"
+      name: '&7&lMithril Chestplate'
       custom-model-data: 48728
       durability: 900
       update: 3
     leggings:
       material: CHAINMAIL_LEGGINGS
-      name: "&7&lMithril Leggings"
+      name: '&7&lMithril Leggings'
       custom-model-data: 48729
       durability: 825
       update: 3
     boots:
       material: CHAINMAIL_BOOTS
-      name: "&7&lMithril Boots"
+      name: '&7&lMithril Boots'
       custom-model-data: 48730
       durability: 750
       update: 3
   obsidian:
     lore:
-      - ""
-      - "&eForged from the the most fortified"
-      - "&eobsidian of the depths, each piece"
-      - "&eof this near-imperishable armor set,"
-      - "&ewhen worn, gives &6+0.2 &earmor"
-      - "&etoughness per level of &bEndurance"
-      - "&eabove 25, increasing its resistance"
-      - "&eagainst high damage sources."
+    - ''
+    - '&eForged from the the most fortified'
+    - '&eobsidian of the depths, each piece'
+    - '&eof this near-imperishable armor set,'
+    - '&ewhen worn, gives &6+0.2 &earmor'
+    - '&etoughness per level of &bEndurance'
+    - '&eabove 25, increasing its resistance'
+    - '&eagainst high damage sources.'
     scaled-attribute:
       skill: ENDURANCE
       type: GENERIC_ARMOR_TOUGHNESS
-      name: "Armor Toughness"
+      name: Armor Toughness
       operation: ADD_NUMBER
       amount: 0.2
     helmet:
       material: LEATHER_HELMET
-      name: "&5Obsidian Helmet"
+      name: '&5Obsidian Helmet'
       custom-model-data: 48731
-      color: "61,40,86"
+      color: 61,40,86
       flags:
-        - HIDE_DYE
+      - HIDE_DYE
       durability: 800
       update: 3
     chestplate:
       material: LEATHER_CHESTPLATE
-      name: "&5Obsidian Chestplate"
+      name: '&5Obsidian Chestplate'
       custom-model-data: 48732
-      color: "40,31,63"
+      color: 40,31,63
       flags:
-        - HIDE_DYE
+      - HIDE_DYE
       durability: 1200
       update: 3
     leggings:
       material: LEATHER_LEGGINGS
-      name: "&5Obsidian Leggings"
+      name: '&5Obsidian Leggings'
       custom-model-data: 48733
-      color: "17,13,29"
+      color: 17,13,29
       flags:
-        - HIDE_DYE
+      - HIDE_DYE
       durability: 1100
       update: 3
     boots:
       material: LEATHER_BOOTS
-      name: "&5Obsidian Boots"
+      name: '&5Obsidian Boots'
       custom-model-data: 48734
-      color: "6,3,12"
+      color: 6,3,12
       flags:
-        - HIDE_DYE
+      - HIDE_DYE
       durability: 1000
       update: 3
   infused:
     lore:
-      - ""
-      - "&eUnleash the power of copper-infused"
-      - "&estrength. Each piece of this set, when"
-      - "&eworn, gives &6+0.5% &eattack damage per"
-      - "&elevel of &bFighting &eabove 25."
+    - ''
+    - '&eUnleash the power of copper-infused'
+    - '&estrength. Each piece of this set, when'
+    - '&eworn, gives &6+0.5% &eattack damage per'
+    - '&elevel of &bFighting &eabove 25.'
     scaled-attribute:
       skill: FIGHTING
       type: GENERIC_ATTACK_DAMAGE
-      name: "Attack Damage"
+      name: Attack Damage
       operation: MULTIPLY_SCALAR_1
       amount: 0.005
     helmet:
       material: LEATHER_HELMET
-      name: "&6Infused Helmet"
+      name: '&6Infused Helmet'
       custom-model-data: 48735
-      color: "223,127,104"
+      color: 223,127,104
       flags:
-        - HIDE_DYE
+      - HIDE_DYE
       durability: 400
       update: 3
     chestplate:
       material: LEATHER_CHESTPLATE
-      name: "&6Infused Chestplate"
+      name: '&6Infused Chestplate'
       custom-model-data: 48736
-      color: "196,154,86"
+      color: 196,154,86
       flags:
-        - HIDE_DYE
+      - HIDE_DYE
       durability: 600
       update: 3
     leggings:
       material: LEATHER_LEGGINGS
-      name: "&6Infused Leggings"
+      name: '&6Infused Leggings'
       custom-model-data: 48737
-      color: "156,177,106"
+      color: 156,177,106
       flags:
-        - HIDE_DYE
+      - HIDE_DYE
       durability: 550
       update: 3
     boots:
       material: LEATHER_BOOTS
-      name: "&6Infused Boots"
+      name: '&6Infused Boots'
       custom-model-data: 48738
-      color: "114,192,152"
+      color: 114,192,152
       flags:
-        - HIDE_DYE
+      - HIDE_DYE
       durability: 500
       update: 3
   shard:
     lore:
-      - ""
-      - "&eImbue yourself with the healing"
-      - "&epowers of amethyst. Each piece of"
-      - "&ethis set, when worn, gives &6+0.1 &emax"
-      - "&ehealth per level of &bGathering"
-      - "&eabove 25."
+    - ''
+    - '&eImbue yourself with the healing'
+    - '&epowers of amethyst. Each piece of'
+    - '&ethis set, when worn, gives &6+0.1 &emax'
+    - '&ehealth per level of &bGathering'
+    - '&eabove 25.'
     scaled-attribute:
       skill: MINING
       type: GENERIC_MAX_HEALTH
-      name: "Max Health"
+      name: Max Health
       operation: ADD_NUMBER
       amount: 0.1
     helmet:
       material: LEATHER_HELMET
-      name: "&dShard Helmet"
+      name: '&dShard Helmet'
       custom-model-data: 48739
-      color: "255,252,211"
+      color: 255,252,211
       flags:
-        - HIDE_DYE
+      - HIDE_DYE
       durability: 400
       update: 3
     chestplate:
       material: LEATHER_CHESTPLATE
-      name: "&dShard Chestplate"
+      name: '&dShard Chestplate'
       custom-model-data: 48740
-      color: "253,203,229"
+      color: 253,203,229
       flags:
-        - HIDE_DYE
+      - HIDE_DYE
       durability: 600
       update: 3
     leggings:
       material: LEATHER_LEGGINGS
-      name: "&dShard Leggings"
+      name: '&dShard Leggings'
       custom-model-data: 48741
-      color: "196,141,235"
+      color: 196,141,235
       flags:
-        - HIDE_DYE
+      - HIDE_DYE
       durability: 550
       update: 3
     boots:
       material: LEATHER_BOOTS
-      name: "&dShard Boots"
+      name: '&dShard Boots'
       custom-model-data: 48742
-      color: "163,118,236"
+      color: 163,118,236
       flags:
-        - HIDE_DYE
+      - HIDE_DYE
       durability: 500
       update: 3
   dragonfirework:
     material: FIREWORK_ROCKET
-    name: "&dDragon Firework"
+    name: '&dDragon Firework'
     lore:
-      - "&7The only firework capable of"
-      - "&7boosting elytra flight. Boost"
-      - "&7is tripled while in the end."
+    - '&7The only firework capable of'
+    - '&7boosting elytra flight. Boost'
+    - '&7is tripled while in the end.'
     custom-model-data: 48753
     glow: true
     update: 1
   introbook:
     material: WRITTEN_BOOK
-    name: "&dKingdoms Guide &b(FREE DIAMONDS)"
+    name: '&dKingdoms Guide &b(FREE DIAMONDS)'
     book:
-      title: "Kingdoms Guide (FREE DIAMONDS)"
-      author: "Ultima"
+      title: Kingdoms Guide (FREE DIAMONDS)
+      author: Ultima
       pages:
-        - "How did you open this book?"
+      - How did you open this book?
       generation: COPY_OF_ORIGINAL
     lore:
-      - ""
-      - "&7A basic server guide. I highly"
-      - "&7recommend you read this. Or else"
-      - "&7you will be banned. Just kidding."
-      - "&7Read it though."
+    - ''
+    - '&7A basic server guide. I highly'
+    - '&7recommend you read this. Or else'
+    - '&7you will be banned. Just kidding.'
+    - '&7Read it though.'
     ability:
-      name: "introbook"
+      name: introbook
       cooldown: 0
   shopkeeperhire:
     material: OAK_SIGN
-    name: "&6Rent the shop to hire me!"
+    name: '&6Rent the shop to hire me!'
     lore:
-      - "&7I love capitalism"
+    - '&7I love capitalism'
   exampleanytotem:
     material: TOTEM_OF_UNDYING
-    name: "&dTotem of Warping &b(Any)"
+    name: '&dTotem of Warping &b(Any)'
     glow: true
     custom-model-data: 48747
     update: 1
     lore:
-      - "&7This recipe allows you to duplicate"
-      - "&7any of your existing totems."
+    - '&7This recipe allows you to duplicate'
+    - '&7any of your existing totems.'
   commondust:
     material: LIGHT_GRAY_DYE
-    name: "&7Common Enchanted Dust"
+    name: '&7Common Enchanted Dust'
     glow: true
     custom-model-data: 48754
   uncommondust:
     material: LIME_DYE
-    name: "&aUncommon Enchanted Dust"
+    name: '&aUncommon Enchanted Dust'
     glow: true
     custom-model-data: 48755
   raredust:
     material: BLUE_DYE
-    name: "&9Rare Enchanted Dust"
+    name: '&9Rare Enchanted Dust'
     glow: true
     custom-model-data: 48756
   epicdust:
     material: PURPLE_DYE
-    name: "&5Epic Enchanted Dust"
+    name: '&5Epic Enchanted Dust'
     glow: true
     custom-model-data: 48757
   legendarydust:
     material: ORANGE_DYE
-    name: "&6Legendary Enchanted Dust"
+    name: '&6Legendary Enchanted Dust'
     glow: true
     custom-model-data: 48758
   nitinoltube:
     material: ECHO_SHARD
-    name: "&1Nitinol Tube"
+    name: '&1Nitinol Tube'
     glow: true
     custom-model-data: 48759
     update: 1
     lore:
-      - "&7A tough, yet super elastic material"
-      - "&7formed by the strongest guardians"
-      - "&7of the deep. You gain a spring in"
-      - "&7your step as you hold it in your"
-      - "&7palms."
-    
-    
+    - '&7A tough, yet super elastic material'
+    - '&7formed by the strongest guardians'
+    - '&7of the deep. You gain a spring in'
+    - '&7your step as you hold it in your'
+    - '&7palms.'
