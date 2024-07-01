@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
@@ -39,7 +40,9 @@ import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.constants.player.StandardKingdomPermission;
 import org.kingdoms.events.general.GroupDisband;
+import org.kingdoms.events.general.GroupDisband.Reason;
 import org.kingdoms.events.general.GroupRelationshipChangeEvent;
+import org.kingdoms.events.general.GroupServerTaxPayEvent;
 import org.kingdoms.events.general.GroupShieldPurchaseEvent;
 import org.kingdoms.events.general.KingdomCreateEvent;
 import org.kingdoms.events.general.KingdomDisbandEvent;
@@ -51,6 +54,7 @@ import org.kingdoms.events.lands.ClaimLandEvent;
 import org.kingdoms.events.lands.NexusMoveEvent;
 import org.kingdoms.events.lands.UnclaimLandEvent;
 import org.kingdoms.events.members.KingdomLeaveEvent;
+import org.kingdoms.events.members.LeaveReason;
 import org.kingdoms.gui.GUIAccessor;
 import org.kingdoms.gui.InteractiveGUI;
 import org.kingdoms.gui.KingdomsGUI;
@@ -71,9 +75,60 @@ import dev.aurelium.auraskills.api.event.skill.DamageXpGainEvent;
 import dev.aurelium.auraskills.api.event.skill.EntityXpGainEvent;
 
 public class KingdomsListener implements Listener {
+    
+    // Time before members are kicked (30 days)
+    private static final long disband = 30 * 24 * 60 * 60 * 1000;
 
     private static Set<Structure> justRemoved = new HashSet<>();
     private static Map<Player, Integer> cantClose = new HashMap<>();
+    
+
+    // -------------------------------------------------
+    // PATCHED DISBANDING MECHANICS
+    // -------------------------------------------------
+    
+    @EventHandler
+    public void onCheck(GroupServerTaxPayEvent e) {
+        if (!(e.getGroup() instanceof Kingdom k)) {
+            return;
+        }
+        
+        // Check kingdom disbanding
+        if (k.isPacifist()) {
+            for (OfflinePlayer op : k.getPlayerMembers()) {
+                if (!isInactive(op)) {
+                    return;
+                }
+            }
+            
+            e.setCancelled(true);
+            Utils.schedule(0, () -> k.disband(Reason.INACTIVITY));
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                p.sendMessage(Utils.toComponent("&e" + k.getName() + " &cwas disbanded due to inactivity."));
+            }
+            return;
+        }
+        
+        for (OfflinePlayer op : k.getPlayerMembers()) {
+            if (k.getKingId().equals(op.getUniqueId())) {
+                continue;
+            }
+            
+            if (!isInactive(op)) {
+                continue;
+            }
+            
+            KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(op);
+            Utils.schedule(0, () -> kp.leaveKingdom(LeaveReason.INACTIVITY));
+            for (Player p : k.getOnlineMembers()) {
+                p.sendMessage(Utils.toComponent("&e" + op.getName() + " &cwas kicked from the kingdom due to inactivity."));
+            }
+        }
+    }
+    
+    private boolean isInactive(OfflinePlayer op) {
+        return op.getLastSeen() + disband < System.currentTimeMillis();
+    }
     
 
     // -------------------------------------------------

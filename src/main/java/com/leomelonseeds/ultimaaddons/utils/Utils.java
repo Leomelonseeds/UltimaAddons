@@ -330,6 +330,10 @@ public class Utils {
      * @param titles
      */
     public static void closeInventory(Player p, String... titles) {
+        if (p == null || !p.isOnline()) {
+            return;
+        }
+        
         String ctitle = Utils.toPlain(p.getOpenInventory().title());
         for (String t : titles) {
             // Stop chat confirm from happening
