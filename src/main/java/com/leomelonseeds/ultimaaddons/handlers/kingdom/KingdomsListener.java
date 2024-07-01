@@ -62,6 +62,7 @@ import org.kingdoms.locale.KingdomsLang;
 import org.kingdoms.main.Kingdoms;
 import org.kingdoms.managers.invasions.Plunder;
 import org.kingdoms.managers.land.indicator.LandVisualizer;
+import org.kingdoms.platform.bukkit.location.BukkitImmutableLocation;
 import org.kingdoms.services.managers.ServiceHandler;
 import org.kingdoms.utils.nbt.ItemNBT;
 import org.kingdoms.utils.nbt.NBTType;
@@ -320,6 +321,16 @@ public class KingdomsListener implements Listener {
         Kingdom k = e.getKingdom();
         Utils.discord(":fleur_de_lis: **" + k.getName() + "** has been founded");
         openSelectionGUI(k);
+        
+        // Force set player respawn point so new players don't spawn at RTP location
+        Utils.schedule(10, () -> {
+            Player player = k.getKing().getPlayer();
+            if (player == null) {
+                return;
+            }
+            
+            player.setRespawnLocation(BukkitImmutableLocation.from(k.getHome()));
+        });
     }
 
     // Open custom creation GUI that only closes once an option is selected
