@@ -17,6 +17,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.Statistic;
 import org.bukkit.World.Environment;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -184,10 +185,9 @@ public class TotemManager implements Listener {
                         break;
                     }
 
-                    // If current location is non-air, move up until safe spot is found
+                    // If current location is non-passable, move up until safe spot is found
                     boolean moved = false;
-                    while (!curLoc.getBlock().getType().isAir() ||
-                            !curLoc.clone().add(0, 1, 0).getBlock().getType().isAir()) {
+                    while (!(isSafe(curLoc) && isSafe(curLoc.clone().add(0, 1, 0)))) {
                         moved = true;
                         curLoc.add(0, 1, 0);
                     }
@@ -198,10 +198,8 @@ public class TotemManager implements Listener {
                     }
 
                     // If the player hasn't moved, check DOWNWARDS until solid ground is found
-                    Material ground = getGround(curLoc);
-                    while (ground == Material.CAVE_AIR || ground == Material.AIR) {
+                    while (isSafe(getGround(curLoc))) {
                         curLoc.add(0, -1, 0);
-                        ground = getGround(curLoc);
                     }
                 } while (false);
 
@@ -216,7 +214,7 @@ public class TotemManager implements Listener {
                 }
 
                 // Give player 40s fire resistance if TPing to lava (like undying totem)
-                if (getGround(curLoc) == Material.LAVA) {
+                if (getGround(curLoc).getBlock().getType() == Material.LAVA) {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 800, 0));
                 }
 
@@ -262,9 +260,14 @@ public class TotemManager implements Listener {
             player.sendMessage(Utils.toComponent("&fRespawn point set"));
         });
     }
+    
+    private boolean isSafe(Location loc) {
+        Block block = loc.getBlock();
+        return block.isPassable() && !block.isLiquid();
+    }
 
-    private Material getGround(Location location) {
-        return location.clone().add(0, -1, 0).getBlock().getType();
+    private Location getGround(Location location) {
+        return location.clone().add(0, -1, 0);
     }
 
     @EventHandler
