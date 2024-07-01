@@ -161,12 +161,22 @@ public class MiscListener implements Listener {
         List<ItemStack> drops = e.getDrops();
         double chance = UASkills.ABIDING.getValue(abiding) / 100.0;
         for (ItemStack drop : new ArrayList<>(drops)) {
-            if (random.nextDouble() < chance) {
-                drops.remove(drop);
-                e.getItemsToKeep().add(drop);
+            double totalChance = drop.getAmount() * chance;
+            int keepAmount = (int) Math.floor(totalChance);
+            double plusChance = totalChance - keepAmount;
+            if (random.nextDouble() < plusChance) {
+                keepAmount++;
+            }
+            
+            if (keepAmount >= 1) {
+                ItemStack keptDrop = new ItemStack(drop);
+                drop.setAmount(drop.getAmount() - keepAmount);
+                keptDrop.setAmount(keepAmount);
+                e.getItemsToKeep().add(keptDrop);
                 continue;
             }
             
+            // Only check for soulbound if item is not kept by Abiding
             int soulbound = AEAPI.getEnchantmentsOnItem(drop).getOrDefault("soulbound", 0);
             if (soulbound <= 0) {
                 continue;
