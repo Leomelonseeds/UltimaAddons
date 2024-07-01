@@ -1,18 +1,11 @@
 package com.leomelonseeds.ultimaaddons.handlers.kingdom;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
-import org.bukkit.SoundCategory;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.invs.ConfirmAction;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
+import dev.aurelium.auraskills.api.event.skill.DamageXpGainEvent;
+import dev.aurelium.auraskills.api.event.skill.EntityXpGainEvent;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -39,14 +32,8 @@ import org.kingdoms.constants.metadata.KingdomMetadata;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.constants.player.StandardKingdomPermission;
-import org.kingdoms.events.general.GroupDisband;
+import org.kingdoms.events.general.*;
 import org.kingdoms.events.general.GroupDisband.Reason;
-import org.kingdoms.events.general.GroupRelationshipChangeEvent;
-import org.kingdoms.events.general.GroupServerTaxPayEvent;
-import org.kingdoms.events.general.GroupShieldPurchaseEvent;
-import org.kingdoms.events.general.KingdomCreateEvent;
-import org.kingdoms.events.general.KingdomDisbandEvent;
-import org.kingdoms.events.general.KingdomPacifismStateChangeEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEndEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEvent;
 import org.kingdoms.events.items.KingdomItemBreakEvent;
@@ -67,32 +54,28 @@ import org.kingdoms.utils.nbt.ItemNBT;
 import org.kingdoms.utils.nbt.NBTType;
 import org.kingdoms.utils.nbt.NBTWrappers;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.invs.ConfirmAction;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
-
-import dev.aurelium.auraskills.api.event.skill.DamageXpGainEvent;
-import dev.aurelium.auraskills.api.event.skill.EntityXpGainEvent;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class KingdomsListener implements Listener {
-    
+
     // Time before members are kicked (30 days)
-    private static final long disband = 30 * 24 * 60 * 60 * 1000;
+    private static final long disband = 30 * 24 * 60 * 60 * 1000L;
 
     private static Set<Structure> justRemoved = new HashSet<>();
     private static Map<Player, Integer> cantClose = new HashMap<>();
-    
+
 
     // -------------------------------------------------
     // PATCHED DISBANDING MECHANICS
     // -------------------------------------------------
-    
+
     @EventHandler
     public void onCheck(GroupServerTaxPayEvent e) {
         if (!(e.getGroup() instanceof Kingdom k)) {
             return;
         }
-        
+
         // Check kingdom disbanding
         if (k.isPacifist()) {
             for (OfflinePlayer op : k.getPlayerMembers()) {
@@ -100,7 +83,7 @@ public class KingdomsListener implements Listener {
                     return;
                 }
             }
-            
+
             e.setCancelled(true);
             Utils.schedule(0, () -> k.disband(Reason.INACTIVITY));
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -108,16 +91,16 @@ public class KingdomsListener implements Listener {
             }
             return;
         }
-        
+
         for (OfflinePlayer op : k.getPlayerMembers()) {
             if (k.getKingId().equals(op.getUniqueId())) {
                 continue;
             }
-            
+
             if (!isInactive(op)) {
                 continue;
             }
-            
+
             KingdomPlayer kp = KingdomPlayer.getKingdomPlayer(op);
             Utils.schedule(0, () -> kp.leaveKingdom(LeaveReason.INACTIVITY));
             for (Player p : k.getOnlineMembers()) {
@@ -125,107 +108,107 @@ public class KingdomsListener implements Listener {
             }
         }
     }
-    
+
     private boolean isInactive(OfflinePlayer op) {
         return op.getLastSeen() + disband < System.currentTimeMillis();
     }
-    
+
 
     // -------------------------------------------------
     // NO SKILL XP GAIN IF SAME KINGDOM
     // -------------------------------------------------
-    
+
     @EventHandler
     public void onEntityXPGain(EntityXpGainEvent e) {
         if (!(e.getAttacked() instanceof Player damaged)) {
             return;
         }
-        
+
         KingdomPlayer attacker = KingdomPlayer.getKingdomPlayer(e.getPlayer());
         KingdomPlayer victim = KingdomPlayer.getKingdomPlayer(damaged);
         if (!canGainXp(attacker, victim)) {
             e.setCancelled(true);
         }
     }
-    
+
     @EventHandler
     public void onDamageXpGain(DamageXpGainEvent e) {
         if (!(e.getDamager() instanceof Player damager)) {
             return;
         }
-        
+
         KingdomPlayer attacker = KingdomPlayer.getKingdomPlayer(damager);
         KingdomPlayer victim = KingdomPlayer.getKingdomPlayer(e.getPlayer());
         if (!canGainXp(attacker, victim)) {
             e.setCancelled(true);
         }
     }
-    
+
     private boolean canGainXp(KingdomPlayer attacker, KingdomPlayer victim) {
         if (!attacker.hasKingdom() || !victim.hasKingdom()) {
             return false;
         }
-        
+
         // At this point both players must be in a kingdom
         if (attacker.getKingdomId().equals(victim.getKingdomId())) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     // -------------------------------------------------
     // ALLOW EXPLOSIONS TO DESTROY TURRETS
     // -------------------------------------------------
-    
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onExplode(EntityExplodeEvent e) {
         if (!e.getEntityType().toString().contains("TNT")) {
             return;
         }
-        
+
         Set<Block> turrets = new HashSet<>();
         e.blockList().forEach(b -> {
             if (b.getType() != Material.PLAYER_HEAD) {
                 return;
             }
-            
+
             Land land = Land.getLand(b);
             if (land == null) {
                 return;
             }
-            
+
             Turret turret = land.getTurrets().get(SimpleLocation.of(b));
             if (turret == null) {
                 return;
             }
-            
+
             turrets.add(b);
             turret.remove();
         });
-        
+
         e.blockList().removeIf(b -> turrets.contains(b));
     }
-    
+
     // -------------------------------------------------
     // ONLY ALLOW INVASIONS ON NON-AIR BLOCKS
     // -------------------------------------------------
-    
+
     @EventHandler
     public void onInvadeCommand(PlayerCommandPreprocessEvent e) {
         String[] args = e.getMessage().split(" ");
         if (args.length < 2) {
             return;
         }
-        
+
         if (!(args[0].equals("/k") || args[0].contains("kingdom"))) {
             return;
         }
-        
+
         if (!(args[1].equals("invade") || args[1].equals("invasion"))) {
             return;
         }
-        
+
         Player p = e.getPlayer();
         Location loc = p.getLocation().clone();
         if (loc.add(0, -1, 0).getBlock().getType() == Material.AIR) {
@@ -233,7 +216,7 @@ public class KingdomsListener implements Listener {
             Utils.msg(p, "&cYou cannot use this command while midair!");
         }
     }
-    
+
     // -------------------------------------------------
     // CANCEL CHALLENGES ON RELATION CHANGE
     // -------------------------------------------------
@@ -248,19 +231,19 @@ public class KingdomsListener implements Listener {
         for (int i = 0; i < 2; i++) {
             Kingdom k1 = (Kingdom) (i == 0 ? e.getFirst() : e.getSecond());
             Kingdom k2 = (Kingdom) (i == 1 ? e.getFirst() : e.getSecond());
-            
+
             String lastChallenge = Utils.getLastChallenge(k1);
             if (lastChallenge == null) {
                 continue;
             }
-            
+
             String[] slck = lastChallenge.split("@");
             long lcd = Long.parseLong(slck[1]);
             UUID cur = UUID.fromString(slck[0]);
             if (!cur.equals(k2.getId()) || lcd < date) {
                 continue;
             }
-            
+
             // If we got here, k1 has challenged k2 and war is pending. Call it off
             Utils.chalreminders.remove(k1.getId());
             String data = UUID.randomUUID() + "@" + lcd;
@@ -320,7 +303,7 @@ public class KingdomsListener implements Listener {
         Kingdom k = e.getKingdom();
         Utils.discord(":fleur_de_lis: **" + k.getName() + "** has been founded");
         openSelectionGUI(k);
-        
+
         // Force set player respawn point so new players don't spawn at RTP location
         k.getKing().getPlayer().setRespawnLocation(null, true);
     }
@@ -336,36 +319,36 @@ public class KingdomsListener implements Listener {
             return;
         }
         cantClose.put(player, att);
-        
+
         InteractiveGUI gui = GUIAccessor.prepare(player, KingdomsGUI.KINGDOM$CREATE);
         gui.push("pacifist", () -> setPacifist(k, kp, player))
-        .push("aggressor", () -> setAggressor(k, kp, player));
+                .push("aggressor", () -> setAggressor(k, kp, player));
         gui.onClose(() -> Utils.schedule(1, () -> {
             // Should not happen
             if (!player.isOnline()) {
                 setAggressor(k, kp, player);
                 return;
             }
-            
+
             if (cantClose.containsKey(player)) {
                 openSelectionGUI(k);
             }
         }));
         gui.open();
     }
-    
+
     private void setAggressor(Kingdom k, KingdomPlayer kp, Player player) {
         k.setPacifist(false, kp, null);
         KingdomsLang.COMMAND_CREATE_AGGRESSOR.sendMessage(player);
         cantClose.remove(player);
         player.closeInventory();
-        
+
         // Add shield if aggressor
         long shieldtime = k.getSince() + Utils.getNewbieTime();
         k.activateShield(shieldtime - System.currentTimeMillis());
         k.getMetadata().put(UltimaAddons.shield_time, new StandardKingdomMetadata(shieldtime));
     }
-    
+
     private void setPacifist(Kingdom k, KingdomPlayer kp, Player player) {
         k.setPacifist(true, kp, null);
         KingdomsLang.COMMAND_CREATE_PACIFIST.sendMessage(player);
@@ -384,7 +367,7 @@ public class KingdomsListener implements Listener {
             Utils.discord(":fire: **" + k + "** is now an aggressor Kingdom");
             inGame = "&6" + k + " &2is now an aggressor Kingdom.";
         }
-        
+
         Bukkit.getOnlinePlayers().forEach(p -> Utils.msg(p, inGame));
     }
 
