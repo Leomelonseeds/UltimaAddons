@@ -143,7 +143,8 @@ public class LootHandler implements Listener {
         // Otherwise apply ench table enchant and attempt to custom enchant as well
         int levels = rand.nextInt(sec.getInt("enchant.min"), sec.getInt("enchant.max") + 1);
         gear = Bukkit.getItemFactory().enchantWithLevels(gear, levels, false, rand);
-        randomlyEnchant(gear, getMaxLevel(ring + 1));
+        double mobBase = lootConfig.getDouble("mobs.custom-base") / 100.0;
+        randomlyEnchant(gear, getMaxLevel(ring + 1, mobBase));
         return gear;
     }
     

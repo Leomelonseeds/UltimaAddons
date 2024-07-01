@@ -135,7 +135,7 @@ introgui:
         structures, and turrets. You can also manage Kingdom shields, permissions,
         and ranks.
       - All nexus purchases cost §lResource Points§r. You can gain resource points
-        by depositing diamonds or diamond blocks within your Nexus’ resource point
+        by depositing §bdiamonds §ror §bdiamond blocks §rwithin your Nexus’ resource point
         converter, and they can be withdrawn back into diamonds later.
       - Use §2/k help§r and explore your Nexus to discover more Kingdoms features.
         Happy claiming!
@@ -185,7 +185,7 @@ introgui:
     slot: 1
   specialfeatures:
     material: WRITTEN_BOOK
-    name: '&f&l&oNon-Vanilla &f&lFeatures'
+    name: '&f&lNon-Vanilla &f&lFeatures'
     book:
       title: NON-VANILLA FEATURES
       author: Ultima
@@ -227,9 +227,42 @@ introgui:
     - ''
     - '&7Useful features unique to Ultima.'
     slot: 2
+  otherfeatures:
+    material: WRITTEN_BOOK
+    name: '&f&lOther Features &8(Not in Quiz)'
+    book:
+      title: Other Features
+      author: Ultima
+      pages:
+      - |-
+        §lMarriage §c♥
+
+        §rYou can ask a staff member to §cmarry §ryou to a partner of your choosing. This allows you to use §2/marry tp§r|§2home§r|§2gift§r, powerful commands to interact with your partner. Note that tp commands cost §b1 diamond §rper use.
+      - |-
+        §lSkills
+
+        §rAs you progress, you will find yourself levelling up the Agility, Combat, Endurance, Gathering, and Sorcery skills. Check §2/skills §rto see your progress and rewards! 
+      - |-
+        §lBrewing
+
+        §rMake your own alcoholic drinks! More information is available in the server guide at §2/help§r.
+      - |-
+        §lCommands
+
+        §r/trade - Securely trade with nearby players
+        /enchants - View a list of custom enchants
+        /help - Access most server features
+      generation: COPY_OF_ORIGINAL
+    lore:
+    - ''
+    - '&7Other features and commands that'
+    - '&7you may find cool or useful. They'
+    - '&7might not be in the quiz, but are'
+    - '&7still useful to know!'
+    slot: 3
   diamond:
     material: DIAMOND
-    name: '&bTake Intro Quiz'
+    name: '&dTake Intro Quiz &b(Free Diamonds)'
     lore:
     - ''
     - '&7Take this quiz based on the books'
@@ -338,6 +371,7 @@ loot:
     # Chance that any equipment will drop
     drop-chance: 2
     looting-add: 1
+    custom-base: 25
   # Disenchanting -> Enchanted Dust config
   # Total amount of dust dropped = chance % 100 + remainder chance for 1 additional.
   # Aurelium Disenchanter ability bonus is added to the final chance for both custom/vanilla
@@ -436,6 +470,8 @@ staff-log:
 - effect
 - sv
 - vanish
+- openinv
+- openender
 
 skaddon:
   limit_warn_start: 5
