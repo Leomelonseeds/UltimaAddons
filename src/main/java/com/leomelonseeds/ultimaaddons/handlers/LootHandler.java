@@ -451,7 +451,6 @@ public class LootHandler implements Listener {
         ItemManager items = UltimaAddons.getPlugin().getItems();
         List<ItemStack> loot = e.getLoot();
         e.getInventoryHolder();
-        Bukkit.getLogger().info("Loot generated, loot: " + loot);
 
         // Find location and get corresponding group
         int group = getGroup(e.getLootContext().getLocation());
