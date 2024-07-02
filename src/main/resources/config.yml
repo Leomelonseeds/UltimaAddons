@@ -334,23 +334,23 @@ loot:
         custom-chance: 30
     epic:
       distance: 7168
-      chance: 4
+      chance: 45
       maxdust: 4
       armor: iron
       weapon: iron
       enchant:
         min: 15
-        max: 30
+        max: 25
         chance: 80
         custom-chance: 45
     legendary:
       distance: 10000
-      chance: 25
+      chance: 30
       maxdust: 5
       armor: diamond
       weapon: diamond
       enchant:
-        min: 15
+        min: 20
         max: 30
         chance: 90
         custom-chance: 60
