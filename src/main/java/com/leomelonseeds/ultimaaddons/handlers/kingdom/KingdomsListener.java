@@ -1,11 +1,18 @@
 package com.leomelonseeds.ultimaaddons.handlers.kingdom;
 
-import com.leomelonseeds.ultimaaddons.UltimaAddons;
-import com.leomelonseeds.ultimaaddons.invs.ConfirmAction;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
-import dev.aurelium.auraskills.api.event.skill.DamageXpGainEvent;
-import dev.aurelium.auraskills.api.event.skill.EntityXpGainEvent;
-import org.bukkit.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -32,8 +39,14 @@ import org.kingdoms.constants.metadata.KingdomMetadata;
 import org.kingdoms.constants.metadata.StandardKingdomMetadata;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.constants.player.StandardKingdomPermission;
-import org.kingdoms.events.general.*;
+import org.kingdoms.events.general.GroupDisband;
 import org.kingdoms.events.general.GroupDisband.Reason;
+import org.kingdoms.events.general.GroupRelationshipChangeEvent;
+import org.kingdoms.events.general.GroupServerTaxPayEvent;
+import org.kingdoms.events.general.GroupShieldPurchaseEvent;
+import org.kingdoms.events.general.KingdomCreateEvent;
+import org.kingdoms.events.general.KingdomDisbandEvent;
+import org.kingdoms.events.general.KingdomPacifismStateChangeEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEndEvent;
 import org.kingdoms.events.invasion.KingdomInvadeEvent;
 import org.kingdoms.events.items.KingdomItemBreakEvent;
@@ -54,8 +67,12 @@ import org.kingdoms.utils.nbt.ItemNBT;
 import org.kingdoms.utils.nbt.NBTType;
 import org.kingdoms.utils.nbt.NBTWrappers;
 
-import java.util.*;
-import java.util.Map.Entry;
+import com.leomelonseeds.ultimaaddons.UltimaAddons;
+import com.leomelonseeds.ultimaaddons.invs.ConfirmAction;
+import com.leomelonseeds.ultimaaddons.utils.Utils;
+
+import dev.aurelium.auraskills.api.event.skill.DamageXpGainEvent;
+import dev.aurelium.auraskills.api.event.skill.EntityXpGainEvent;
 
 public class KingdomsListener implements Listener {
 
@@ -64,7 +81,6 @@ public class KingdomsListener implements Listener {
 
     private static Set<Structure> justRemoved = new HashSet<>();
     private static Map<Player, Integer> cantClose = new HashMap<>();
-
 
     // -------------------------------------------------
     // PATCHED DISBANDING MECHANICS
@@ -260,7 +276,7 @@ public class KingdomsListener implements Listener {
     }
 
     // -------------------------------------------------
-    // EXTRA DISCORDSRV MESSAGES
+    // EXTRA DISCORDSRV MESSAGES AND SETSPAWNS
     // -------------------------------------------------
 
     // Close GUIs to stop bad things from happening
@@ -305,7 +321,14 @@ public class KingdomsListener implements Listener {
         openSelectionGUI(k);
 
         // Force set player respawn point so new players don't spawn at RTP location
-        k.getKing().getPlayer().setRespawnLocation(null, true);
+        Utils.schedule(10, () -> {
+            Player player = k.getKing().getPlayer();
+            if (player == null || k.getHome() == null) {
+                return;
+            }
+            
+            player.setRespawnLocation(null, true);
+        });
     }
 
     // Open custom creation GUI that only closes once an option is selected

@@ -27,12 +27,8 @@ Listed below are many of the formulas used on Ultima to determine various costs/
 ### Skills
 - XP required per level: `50 * (level - 1)^2 + 50`
     - `level`: The current level of the skill.
-- Kept items on death: `floor(original_amount * abiding_level * 0.05) + rng(remaining_amount * abiding_level * 0.05) ? 1 : 0`
-    - `original_amount`: The amount of items in one stack of items in your inventory.
-    - `abiding_level`: The level of the `Abiding` ability for the Endurance skill.
-    - `remaining_amount`: `original_amount - floor(original_amount * abiding_level * 0.05)`
-    - This amount is calculated for each item in your inventory.
-    - For stacks of 1 item, this implies you simply have a `abiding_level * 0.05` chance of keeping that item.
+- Kept items on death: `rng(abiding_level * 0.05)`
+    - This amount is calculated for each item in your inventory, including for each item in a stack.
     
 ### Cindersmith
 - Minimum dust for enchantment: `max(-max_level + 5, 2)`

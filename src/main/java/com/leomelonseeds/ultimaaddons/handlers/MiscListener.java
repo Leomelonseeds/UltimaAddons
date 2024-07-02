@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.lang.WordUtils;
@@ -46,6 +45,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.platform.bukkit.location.BukkitImmutableLocation;
+import org.kingdoms.server.location.ImmutableLocation;
 
 import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
@@ -87,7 +87,12 @@ public class MiscListener implements Listener {
             return;
         }
         
-        event.setRespawnLocation(BukkitImmutableLocation.from(kp.getKingdom().getHome()));
+        ImmutableLocation home = kp.getKingdom().getHome();
+        if (home == null) {
+            return;
+        }
+        
+        event.setRespawnLocation(BukkitImmutableLocation.from(home));
     }
     
     // Minecart speed on copper
@@ -157,14 +162,19 @@ public class MiscListener implements Listener {
             return;
         }
         
-        Random random = new Random();
         List<ItemStack> drops = e.getDrops();
         double chance = UASkills.ABIDING.getValue(abiding) / 100.0;
         for (ItemStack drop : new ArrayList<>(drops)) {
-            double totalChance = drop.getAmount() * chance;
-            int keepAmount = (int) Math.floor(totalChance);
-            double plusChance = totalChance - keepAmount;
-            if (random.nextDouble() < plusChance) {
+            // Binomial distribution calculator by pjs on stackoverflow
+            double log_q = Math.log(1.0 - chance);
+            int amount = drop.getAmount();
+            int keepAmount = 0;
+            double sum = 0;
+            while (true) {
+                sum += Math.log(Math.random()) / (amount - keepAmount);
+                if (sum < log_q) {
+                   break;
+                }
                 keepAmount++;
             }
             

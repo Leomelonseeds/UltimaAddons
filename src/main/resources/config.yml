@@ -301,7 +301,7 @@ loot:
   main:
     common:
       distance: 4096 # Max distance this loot will generate at
-      chance: 10 # Chance that the chest will generate loot at all, or if gear will have custom enchant
+      chance: 10 # Chance that the chest will generate loot at all
       maxdust: 1 # Max amount of any dust that will generate
       armor: leather # The armor type the NEXT tier may have
       weapon: '' # The weapon type the NEXT tier may have
@@ -309,36 +309,40 @@ loot:
         min: 1
         max: 10
         chance: 50
+        custom-chance: 0 # This custom chance replaces the base chance
     uncommon:
       distance: 5120
-      chance: 50 # Chance that the lower tier will turn into this tier (total chance = lower tier * this)
+      chance: 75 # Chance that the lower tier will turn into this tier (total chance = lower tier * this)
       maxdust: 2
       armor: golden
       weapon: wooden
       enchant:
         min: 5
         max: 15
-        chance: 50
+        chance: 60
+        custom-chance: 15
     rare:
       distance: 6144
-      chance: 50
+      chance: 60
       maxdust: 3
       armor: golden
       weapon: stone
       enchant:
         min: 10
         max: 20
-        chance: 50
+        chance: 70
+        custom-chance: 30
     epic:
       distance: 7168
-      chance: 50
+      chance: 4
       maxdust: 4
       armor: iron
       weapon: iron
       enchant:
         min: 15
         max: 30
-        chance: 50
+        chance: 80
+        custom-chance: 45
     legendary:
       distance: 10000
       chance: 25
@@ -348,7 +352,8 @@ loot:
       enchant:
         min: 15
         max: 30
-        chance: 50
+        chance: 90
+        custom-chance: 60
   ores:
     # Replaces main.common.chance for ores
     # If a deepslate variant is not detected, it will
@@ -371,7 +376,6 @@ loot:
     # Chance that any equipment will drop
     drop-chance: 2
     looting-add: 1
-    custom-base: 25
   # Disenchanting -> Enchanted Dust config
   # Total amount of dust dropped = chance % 100 + remainder chance for 1 additional.
   # Aurelium Disenchanter ability bonus is added to the final chance for both custom/vanilla
@@ -1078,3 +1082,8 @@ items:
     - '&7of the deep. You gain a spring in'
     - '&7your step as you hold it in your'
     - '&7palms.'
+  sealofaphrodite:
+    material: TORCHFLOWER
+    name: '&c&lSeal of Aphrodite'
+    glow: true
+    custom-model-data: 48760

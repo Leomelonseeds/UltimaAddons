@@ -97,13 +97,9 @@ public class LootHandler implements Listener {
     public ItemStack randomGear(int ring, String type) {
         // Get tier of the random gear.
         // Always give 30% chance to upgrade to the next tier
-        // Unless we're already at max tier, then lower chance
-        // for diamond tier
         int tier = getMaxLevel(ring, 100);
-        if (tier < 4 && rand.nextDouble() < 0.3) {
+        if (rand.nextDouble() < 0.3) {
             tier++;
-        } else if (tier == 4 && rand.nextDouble() < 0.1) {
-            tier = 5;
         }
         
         String group = groups.get(tier);
@@ -114,7 +110,8 @@ public class LootHandler implements Listener {
         // Determine exact gear material to use
         String matName = type;
         ConfigurationSection sec = lootConfig.getConfigurationSection("main." + group);
-        if (type.equalsIgnoreCase("sword") || type.equalsIgnoreCase("axe")) {
+        if (type.equals("sword") || type.equals("axe") ||
+            type.equals("pickaxe") || type.equals("shovel")) {
             matName = sec.getString("weapon") + "_" + matName;
         } else if (!type.contains("bow")) {
             matName = sec.getString("armor") + "_" + matName;
@@ -143,8 +140,7 @@ public class LootHandler implements Listener {
         // Otherwise apply ench table enchant and attempt to custom enchant as well
         int levels = rand.nextInt(sec.getInt("enchant.min"), sec.getInt("enchant.max") + 1);
         gear = Bukkit.getItemFactory().enchantWithLevels(gear, levels, false, rand);
-        double mobBase = lootConfig.getDouble("mobs.custom-base") / 100.0;
-        randomlyEnchant(gear, getMaxLevel(ring + 1, mobBase));
+        randomlyEnchant(gear, getMaxLevel(ring + 1, sec.getDouble("enchant.custom-chance")));
         return gear;
     }
     
@@ -454,6 +450,8 @@ public class LootHandler implements Listener {
     public void onLoot(LootGenerateEvent e) {
         ItemManager items = UltimaAddons.getPlugin().getItems();
         List<ItemStack> loot = e.getLoot();
+        e.getInventoryHolder();
+        Bukkit.getLogger().info("Loot generated, loot: " + loot);
 
         // Find location and get corresponding group
         int group = getGroup(e.getLootContext().getLocation());
