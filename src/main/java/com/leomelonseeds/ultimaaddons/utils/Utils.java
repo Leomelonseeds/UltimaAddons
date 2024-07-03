@@ -307,7 +307,7 @@ public class Utils {
     }
     
     public static void discord(String s) {
-        if (!UltimaAddons.getPlugin().getConfig().getBoolean("enable-discord")) {
+        if (!isInstalled("DiscordSRV")) {
             return;
         }
         
@@ -500,6 +500,10 @@ public class Utils {
             Item dropped = player.getWorld().dropItem(player.getLocation(), drop);
             dropped.setOwner(player.getUniqueId());
         }
+    }
+    
+    public static boolean isInstalled(String plugin) {
+        return Bukkit.getServer().getPluginManager().getPlugin(plugin) != null;
     }
     
 }

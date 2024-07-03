@@ -446,22 +446,28 @@ public class KingdomsListener implements Listener {
                     if (outpost != null) {
                         Utils.msg(p, "&cYour outpost land was invaded, and all claims made from the outpost have been lost.");
                     }
-                    Utils.msg(p, "&cYour kingdom lost &6" + floss + " &cresource points.");
+                    
+                    if (floss > 0) {
+                        Utils.msg(p, "&cYour kingdom lost &6" + floss + " &cresource points.");
+                    }
                 });
 
                 defender.addResourcePoints(-1 * floss);
             }
 
-            long floss = loss;
+            long gain = loss;
             attacker.getOnlineMembers().forEach(p -> {
                 p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.MASTER, 1, 0.8F);
                 if (outpost != null) {
                     Utils.msg(p, "&2You invaded an enemy outpost, and all enemy claims made from that outpost were unclaimed.");
                 }
-                Utils.msg(p, "&2Your kingdom gained &6" + floss + " &2resource points.");
+                
+                if (gain > 0) {
+                    Utils.msg(p, "&2Your kingdom gained &6" + gain + " &2resource points.");
+                }
             });
 
-            attacker.addResourcePoints(floss);
+            attacker.addResourcePoints(gain);
         });
     }
 

@@ -1,9 +1,6 @@
 # Disable if a dupe is found
 enable-shulkers: true
 
-# Disable if discord not set
-enable-discord: true
-
 # Drop party settings
 # time: time between each give, in ticks
 # amount: amount of iterations for each drop party
@@ -476,6 +473,7 @@ staff-log:
 - vanish
 - openinv
 - openender
+- co
 
 skaddon:
   limit_warn_start: 5

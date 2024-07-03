@@ -145,6 +145,10 @@
             <id>aikar</id>
             <url>https://repo.aikar.co/content/groups/aikar/</url>
         </repository>
+        <repository>
+            <id>playpro-repo</id>
+            <url>https://maven.playpro.com</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -211,6 +215,18 @@
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.arcaneplugins</groupId>
+            <artifactId>levelledmobs-plugin</artifactId>
+            <version>4.0.6</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.coreprotect</groupId>
+            <artifactId>coreprotect</artifactId>
+            <version>22.4</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

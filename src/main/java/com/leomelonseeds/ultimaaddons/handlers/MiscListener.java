@@ -418,7 +418,7 @@ public class MiscListener implements Listener {
     // Log Staff
     @EventHandler
     public void listen(PlayerCommandPreprocessEvent e) {
-        if (!UltimaAddons.getPlugin().getConfig().getBoolean("enable-discord")) {
+        if (!Utils.isInstalled("DiscordSRV")) {
             return;
         }
         

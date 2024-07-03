@@ -17,6 +17,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.World.Environment;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
@@ -53,7 +54,9 @@ import dev.aurelium.auraskills.api.ability.Ability;
 import dev.aurelium.auraskills.api.registry.NamespacedId;
 import dev.aurelium.auraskills.api.trait.Traits;
 import dev.aurelium.auraskills.api.user.SkillsUser;
+import io.github.arcaneplugins.levelledmobs.LevelledMobs;
 import net.advancedplugins.ae.api.AEAPI;
+import net.coreprotect.api.BlockAPI;
 
 /**
  * Everything to do with dropping enchanted dust, and mob gear
@@ -150,6 +153,13 @@ public class LootHandler implements Listener {
         LivingEntity ent = e.getEntity();
         Player player = ent.getKiller();
         if (player == null) {
+            return;
+        }
+        
+        // Chunk kill max check
+        long chunkId = player.getLocation().getChunk().getChunkKey();
+        if (Utils.isInstalled("LevelledMobs") && LevelledMobs.getInstance().getMainCompanion()
+                .doesUserHaveCooldown(List.of(chunkId), player.getUniqueId())) {
             return;
         }
         
@@ -397,53 +407,61 @@ public class LootHandler implements Listener {
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void lootOres(BlockBreakEvent e) {
-        String type = e.getBlock().getType().toString();
+        Block block = e.getBlock();
+        String type = block.getType().toString();
         if (!type.contains("ORE") || e.getExpToDrop() <= 0) {
             return;
         }
         
-        double base;
-        String fullpath = "ores.chance." + type;
-        if (lootConfig.contains(fullpath)) {
-            base = lootConfig.getDouble(fullpath);
-        } else if (type.contains("DEEPSLATE_")) {
-            fullpath = fullpath.replace("DEEPSLATE_", "");
-            base = lootConfig.getDouble(fullpath, 0);
-        } else {
-            return;
-        }
-        
-        if (base <= 0) {
-            return;
-        }
-        
-        Location loc = e.getBlock().getLocation();
-        int group = getGroup(loc);
-        if (group == -1) {
-            return;
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            // If anyone has touched this block before, do not do anything
+            // Run async so long lookups don't kill the server
+            if (Utils.isInstalled("CoreProtect") && !BlockAPI.performLookup(block, -1).isEmpty()) {
+                return;
+            }
+            
+            double base;
+            String fullpath = "ores.chance." + type;
+            if (lootConfig.contains(fullpath)) {
+                base = lootConfig.getDouble(fullpath);
+            } else if (type.contains("DEEPSLATE_")) {
+                fullpath = fullpath.replace("DEEPSLATE_", "");
+                base = lootConfig.getDouble(fullpath, 0);
+            } else {
+                return;
+            }
+            
+            if (base <= 0) {
+                return;
+            }
+            
+            Location loc = block.getLocation();
+            int group = getGroup(loc);
+            if (group == -1) {
+                return;
+            }
+            
+            // Apply aurelium mining luck buff
+            Player player = e.getPlayer();
+            AuraSkillsApi auraSkills = AuraSkillsApi.get();
+            SkillsUser user = auraSkills.getUser(player.getUniqueId());
+            double ladd = lootConfig.getDouble("ores.luck-add");
+            base += ladd * user.getEffectiveTraitLevel(Traits.MINING_LUCK);
 
-        // Apply fortune buff
-        Player player = e.getPlayer();
-        ItemStack tool = player.getInventory().getItemInMainHand();
-        double fadd = lootConfig.getDouble("ores.fortune-add");
-        base += fadd * tool.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS);
-        
-        // Apply aurelium mining luck buff
-        AuraSkillsApi auraSkills = AuraSkillsApi.get();
-        SkillsUser user = auraSkills.getUser(player.getUniqueId());
-        double ladd = lootConfig.getDouble("ores.luck-add");
-        base += ladd * user.getEffectiveTraitLevel(Traits.MINING_LUCK);
-        
-        // Get final dust level and drop item
-        int dustLvl = getMaxLevel(group, base);
-        if (dustLvl <= 0) {
-            return;
-        }
-        
-        ItemManager items = UltimaAddons.getPlugin().getItems();
-        ItemStack toDrop = items.getItem(groups.get(dustLvl) + "dust");
-        loc.getWorld().dropItemNaturally(loc, toDrop);
+            // Apply fortune buff
+            ItemStack tool = player.getInventory().getItemInMainHand();
+            double fadd = lootConfig.getDouble("ores.fortune-add");
+            base += fadd * tool.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS);
+            
+            // Get final dust level and drop item
+            int dustLvl = getMaxLevel(group, base);
+            if (dustLvl <= 0) {
+                return;
+            }
+            
+            ItemStack toDrop = UltimaAddons.getPlugin().getItems().getItem(groups.get(dustLvl) + "dust");
+            Bukkit.getScheduler().runTask(plugin, () -> loc.getWorld().dropItemNaturally(loc, toDrop));
+        });
     }
     
     @EventHandler
