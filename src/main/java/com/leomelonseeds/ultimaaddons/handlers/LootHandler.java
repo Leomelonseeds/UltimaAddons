@@ -409,7 +409,7 @@ public class LootHandler implements Listener {
     public void lootOres(BlockBreakEvent e) {
         Block block = e.getBlock();
         String type = block.getType().toString();
-        if (!type.contains("ORE") || e.getExpToDrop() <= 0) {
+        if (!type.contains("ORE") || !e.isDropItems()) {
             return;
         }
         
