@@ -18,6 +18,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -486,6 +487,19 @@ public class Utils {
         }
         
         return meta.getPersistentDataContainer().get(key, PersistentDataType.STRING);
+    }
+    
+    /**
+     * Give players items, dropping if necessary
+     * 
+     * @param player
+     * @param items
+     */
+    public static void giveItems(Player player, ItemStack... items) {
+        for (ItemStack drop : player.getInventory().addItem(items).values()) {
+            Item dropped = player.getWorld().dropItem(player.getLocation(), drop);
+            dropped.setOwner(player.getUniqueId());
+        }
     }
     
 }

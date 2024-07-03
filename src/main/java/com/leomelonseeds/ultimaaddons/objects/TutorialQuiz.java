@@ -87,7 +87,7 @@ public class TutorialQuiz {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
         Utils.msg(player, "&aCongratulations on completing the quiz! You get " + rewardAmt + " free diamonds as a reward.");
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F);
-        player.getInventory().addItem(new ItemStack(Material.DIAMOND, rewardAmt));
+        Utils.giveItems(player, new ItemStack(Material.DIAMOND, rewardAmt));
     }
 
     // Load hard-coded questions
