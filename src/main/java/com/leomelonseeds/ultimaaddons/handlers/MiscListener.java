@@ -165,6 +165,13 @@ public class MiscListener implements Listener {
         List<ItemStack> drops = e.getDrops();
         double chance = UASkills.ABIDING.getValue(abiding) / 100.0;
         for (ItemStack drop : new ArrayList<>(drops)) {
+            String id = Utils.getItemID(drop);
+            if (id != null && id.equals("introbook")) {
+                e.getDrops().remove(drop);
+                e.getItemsToKeep().add(drop);
+                continue;
+            }
+            
             // Binomial distribution calculator by pjs on stackoverflow
             double log_q = Math.log(1.0 - chance);
             int amount = drop.getAmount();
