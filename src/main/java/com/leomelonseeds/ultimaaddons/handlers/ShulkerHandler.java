@@ -138,11 +138,6 @@ public class ShulkerHandler implements Listener {
         }
     }
 
-    /**
-     * Make sure that 
-     * 
-     * @param inv
-     */
     private static void saveShulker(Pair<Inventory, ItemStack> shulker) {
         ItemStack item = shulker.getRight();
         ItemMeta meta = item.getItemMeta();

@@ -409,7 +409,14 @@ public class LootHandler implements Listener {
     public void lootOres(BlockBreakEvent e) {
         Block block = e.getBlock();
         String type = block.getType().toString();
-        if (!type.contains("ORE") || !e.isDropItems()) {
+        if (!type.contains("ORE")) {
+            return;
+        }
+        
+        // If block drops no EXP, player must be using silk touch to get dust
+        Player player = e.getPlayer();
+        if (e.getExpToDrop() == 0 && player.getInventory().getItemInMainHand()
+                .getEnchantmentLevel(Enchantment.SILK_TOUCH) == 0) {
             return;
         }
         
@@ -442,7 +449,6 @@ public class LootHandler implements Listener {
             }
             
             // Apply aurelium mining luck buff
-            Player player = e.getPlayer();
             AuraSkillsApi auraSkills = AuraSkillsApi.get();
             SkillsUser user = auraSkills.getUser(player.getUniqueId());
             double ladd = lootConfig.getDouble("ores.luck-add");
