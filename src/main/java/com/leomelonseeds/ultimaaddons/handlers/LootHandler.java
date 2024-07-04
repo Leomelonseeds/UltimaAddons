@@ -12,6 +12,7 @@ import java.util.Set;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -56,7 +57,9 @@ import dev.aurelium.auraskills.api.trait.Traits;
 import dev.aurelium.auraskills.api.user.SkillsUser;
 import io.github.arcaneplugins.levelledmobs.LevelledMobs;
 import net.advancedplugins.ae.api.AEAPI;
-import net.coreprotect.api.BlockAPI;
+import net.coreprotect.CoreProtect;
+import net.coreprotect.CoreProtectAPI;
+import net.coreprotect.CoreProtectAPI.ParseResult;
 
 /**
  * Everything to do with dropping enchanted dust, and mob gear
@@ -408,23 +411,35 @@ public class LootHandler implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void lootOres(BlockBreakEvent e) {
         Block block = e.getBlock();
-        String type = block.getType().toString();
-        if (!type.contains("ORE")) {
-            return;
-        }
-        
-        // If block drops no EXP, player must be using silk touch to get dust
+        Material mat = block.getType();
+        String type = mat.toString();
         Player player = e.getPlayer();
-        if (e.getExpToDrop() == 0 && player.getInventory().getItemInMainHand()
-                .getEnchantmentLevel(Enchantment.SILK_TOUCH) == 0) {
+        if (!type.contains("ORE") || player.getGameMode() != GameMode.SURVIVAL) {
             return;
         }
         
+        // Block must be able to drop items according to the player tool
+        if (block.getDrops(player.getInventory().getItemInMainHand()).isEmpty()) {
+            return;
+        }
+
+        // Run async so many BBE and lookups don't kill the server
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            // If anyone has touched this block before, do not do anything
-            // Run async so long lookups don't kill the server
-            if (Utils.isInstalled("CoreProtect") && !BlockAPI.performLookup(block, -1).isEmpty()) {
+            if (!player.isOnline()) {
                 return;
+            }
+            
+            // If anyone has placed this type of block in this location, don't do anything
+            if (Utils.isInstalled("CoreProtect")) {
+                CoreProtectAPI capi = CoreProtect.getInstance().getAPI();
+                List<String[]> logs = capi.blockLookup(block, -1);
+                for (String[] log : logs) {
+                    // Action id 1 = placed. Cannot have placed.
+                    ParseResult parsedLog = capi.parseResult(log);
+                    if (parsedLog.getActionId() == 1 && parsedLog.getType() == mat) {
+                        return;
+                    }
+                }
             }
             
             double base;
