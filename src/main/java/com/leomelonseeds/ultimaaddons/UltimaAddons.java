@@ -101,7 +101,7 @@ public class UltimaAddons extends JavaPlugin {
         itemManager = new ItemManager(this);
         lootHandler = new LootHandler(this);
         parryListener = new ParryListener();
-        shulkerHandler = new ShulkerHandler();
+        shulkerHandler = new ShulkerHandler(this);
         UAUnclaimProcessor.register();
         new UAPlaceholders().register();
         registerAE(new CaptureEffect(this));

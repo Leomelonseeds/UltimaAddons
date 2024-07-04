@@ -334,6 +334,8 @@ public class TotemManager implements Listener {
             return;
         }
 
+        e.setCancelled(true);
+        
         // KINGDOM HOME TELEPORT
         Player player = e.getPlayer();
         EquipmentSlot hand = e.getHand();
