@@ -151,12 +151,7 @@ public class MiscListener implements Listener {
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
         Player player = e.getPlayer();
-        Location loc = player.getLocation();
-        Utils.schedule(1, () -> msg(player, "&c&l[!] &7You died at &6" + loc.getBlockX() + 
-                "&7, &6" + loc.getBlockY() + "&7, &6" + loc.getBlockZ()));
-        
-        AuraSkillsApi auraSkills = AuraSkillsApi.get();
-        SkillsUser user = auraSkills.getUser(player.getUniqueId());
+        SkillsUser user = AuraSkillsApi.get().getUser(player.getUniqueId());
         int abiding = user.getAbilityLevel(UASkills.ABIDING);
         if (abiding <= 0) {
             return;
