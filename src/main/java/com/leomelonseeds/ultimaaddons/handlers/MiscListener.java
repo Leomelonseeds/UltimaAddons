@@ -76,7 +76,7 @@ public class MiscListener implements Listener {
     
     // Respawn at bed location if it exists, otherwise go k home, otherwise let essentials do the job
     @EventHandler(priority = EventPriority.HIGH)
-    public final void onRespawn(PlayerRespawnEvent event) {
+    public void onRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
         if (player.getRespawnLocation() != null) {
             return;

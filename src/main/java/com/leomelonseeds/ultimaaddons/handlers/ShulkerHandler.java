@@ -14,6 +14,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -106,6 +107,23 @@ public class ShulkerHandler implements Listener {
         
         ItemStack toCheck = e.getItemDrop().getItemStack();
         String checkId = Utils.getItemID(toCheck, shulkerKey);
+        if (shulker.getRight().equals(checkId)) {
+            e.setCancelled(true);
+        }
+    }
+    
+    @EventHandler
+    public void onPlayerClickOpenedShulker(InventoryClickEvent e) {
+        if (!(e.getWhoClicked() instanceof Player p)) {
+            return;
+        }
+        
+        Pair<Inventory, String> shulker = openShulkers.get(p);
+        if (shulker == null) {
+            return;
+        }
+        
+        String checkId = Utils.getItemID(e.getCurrentItem(), shulkerKey);
         if (shulker.getRight().equals(checkId)) {
             e.setCancelled(true);
         }
