@@ -132,8 +132,8 @@ introgui:
         structures, and turrets. You can also manage Kingdom shields, permissions,
         and ranks.
       - All nexus purchases cost §lResource Points§r. You can gain resource points
-        by depositing §bdiamonds §ror §bdiamond blocks §rwithin your Nexus’ resource point
-        converter, and they can be withdrawn back into diamonds later.
+        by depositing §bdiamonds §ror §bdiamond blocks §rwithin your Nexus’ resource
+        point converter, and they can be withdrawn back into diamonds later.
       - Use §2/k help§r and explore your Nexus to discover more Kingdoms features.
         Happy claiming!
       generation: COPY_OF_ORIGINAL
@@ -235,10 +235,9 @@ introgui:
         §lMarriage §c♥
 
         §rYou can ask a staff member to §cmarry §ryou to a partner of your choosing. This allows you to use §2/marry tp§r|§2home§r|§2gift§r, powerful commands to interact with your partner. Note that tp commands cost §b1 diamond §rper use.
-      - |-
-        §lSkills
-
-        §rAs you progress, you will find yourself levelling up the Agility, Combat, Endurance, Gathering, and Sorcery skills. Check §2/skills §rto see your progress and rewards! 
+      - "§lSkills\n\n§rAs you progress, you will find yourself levelling up the Agility,\
+        \ Combat, Endurance, Gathering, and Sorcery skills. Check §2/skills §rto see\
+        \ your progress and rewards! "
       - |-
         §lBrewing
 
@@ -360,15 +359,17 @@ loot:
       DEEPSLATE_COAL_ORE: 50
       NETHER_GOLD_ORE: 1
       NETHER_QUARTZ_ORE: 0.5
-      DIAMOND_ORE: 5
+      DIAMOND_ORE: 10
       EMERALD_ORE: 20
       DEEPSLATE_EMERALD_ORE: 100
       LAPIS_LAZULI_ORE: 2
       REDSTONE_ORE: 1
-    # Add to the final result for each fortune level
-    fortune-add: 1
-    # Add to the final result for each mining luck auraskills level
-    luck-add: 0.25
+    # Add base chance * this to the final result for each fortune level
+    fortune-add: 0.5
+    # Add base chance * this per auraskills mining luck level
+    luck-add: 0.1
+    # The maximum amount to add for any of above calculations per level
+    max-add: 1
   mobs:
     # Chance that any equipment will drop
     drop-chance: 2

@@ -464,15 +464,15 @@ public class LootHandler implements Listener {
             }
             
             // Apply aurelium mining luck buff
-            AuraSkillsApi auraSkills = AuraSkillsApi.get();
-            SkillsUser user = auraSkills.getUser(player.getUniqueId());
+            double maxAdd = lootConfig.getDouble("ores.max-add");
+            SkillsUser user = AuraSkillsApi.get().getUser(player.getUniqueId());
             double ladd = lootConfig.getDouble("ores.luck-add");
-            base += ladd * user.getEffectiveTraitLevel(Traits.MINING_LUCK);
+            base += Math.max(base * ladd, maxAdd) * user.getEffectiveTraitLevel(Traits.MINING_LUCK);
 
             // Apply fortune buff
             ItemStack tool = player.getInventory().getItemInMainHand();
             double fadd = lootConfig.getDouble("ores.fortune-add");
-            base += fadd * tool.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS);
+            base += Math.max(base * fadd, maxAdd) * tool.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS);
             
             // Get final dust level and drop item
             int dustLvl = getMaxLevel(group, base);
