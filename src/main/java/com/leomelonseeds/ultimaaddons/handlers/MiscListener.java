@@ -147,22 +147,20 @@ public class MiscListener implements Listener {
         }
     }
     
-    // Abiding skill application, let player know death location
+    // Abiding skill application
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
+        // Calculate abiding chance
         Player player = e.getPlayer();
         SkillsUser user = AuraSkillsApi.get().getUser(player.getUniqueId());
         int abiding = user.getAbilityLevel(UASkills.ABIDING);
-        if (abiding <= 0) {
-            return;
-        }
+        double chance = UASkills.ABIDING.getValue(abiding) / 100.0;
         
         List<ItemStack> drops = e.getDrops();
-        double chance = UASkills.ABIDING.getValue(abiding) / 100.0;
         for (ItemStack drop : new ArrayList<>(drops)) {
             String id = Utils.getItemID(drop);
             if (id != null && id.equals("introbook")) {
-                e.getDrops().remove(drop);
+                drops.remove(drop);
                 e.getItemsToKeep().add(drop);
                 continue;
             }
@@ -183,8 +181,8 @@ public class MiscListener implements Listener {
             if (keepAmount >= 1) {
                 ItemStack keptDrop = new ItemStack(drop);
                 drop.setAmount(drop.getAmount() - keepAmount);
-                keptDrop.setAmount(keepAmount);
                 e.getItemsToKeep().add(keptDrop);
+                keptDrop.setAmount(keepAmount);
                 continue;
             }
             
