@@ -19,11 +19,14 @@ import org.bukkit.Statistic;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Enemy;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -66,12 +69,14 @@ public class TotemManager implements Listener {
     private ConfigurationSection totemSec;
     private Map<Player, BukkitTask> pendingTP;
     private Set<Player> pendingAccept;
+    private Set<Player> damageImmune;
 
     public TotemManager(ItemManager im, UltimaAddons plugin) {
         this.im = im;
         this.plugin = plugin;
         this.pendingTP = new HashMap<>();
         this.pendingAccept = new HashSet<>();
+        this.damageImmune = new HashSet<>();
         if (totemKey == null) {
             totemKey = new NamespacedKey(plugin, "totem");
         }
@@ -229,7 +234,15 @@ public class TotemManager implements Listener {
                     curLoc.setPitch(player.getLocation().getPitch());
                 }
                 
-                msg(player, "&bTeleporting...");
+                // Damage immunity for death totems
+                if (isType(Utils.getItemID(totem, totemKey), TotemType.DEATH)) {
+                    damageImmune.add(player);
+                    Utils.schedule(15 * 20, () -> damageImmune.remove(player));
+                    msg(player, "&bYou are immune to damage for 15 seconds");
+                } else {
+                    msg(player, "&bTeleporting...");
+                }
+                
                 player.teleport(curLoc);
                 Utils.sendSound(Sound.ITEM_TOTEM_USE, 0.8F, 2F, curLoc);
                 Utils.schedule(1, () -> curLoc.getWorld().spawnParticle(
@@ -268,6 +281,32 @@ public class TotemManager implements Listener {
 
     private Location getGround(Location location) {
         return location.clone().add(0, -1, 0);
+    }
+    
+    @EventHandler
+    public void onDamage(EntityDamageEvent e) {
+        if (!(e.getEntity() instanceof Player p)) {
+            return;
+        }
+        
+        if (damageImmune.contains(p)) {
+            e.setCancelled(true);
+        }
+    }
+    
+    @EventHandler
+    public void onHit(EntityDamageByEntityEvent e) {
+        if (!(e.getEntity() instanceof Enemy || e.getEntity() instanceof Player)) {
+            return;
+        }
+        
+        if (!(e.getDamager() instanceof Player p)) {
+            return;
+        }
+        
+        if (damageImmune.remove(p)) {
+            msg(p, "&cDamage immunity was removed because you attacked");
+        }
     }
 
     @EventHandler
