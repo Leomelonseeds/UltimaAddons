@@ -2,6 +2,7 @@ package com.leomelonseeds.ultimaaddons.handlers.kingdom;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -83,7 +84,7 @@ public class KingdomsListener implements Listener {
     private static Map<Player, Integer> cantClose = new HashMap<>();
 
     // -------------------------------------------------
-    // PATCHED DISBANDING MECHANICS
+    // PATCHED DISBANDING MECHANICS/ONLINE AND NOT DEAD PLAYERS
     // -------------------------------------------------
 
     @EventHandler
@@ -107,7 +108,22 @@ public class KingdomsListener implements Listener {
             }
             return;
         }
+        
+        // Check for dead players
+        List<Player> onlineMembers = k.getOnlineMembers();
+        if (onlineMembers.size() > 0) {
+            double taxPerPlayer = Math.floor(Math.sqrt(k.getLands().size()));
+            for (Player member : onlineMembers) {
+                if (member.getHealth() > 0) {
+                    continue;
+                }
+                
+                // Tax is negative. Add tax to make it less
+                e.setAmount(Math.min(e.getAmount() + taxPerPlayer, 0));
+            }
+        }
 
+        // Check non-pacifist member kick
         for (OfflinePlayer op : k.getPlayerMembers()) {
             if (k.getKingId().equals(op.getUniqueId())) {
                 continue;
