@@ -74,6 +74,23 @@ public class MiscListener implements Listener {
     private static Map<Player, String> msgs = new HashMap<>();
     private static Set<Player> elytraCancelling = new HashSet<>();
     
+    // Stop enchanted dust from being able to be used as dyes
+    @EventHandler
+    public void onDye(PlayerInteractEvent e) {
+        if (e.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+        
+        String id = Utils.getItemID(e.getItem());
+        if (id == null || !id.contains("dust")) {
+            return;
+        }
+        
+        if (e.getClickedBlock().getType().toString().contains("SIGN")) {
+            e.setCancelled(true);
+        }
+    }
+    
     // Respawn at bed location if it exists, otherwise go k home, otherwise let essentials do the job
     @EventHandler(priority = EventPriority.HIGH)
     public void onRespawn(PlayerRespawnEvent event) {
@@ -117,13 +134,13 @@ public class MiscListener implements Listener {
         }
         
         if (type.contains("OXIDIZED")) {
-            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 6);
+            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 3);
         } else if (type.contains("WEATHERED")) {
-            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 5.33);
+            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 3.67);
         } else if (type.contains("EXPOSED")) {
-            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 4.67);
+            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 4.33);
         } else {
-            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 4);
+            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 5);
         }
     }
     
