@@ -198,7 +198,7 @@ introgui:
       - |-
         §lMinecarts
 
-        §rPowered rails placed on copper blocks make minecarts travel §n4x faster§r than vanilla. The speed is even faster the more oxidized the copper.
+        §rPowered rails placed on copper blocks make minecarts travel §n5x faster§r than vanilla. The speed is slows down more oxidized the copper.
       - |-
         §lElytra
 
@@ -356,7 +356,7 @@ loot:
     # automatically use non-deepslate chance
     chance:
       COAL_ORE: 0.5
-      DEEPSLATE_COAL_ORE: 50
+      DEEPSLATE_COAL_ORE: 33
       NETHER_GOLD_ORE: 1
       NETHER_QUARTZ_ORE: 0.5
       DIAMOND_ORE: 10

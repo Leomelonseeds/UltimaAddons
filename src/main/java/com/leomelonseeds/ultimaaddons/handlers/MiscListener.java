@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang.WordUtils;
-import org.apache.http.cookie.SetCookie;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
