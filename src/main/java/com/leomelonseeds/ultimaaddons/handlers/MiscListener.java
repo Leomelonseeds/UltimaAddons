@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang.WordUtils;
+import org.apache.http.cookie.SetCookie;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -30,6 +31,7 @@ import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -74,7 +76,7 @@ public class MiscListener implements Listener {
     private static Map<Player, String> msgs = new HashMap<>();
     private static Set<Player> elytraCancelling = new HashSet<>();
     
-    // Stop enchanted dust from being able to be used as dyes
+    // Stop enchanted dust from being able to be used as dyes on mobs/signs
     @EventHandler
     public void onDye(PlayerInteractEvent e) {
         if (e.getAction() != Action.RIGHT_CLICK_BLOCK) {
@@ -87,6 +89,20 @@ public class MiscListener implements Listener {
         }
         
         if (e.getClickedBlock().getType().toString().contains("SIGN")) {
+            e.setCancelled(true);
+        }
+    }
+    
+    // Stop enchanted dust from being able to be used as dyes on mobs/signs
+    @EventHandler
+    public void onInteract(PlayerInteractEntityEvent e) {
+        String id = Utils.getItemID(e.getPlayer().getInventory().getItem(e.getHand()));
+        if (id == null || !id.contains("dust")) {
+            return;
+        }
+        
+        EntityType type = e.getRightClicked().getType();
+        if (type == EntityType.SHEEP || type == EntityType.WOLF || type == EntityType.CAT) {
             e.setCancelled(true);
         }
     }
