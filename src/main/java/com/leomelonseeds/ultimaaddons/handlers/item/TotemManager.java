@@ -276,6 +276,10 @@ public class TotemManager implements Listener {
     
     private boolean isSafe(Location loc) {
         Block block = loc.getBlock();
+        if (block.getType() == Material.PLAYER_HEAD) {
+            return true;
+        }
+        
         return block.isPassable() && !block.isLiquid();
     }
 
