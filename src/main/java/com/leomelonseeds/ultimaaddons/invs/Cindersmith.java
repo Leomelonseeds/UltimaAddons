@@ -57,12 +57,18 @@ public class Cindersmith extends UAInventory {
     private Player player;
     private EnchantResult[] results;
     private BukkitTask displayRevolver;
+    private boolean giveXP;
     
-    public Cindersmith(Player player) {
+    /**
+     * @param player
+     * @param giveXP whether to give Sorcery XP to the player
+     */
+    public Cindersmith(Player player, boolean giveXP) {
         super(player, 54, "Cindersmith");
         this.plugin = UltimaAddons.getPlugin();
         this.player = player;
         this.uuid = player.getUniqueId();
+        this.giveXP = giveXP;
         this.results = new EnchantResult[3];
         
         if (!data.containsKey(uuid)) {
@@ -248,6 +254,10 @@ public class Cindersmith extends UAInventory {
         player.playSound(player, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 2F, 1F);
         
         // Aurelium exp = 10 * rarity * dust used
+        if (!giveXP) {
+            return;
+        }
+        
         String rarity = Utils.getItemID(dust).replace("dust", "");
         int exp = 10 * dustAmt * (tiers.indexOf(rarity) + 1);
         AuraSkillsApi.get().getUser(player.getUniqueId()).addSkillXp(UASkills.SORCERY, exp);

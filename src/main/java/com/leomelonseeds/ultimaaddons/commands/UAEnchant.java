@@ -12,6 +12,7 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.Flags;
+import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Syntax;
 
 @CommandAlias("uenchant")
@@ -22,8 +23,9 @@ public class UAEnchant extends BaseCommand {
     @CommandCompletion("@players")
     @Description("Open the cindersmith GUI for a player")
     @Syntax("<player>")
-    public void onUEnchant(CommandSender sender, @Flags("other") Player target) {
-        new Cindersmith(target);
+    public void onUEnchant(CommandSender sender, @Flags("other") Player target, @Optional Boolean giveXP) {
+        boolean xp = giveXP == null ? true : giveXP;
+        new Cindersmith(target, xp);
     }
 
 }
