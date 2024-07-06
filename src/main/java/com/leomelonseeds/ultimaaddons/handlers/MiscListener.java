@@ -149,13 +149,13 @@ public class MiscListener implements Listener {
         }
         
         if (type.contains("OXIDIZED")) {
-            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 3);
+            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 4);
         } else if (type.contains("WEATHERED")) {
-            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 3.67);
+            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 4.67);
         } else if (type.contains("EXPOSED")) {
-            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 4.33);
+            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 5.33);
         } else {
-            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 5);
+            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 6);
         }
     }
     
