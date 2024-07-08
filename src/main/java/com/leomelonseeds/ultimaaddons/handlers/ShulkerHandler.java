@@ -77,7 +77,7 @@ public class ShulkerHandler implements Listener {
         Inventory inv = sm.getInventory();
         openShulkers.put(p, Pair.of(inv, id));
         p.openInventory(inv);
-        p.playSound(p.getLocation(), Sound.BLOCK_SHULKER_BOX_OPEN, 0.5F, 1F);
+        Utils.sendSound(Sound.BLOCK_SHULKER_BOX_OPEN, 0.5F, 1F, p.getLocation());
     }
 
     @EventHandler
@@ -94,7 +94,7 @@ public class ShulkerHandler implements Listener {
         // Do NOT need to remove the persistent data, since it gets
         // overridden every time a shulker is opened.
         Utils.schedule(10, () -> openShulkers.remove(p));
-        p.playSound(p.getLocation(), Sound.BLOCK_SHULKER_BOX_CLOSE, 0.5F, 1F);
+        Utils.sendSound(Sound.BLOCK_SHULKER_BOX_CLOSE, 0.5F, 1F, p.getLocation());
     }
     
     
