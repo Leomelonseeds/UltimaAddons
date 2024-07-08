@@ -214,6 +214,7 @@ public class LootHandler implements Listener {
     }
     
     // Drops dust or enchanted books when fishing
+    // TODO: Fix dust drops here!
     @EventHandler
     public void onFish(PlayerFishEvent e) {
         if (e.getState() != PlayerFishEvent.State.CAUGHT_FISH) {
@@ -226,27 +227,30 @@ public class LootHandler implements Listener {
             return;
         }
 
-        int lvl = getMaxLevel(getGroup(caught.getLocation()));
-        if (lvl <= 0) {
-            return;
-        }
-        
+        int group = getGroup(caught.getLocation());
         if (loot.getType() == Material.BOW) {
-            randomlyEnchant(loot, lvl);
+            int bowlvl = getMaxLevel(group);
+            if (bowlvl <= 0) {
+                return;
+            }
+            
+            randomlyEnchant(loot, bowlvl);
             caught.setItemStack(loot);
             return;
         }
         
         // Material must be an enchanted book here
+        // Note that the base enchant level is 100%
+        int dustlvl = getMaxLevel(group, 100);
         double dustChance = lootConfig.getDouble("fishing-dust-chance") / 100.0;
         if (rand.nextDouble() > dustChance) {
-            randomlyEnchant(loot, lvl);
+            randomlyEnchant(loot, dustlvl);
             caught.setItemStack(loot);
             return;
         }
 
         ItemManager items = UltimaAddons.getPlugin().getItems();
-        ItemStack dust = items.getItem(groups.get(lvl) + "dust");
+        ItemStack dust = items.getItem(groups.get(dustlvl) + "dust");
         caught.setItemStack(dust);
     }
     
