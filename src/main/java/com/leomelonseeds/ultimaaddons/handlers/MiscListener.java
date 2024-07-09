@@ -162,7 +162,7 @@ public class MiscListener implements Listener {
         Location cartLocation = cart.getLocation();
         World cartsWorld = cart.getWorld();
         Block rail = cartsWorld.getBlockAt(cartLocation);
-        if (rail.getType() != Material.POWERED_RAIL) {
+        if (!rail.getType().toString().contains("RAIL")) {
             return;
         }
         
