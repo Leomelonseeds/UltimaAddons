@@ -399,6 +399,11 @@ public class LootHandler implements Listener {
             return;
         }
         
+        // Suspicious sand/gravel has loot tables but aren't chests
+        if (e.getBlock().getType().toString().contains("SUSPICIOUS")) {
+            return;
+        }
+        
         Player player = e.getPlayer();
         if (canBreak.remove(player)) {
             return;

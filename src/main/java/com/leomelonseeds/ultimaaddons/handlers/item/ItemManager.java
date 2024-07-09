@@ -161,6 +161,15 @@ public class ItemManager implements Listener {
             return false;
         }
         
+        int midas = AEAPI.getEnchantmentsOnItem(item).getOrDefault("midas", 0);
+        if (midas > 0) {
+            // Each level of midas makes tool last 10x longer
+            // This means each time there's a 1/(lvl*10) chance of it actually breaking
+            // If math rand > chance (no break), return true to cancel
+            double chance = 1.0 / (midas * 10);
+            return Math.random() > chance;
+        }
+        
         String dura = Utils.getItemID(item, UltimaAddons.duraKey);
         if (dura == null) {
             return false;
