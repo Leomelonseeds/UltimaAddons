@@ -32,6 +32,7 @@ import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
@@ -74,6 +75,29 @@ public class MiscListener implements Listener {
     
     private static Map<Player, String> msgs = new HashMap<>();
     private static Set<Player> elytraCancelling = new HashSet<>();
+    
+    // Vulcan enchantment
+    @EventHandler
+    public void onBreak(PlayerItemBreakEvent e) {
+        ItemStack broke = e.getBrokenItem();
+        int vulcan = AEAPI.getEnchantmentsOnItem(broke).getOrDefault("vulcan", 0);
+        if (vulcan <= 0) {
+            return;
+        }
+
+        broke.setAmount(2);
+        UltimaAddons.getPlugin().getItems().damageItem(broke, -5000);
+        AEAPI.removeEnchantment(broke, "vulcan");
+        if (vulcan > 1) {
+            AEAPI.applyEnchant("vulcan", vulcan - 1, broke);
+        }
+        
+        Location loc = e.getPlayer().getLocation();
+        Utils.sendSound(Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 0.5F, 2F, loc);
+        Utils.sendSound(Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1F, 1F, loc);
+        String name = Utils.toPlain(broke.displayName());
+        msg(e.getPlayer(), "&a&l[!] &7Your &f" + name + " &7was restored by &6Vulcan's Blessing");
+    }
     
     // Stop enchanted dust from being able to be used as dyes on mobs/signs
     @EventHandler
