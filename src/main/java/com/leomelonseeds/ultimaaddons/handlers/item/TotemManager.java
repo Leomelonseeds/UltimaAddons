@@ -211,7 +211,7 @@ public class TotemManager implements Listener {
                 // Cancel if player would be teleported to the void, or nether roof
                 // For nether roof, there are 5 layers of bedrock from 251 to 255, so any location
                 // at 252 or higher has a chance of trapping player in a bedrock box
-                if (curLoc.getBlock().getType() == Material.VOID_AIR ||
+                if (curLoc.getBlock().getType() == Material.VOID_AIR || curLoc.getBlockY() > 384 ||
                         curLoc.getWorld().getEnvironment() == Environment.NETHER && curLoc.getBlockY() >= 252) {
                     this.cancel();
                     removePlayer(player, "the destination is unsafe");
