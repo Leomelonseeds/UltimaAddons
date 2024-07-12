@@ -208,18 +208,19 @@ public class TotemManager implements Listener {
                     }
                 } while (false);
 
-                // Cancel if player would be teleported to the void, or nether roof
+                // Cancel if player would be teleported to nether roof
                 // For nether roof, there are 5 layers of bedrock from 251 to 255, so any location
                 // at 252 or higher has a chance of trapping player in a bedrock box
-                if (curLoc.getBlock().getType() == Material.VOID_AIR || curLoc.getBlockY() > 384 ||
-                        curLoc.getWorld().getEnvironment() == Environment.NETHER && curLoc.getBlockY() >= 252) {
+                Material ground = getGround(curLoc).getBlock().getType();
+                if (curLoc.getWorld().getEnvironment() == Environment.NETHER && curLoc.getBlockY() >= 252 ||
+                        ground == Material.VOID_AIR) {
                     this.cancel();
                     removePlayer(player, "the destination is unsafe");
                     return;
                 }
 
                 // Give player 40s fire resistance if TPing to lava (like undying totem)
-                if (getGround(curLoc).getBlock().getType() == Material.LAVA) {
+                if (ground == Material.LAVA) {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 800, 0));
                 }
 
@@ -275,9 +276,18 @@ public class TotemManager implements Listener {
     }
     
     private boolean isSafe(Location loc) {
+        if (loc.getBlockY() > 384) {
+            return false;
+        }
+        
+        // Player head for grave support
         Block block = loc.getBlock();
         if (block.getType() == Material.PLAYER_HEAD) {
             return true;
+        }
+        
+        if (block.getType() == Material.VOID_AIR) {
+            return false;
         }
         
         return block.isPassable() && !block.isLiquid();
