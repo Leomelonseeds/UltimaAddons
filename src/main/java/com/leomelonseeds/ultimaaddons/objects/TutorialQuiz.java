@@ -65,7 +65,7 @@ public class TutorialQuiz {
         Pair<String, String> question = questions.get(q);
         Utils.msg(player, "");
         Utils.msg(player, "&b" + question.getLeft());
-        Utils.msg(player, "&7&oPlease enter a &f&o1 " + (q == 5 ? "digit" : "word") + " &7&oresponse in chat within 30 seconds.");
+        Utils.msg(player, "&7&oPlease enter a &f&o1 word &7&oresponse in chat within 30 seconds.");
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, 1F);
         new ChatConfirm(player, question.getRight(), 30, null, result -> {
             if (result == null || !result) {
@@ -108,19 +108,15 @@ public class TutorialQuiz {
                 "resource"));
         
         questions.put(2, ImmutablePair.of(
+                "What is the only ore that can be used to gain resource points?", 
+                "diamond"));
+        
+        questions.put(3, ImmutablePair.of(
                 "What is the name of the mob that spawns to defend your Kingdom from invasions?", 
                 "champion"));
         
-        questions.put(3, ImmutablePair.of(
-                "What is the name of the Kingdom at the center of the world, where players can sell and trade items?", 
-                "market"));
-        
         questions.put(4, ImmutablePair.of(
-                "You can teleport to your home, other players, or last death location using a Totem of _______.", 
-                "warping"));
-        
-        questions.put(5, ImmutablePair.of(
-                "How many thousand blocks away is the Overworld border from the center?", 
-                "8"));
+                "True or false? You can move your Nexus using &a/k nexus", 
+                "true"));
     }
 }

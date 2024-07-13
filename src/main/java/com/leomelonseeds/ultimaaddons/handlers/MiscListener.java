@@ -35,6 +35,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.inventory.GrindstoneInventory;
 import org.bukkit.inventory.ItemFlag;
@@ -75,6 +76,22 @@ public class MiscListener implements Listener {
     
     private static Map<Player, String> msgs = new HashMap<>();
     private static Set<Player> elytraCancelling = new HashSet<>();
+    
+    // Tutorial vehicle exit
+    @EventHandler
+    public void onVehicleExit(VehicleExitEvent e) {
+        if (!(e.getExited() instanceof Player p)) {
+            return;
+        }
+        
+        if (e.getVehicle().getType() != EntityType.MINECART) {
+            return;
+        }
+        
+        if (!p.hasPermission("ua.exitvehicle") && e.isCancellable()) {
+            e.setCancelled(true);
+        }
+    }
     
     // Vulcan enchantment
     @EventHandler

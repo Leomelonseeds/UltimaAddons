@@ -74,8 +74,8 @@ public class ChatConfirm implements Listener {
 
         e.setCancelled(true);
         String msg = e.getMessage();
-        boolean success = msg.equalsIgnoreCase(req);
-        if (!success && !msg.equalsIgnoreCase(deny)) {
+        boolean success = isCorrect(msg, req);
+        if (!success && !isCorrect(msg, deny)) {
             return;
         }
         
@@ -94,6 +94,11 @@ public class ChatConfirm implements Listener {
         }
         
         callback.onConfirm(success);
+    }
+    
+    private boolean isCorrect(String supplied, String answer) {
+        String plural = answer + "s";
+        return supplied.equalsIgnoreCase(answer) || supplied.equalsIgnoreCase(plural);
     }
     
     public void stop() {
