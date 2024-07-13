@@ -70,6 +70,7 @@ import org.kingdoms.utils.nbt.NBTWrappers;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.invs.ConfirmAction;
+import com.leomelonseeds.ultimaaddons.utils.InventoryUtils;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 import dev.aurelium.auraskills.api.event.skill.DamageXpGainEvent;
@@ -313,13 +314,13 @@ public class KingdomsListener implements Listener {
         });
 
         // Close other shield buyers to stop abuse
-        k.getOnlineMembers().forEach(p -> Utils.closeInventory(p, "Shields", "Challenge"));
+        k.getOnlineMembers().forEach(p -> InventoryUtils.closeInventory(p, "Shields", "Challenge"));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onDisband(KingdomDisbandEvent e) {
         Kingdom k = e.getKingdom();
-        k.getOnlineMembers().forEach(p -> Utils.closeInventory(p, "Challenge"));
+        k.getOnlineMembers().forEach(p -> InventoryUtils.closeInventory(p, "Challenge"));
         String name = k.getName();
         if (e.getReason() == GroupDisband.Reason.INVASION) {
             Utils.discord(":dart: **" + name + "** was disbanded because their nexus chunk was captured");
@@ -834,7 +835,7 @@ public class KingdomsListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onLeave(KingdomLeaveEvent e) {
-        Utils.closeInventory(e.getPlayer().getPlayer(), "Challenge");
+        InventoryUtils.closeInventory(e.getPlayer().getPlayer(), "Challenge");
     }
 
 

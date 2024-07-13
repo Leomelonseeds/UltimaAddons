@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
-import com.leomelonseeds.ultimaaddons.utils.Utils;
+import com.leomelonseeds.ultimaaddons.utils.InventoryUtils;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
@@ -26,7 +26,7 @@ public class UToggleShulkers extends BaseCommand {
         if (config.getBoolean(setting)) {
             config.set(setting, false);
             for (Player p : Bukkit.getOnlinePlayers()) {
-                Utils.closeInventory(p, "Shulker");
+                InventoryUtils.closeInventory(p, "Shulker");
             }
             CommandUtils.sendSuccessMsg(sender, "Right-click shulkers are now disabled");
         } else {

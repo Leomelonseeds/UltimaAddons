@@ -47,6 +47,7 @@ import org.bukkit.persistence.PersistentDataType;
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.handlers.item.ItemManager;
 import com.leomelonseeds.ultimaaddons.objects.UASkills;
+import com.leomelonseeds.ultimaaddons.utils.InventoryUtils;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 import dev.aurelium.auraskills.api.AuraSkillsApi;
@@ -269,7 +270,7 @@ public class LootHandler implements Listener {
         }
 
         ClickType click = e.getClick();
-        if (click != ClickType.LEFT && click != ClickType.RIGHT && Utils.isInventoryFull(player)) return;
+        if (click != ClickType.LEFT && click != ClickType.RIGHT && InventoryUtils.isInventoryFull(player)) return;
         if (e.getResult() != Result.ALLOW) return;
 
         // Only give if item was picked up

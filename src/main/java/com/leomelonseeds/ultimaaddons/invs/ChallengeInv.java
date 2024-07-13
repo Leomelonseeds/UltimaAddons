@@ -17,6 +17,7 @@ import org.kingdoms.constants.player.KingdomPlayer;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.utils.CommandUtils;
+import com.leomelonseeds.ultimaaddons.utils.InventoryUtils;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class ChallengeInv extends UAInventory {
@@ -124,7 +125,7 @@ public class ChallengeInv extends UAInventory {
             Utils.warAnnounce(attacker, target, true, p -> {
                 p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.MASTER, 1, 1.2F);
                 p.sendMessage(Utils.toComponent("&7War can be cancelled by requesting a neutral, truce, or ally relation."));
-                Utils.closeInventory(p, "Challenge", "Shields");
+                InventoryUtils.closeInventory(p, "Challenge", "Shields");
             }, null, null, null);
             
             Utils.setupReminders(attacker, target, timeleft);

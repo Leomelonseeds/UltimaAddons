@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.leomelonseeds.ultimaaddons.UltimaAddons;
 import com.leomelonseeds.ultimaaddons.utils.ChatConfirm;
+import com.leomelonseeds.ultimaaddons.utils.InventoryUtils;
 import com.leomelonseeds.ultimaaddons.utils.Utils;
 
 public class TutorialQuiz {
@@ -87,7 +88,7 @@ public class TutorialQuiz {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
         Utils.msg(player, "&aCongratulations on completing the quiz! You get " + rewardAmt + " free diamonds as a reward.");
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F);
-        Utils.giveItems(player, new ItemStack(Material.DIAMOND, rewardAmt));
+        InventoryUtils.giveItems(player, new ItemStack(Material.DIAMOND, rewardAmt));
     }
 
     // Load hard-coded questions
