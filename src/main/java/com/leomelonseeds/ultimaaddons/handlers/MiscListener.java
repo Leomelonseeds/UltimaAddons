@@ -88,7 +88,7 @@ public class MiscListener implements Listener {
             return;
         }
         
-        if (!p.hasPermission("ua.exitvehicle") && e.isCancellable()) {
+        if (!p.hasPermission("ua.exitminecart") && e.isCancellable()) {
             e.setCancelled(true);
         }
     }
