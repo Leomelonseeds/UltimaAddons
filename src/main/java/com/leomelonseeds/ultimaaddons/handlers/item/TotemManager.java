@@ -336,7 +336,7 @@ public class TotemManager implements Listener {
         }
     }
 
-    // Keep death totems on death
+    // Keep death/RTP totems on death
     // HIGH priority to run after Abiding skill check
     @EventHandler(priority = EventPriority.HIGH)
     public void onDeath(PlayerDeathEvent e) {
@@ -348,7 +348,7 @@ public class TotemManager implements Listener {
                 continue;
             }
 
-            if (isType(id, TotemType.DEATH)) {
+            if (isType(id, TotemType.DEATH) || isType(id, TotemType.RANDOM)) {
                 drops.remove(i);
                 e.getItemsToKeep().add(i);
             }
