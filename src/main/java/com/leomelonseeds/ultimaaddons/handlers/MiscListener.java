@@ -253,7 +253,12 @@ public class MiscListener implements Listener {
             
             if (keepAmount >= 1) {
                 ItemStack keptDrop = new ItemStack(drop);
-                drop.setAmount(drop.getAmount() - keepAmount);
+                if (amount == keepAmount) {
+                    drops.remove(drop);
+                } else {
+                    drop.setAmount(amount - keepAmount);
+                }
+                
                 e.getItemsToKeep().add(keptDrop);
                 keptDrop.setAmount(keepAmount);
                 continue;
