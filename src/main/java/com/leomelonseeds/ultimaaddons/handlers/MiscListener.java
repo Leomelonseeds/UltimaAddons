@@ -46,6 +46,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 import org.kingdoms.constants.player.KingdomPlayer;
 import org.kingdoms.platform.bukkit.location.BukkitImmutableLocation;
 import org.kingdoms.server.location.ImmutableLocation;
@@ -185,18 +186,32 @@ public class MiscListener implements Listener {
         
         String type = cartsWorld.getBlockAt(cartLocation.add(0, -1, 0)).getType().toString();
         if (!type.contains("COPPER") || type.contains("ORE") || type.contains("RAW")) {
-            cart.setMaxSpeed(DEFAULT_MINECART_SPEED);
+            setMaxSpeed(cart, DEFAULT_MINECART_SPEED);
             return;
         }
         
         if (type.contains("OXIDIZED")) {
-            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 4);
+            setMaxSpeed(cart, DEFAULT_MINECART_SPEED * 2);
         } else if (type.contains("WEATHERED")) {
-            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 4.67);
+            setMaxSpeed(cart, DEFAULT_MINECART_SPEED * 2.67);
         } else if (type.contains("EXPOSED")) {
-            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 5.33);
+            setMaxSpeed(cart, DEFAULT_MINECART_SPEED * 3.33);
         } else {
-            cart.setMaxSpeed(DEFAULT_MINECART_SPEED * 6);
+            setMaxSpeed(cart, DEFAULT_MINECART_SPEED * 4);
+        }
+    }
+    
+    /**
+     * Set max speed of a minecart, and reduce velocity if needed
+     * 
+     * @param cart
+     * @param speed
+     */
+    private void setMaxSpeed(Minecart cart, double speed) {
+        cart.setMaxSpeed(speed);
+        Vector vel = cart.getVelocity();
+        if (vel.length() > speed) {
+            cart.setVelocity(vel.normalize().multiply(speed));
         }
     }
     
