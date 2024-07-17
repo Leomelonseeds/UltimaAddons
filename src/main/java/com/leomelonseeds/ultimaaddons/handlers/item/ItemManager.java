@@ -20,6 +20,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.Player;
@@ -251,8 +252,16 @@ public class ItemManager implements Listener {
     
     @EventHandler
     public void onMend(PlayerItemMendEvent e) {
-        if (damageItem(e.getItem(), e.getRepairAmount() * -1)) {
-            e.setCancelled(true);
+        if (!damageItem(e.getItem(), e.getRepairAmount() * -1)) {
+            return;
+        }
+        
+        ExperienceOrb orb = e.getExperienceOrb();
+        int finalXp = orb.getExperience() - e.getConsumedExperience();
+        if (finalXp <= 0) {
+            orb.remove();
+        } else {
+            orb.setExperience(finalXp);
         }
     }
 
